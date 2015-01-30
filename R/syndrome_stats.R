@@ -11,6 +11,8 @@ get_pheno_data <- function(path) {
     # change the blank syndrome fields to NA
     pheno$syndrome[nchar(pheno$syndrome) == 0] = NA
     
+    pheno = pheno[!(is.na(pheno$syndrome)), ]
+    
     return(pheno)
 }
 
@@ -36,7 +38,7 @@ show_missing_syndromes <- function(has_match, pheno) {
     
     # show the most recurrent syndrome strings (these should all have 1-2
     # entries)
-    print(head(missing[order(a$Freq, decreasing=TRUE), ], 40))
+    print(head(missing[order(missing$Freq, decreasing=TRUE), ], 40))
     
     # how many probands have any information in the syndrome field
     print(length(pheno$syndrome) - sum(is.na(pheno$syndrome)))
@@ -58,6 +60,13 @@ show_missing_syndromes <- function(has_match, pheno) {
 
 pheno = get_pheno_data(PHENOTYPES_PATH)
 all_matches = get_syndrome_matches(SYNDROMES, pheno)
-has_match = rowSums(data.frame(all_matches)) > 0
+all_matches = data.frame(all_matches)
+
+pheno$matched_terms = apply(all_matches, 1, function(x) SYNDROMES[as.vector(unlist(x))])
+pheno[, c("syndrome", "matched_terms")]
+
+pheno$syndrome[grepl("SOX3 causing X-linked isolated growth hormone deficiency with MR  IGHDIII caused isolated growth hormone deficiency with or without agammaglobuliaemia", pheno$syndrome)] = "X-linked with MR  isolated growth hormone deficiency/ Weil-Marchesani syndrome XLMR syndrome with seizures  hypogammaglobulinaemia"
+
+has_match = rowSums(all_matches) > 0
 
 missing = show_missing_syndromes(has_match, pheno)
