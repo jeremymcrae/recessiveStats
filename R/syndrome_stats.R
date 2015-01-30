@@ -62,10 +62,11 @@ pheno = get_pheno_data(PHENOTYPES_PATH)
 all_matches = get_syndrome_matches(SYNDROMES, pheno)
 all_matches = data.frame(all_matches)
 
-pheno$matched_terms = apply(all_matches, 1, function(x) SYNDROMES[as.vector(unlist(x))])
-pheno[, c("syndrome", "matched_terms")]
-
 pheno$syndrome[grepl("SOX3 causing X-linked isolated growth hormone deficiency with MR  IGHDIII caused isolated growth hormone deficiency with or without agammaglobuliaemia", pheno$syndrome)] = "X-linked with MR  isolated growth hormone deficiency/ Weil-Marchesani syndrome XLMR syndrome with seizures  hypogammaglobulinaemia"
+
+pheno$matched_terms = apply(all_matches, 1, function(x) SYNDROMES[as.vector(unlist(x))])
+pheno$matched_terms = sapply(pheno$matched_terms, paste, collapse=";")
+write.table(pheno[, c("patient_id", "syndrome", "matched_terms")], file="test.txt", sep="\t", row.names=FALSE, quote=FALSE)
 
 has_match = rowSums(all_matches) > 0
 

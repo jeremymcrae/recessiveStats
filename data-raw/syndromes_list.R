@@ -166,7 +166,7 @@ SYNDROMES = c("22q",
     "usher",
     "vacter[a]*l",
     "vater",
-    "velo-cardi[o|al]+-fac[ial|e]+|vcf"
+    "velo-cardi[o|al]+-fac[ial|e]+|vcf",
     "waardenburg",
     "walker-warburg",
     "weaver",
