@@ -2,8 +2,8 @@
 # shared suspected-syndromes
 
 # note when we search for these syndromes, those that have dashes may have spaces
-# instead, or vice versa, or dashes and spaces combined, or not gap between the
-# words.
+# instead, or vice versa, or dashes and spaces combined, or no gap between the
+# words e.g. DiGeorge, Di-George, Di George, Di -George.
 SYNDROMES = c("22q11",
     "3m",
     "9q34",

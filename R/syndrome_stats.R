@@ -5,7 +5,7 @@ PHENOTYPES_PATH = file.path(DATAFREEZE_DIR, "phenotypes_and_patient_info.txt")
 # get the curated list of syndrome strings
 source("data-raw/syndromes_list.R")
 
-get_pheno_data <- function(path){
+get_pheno_data <- function(path) {
     pheno = read.table(path, sep="\t", header=TRUE, stringsAsFactors=FALSE)
     
     # change the blank syndrome fields to NA
@@ -14,6 +14,7 @@ get_pheno_data <- function(path){
     return(pheno)
 }
 
+# search for all the strings in the syndrome column
 get_syndrome_matches <- function(syndromes, pheno) {
     all_matches = list()
     for (syndrome in syndromes) {
@@ -21,6 +22,7 @@ get_syndrome_matches <- function(syndromes, pheno) {
         matches = grepl(syndrome, tolower(pheno$syndrome))
         
         all_matches[[syndrome]] = matches
+    }
     
     return(all_matches)
 }
@@ -31,7 +33,10 @@ get_syndrome_matches <- function(syndromes, pheno) {
 show_missing_syndromes <- function(has_match, pheno) {
     # find the syndromes that I haven't added to the list already
     missing = data.frame(table(pheno$syndrome[!has_match & ! is.na(pheno$syndrome)]))
-    head(missing[order(a$Freq, decreasing=TRUE), ], 40)
+    
+    # show the most recurrent syndrome strings (these should all have 1-2
+    # entries)
+    print(head(missing[order(a$Freq, decreasing=TRUE), ], 40))
     
     # how many probands have any information in the syndrome field
     print(length(pheno$syndrome) - sum(is.na(pheno$syndrome)))
@@ -39,12 +44,14 @@ show_missing_syndromes <- function(has_match, pheno) {
     # how many probands have at least one syndrome matched so far
     print(sum(has_match))
     
-    for (syndrome in names(all_matches)) {
-        cat("\n")
-        cat(syndrome)
-        cat("\n")
-        print(pheno$syndrome[all_matches[[syndrome]]])
-    }
+    # # show the exact matches for each syndrome string. Note: this misses the
+    # # strings that did NOT match the regex.
+    # for (syndrome in names(all_matches)) {
+    #     cat("\n")
+    #     cat(syndrome)
+    #     cat("\n")
+    #     print(pheno$syndrome[all_matches[[syndrome]]])
+    # }
     
     return(missing)
 }
