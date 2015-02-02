@@ -53,7 +53,9 @@ get_syndrome_matches <- function(syndromes, pheno) {
 #' syndromes_list.R
 #'
 #' @param all_matches dataframe of booleans for different syndrome regex strings
-#' @param pheno dataframe of phenotypes for probands, containing "syndrome" column
+#' @param pheno dataframe of phenotypes for probands, containing a "syndrome"
+#'     column.
+#' @export
 #'
 #' @return dataframe
 show_missing_syndromes <- function(all_matches, pheno) {
@@ -83,14 +85,16 @@ show_missing_syndromes <- function(all_matches, pheno) {
     return(missing)
 }
 
-pheno = get_pheno_data(PHENOTYPES_PATH)
-all_matches = get_syndrome_matches(recessiveStats::SYNDROMES$regex, pheno)
+main <- function() {
+    pheno = get_pheno_data(PHENOTYPES_PATH)
+    all_matches = get_syndrome_matches(recessiveStats::SYNDROMES$regex, pheno)
 
-# rename the over-long syndrome text for one proband to something more readable
-pheno$syndrome[grepl("SOX3 causing X-linked isolated growth hormone deficiency with MR  IGHDIII caused isolated growth hormone deficiency with or without agammaglobuliaemia", pheno$syndrome)] = "X-linked with MR  isolated growth hormone deficiency/ Weil-Marchesani syndrome XLMR syndrome with seizures  hypogammaglobulinaemia"
+    # rename the over-long syndrome text for one proband to something more readable
+    pheno$syndrome[grepl("SOX3 causing X-linked isolated growth hormone deficiency with MR  IGHDIII caused isolated growth hormone deficiency with or without agammaglobuliaemia", pheno$syndrome)] = "X-linked with MR  isolated growth hormone deficiency/ Weil-Marchesani syndrome XLMR syndrome with seizures  hypogammaglobulinaemia"
 
-pheno$matched_terms = apply(all_matches, 1, function(x) recessiveStats:: SYNDROMES$name[as.vector(unlist(x))])
-pheno$matched_terms = sapply(pheno$matched_terms, paste, collapse=";")
-write.table(pheno[, c("patient_id", "syndrome", "matched_terms")], file="test.txt", sep="\t", row.names=FALSE, quote=FALSE)
+    pheno$matched_terms = apply(all_matches, 1, function(x) recessiveStats:: SYNDROMES$name[as.vector(unlist(x))])
+    pheno$matched_terms = sapply(pheno$matched_terms, paste, collapse=";")
+    write.table(pheno[, c("patient_id", "syndrome", "matched_terms")], file="test.txt", sep="\t", row.names=FALSE, quote=FALSE)
 
-missing = show_missing_syndromes(all_matches, pheno)
+    missing = show_missing_syndromes(all_matches, pheno)
+}
