@@ -2,9 +2,6 @@
 DATAFREEZE_DIR = "/nfs/ddd0/Data/datafreeze/ddd_data_releases/2014-11-04"
 PHENOTYPES_PATH = file.path(DATAFREEZE_DIR, "phenotypes_and_patient_info.txt")
 
-# get the curated list of syndrome strings
-source("R/syndromes_list.R")
-
 #' open the phenotype data,
 #'
 #' @param path path to the proband's phenotype file.
@@ -87,12 +84,12 @@ show_missing_syndromes <- function(all_matches, pheno) {
 }
 
 pheno = get_pheno_data(PHENOTYPES_PATH)
-all_matches = get_syndrome_matches(SYNDROMES$regex, pheno)
+all_matches = get_syndrome_matches(recessiveStats::SYNDROMES$regex, pheno)
 
 # rename the over-long syndrome text for one proband to something more readable
 pheno$syndrome[grepl("SOX3 causing X-linked isolated growth hormone deficiency with MR  IGHDIII caused isolated growth hormone deficiency with or without agammaglobuliaemia", pheno$syndrome)] = "X-linked with MR  isolated growth hormone deficiency/ Weil-Marchesani syndrome XLMR syndrome with seizures  hypogammaglobulinaemia"
 
-pheno$matched_terms = apply(all_matches, 1, function(x) SYNDROMES$name[as.vector(unlist(x))])
+pheno$matched_terms = apply(all_matches, 1, function(x) recessiveStats:: SYNDROMES$name[as.vector(unlist(x))])
 pheno$matched_terms = sapply(pheno$matched_terms, paste, collapse=";")
 write.table(pheno[, c("patient_id", "syndrome", "matched_terms")], file="test.txt", sep="\t", row.names=FALSE, quote=FALSE)
 

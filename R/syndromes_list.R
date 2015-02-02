@@ -174,3 +174,5 @@ SYNDROMES = data.frame(matrix(c("22q", "22q deletion",
     "x-linked-mental-retardation", "X-linked mental retardation"),
     ncol=2, byrow=TRUE))
 names(SYNDROMES) = c("regex", "name")
+
+save(SYNDROMES, file="data/syndromes_list.rda", compress="xz")
