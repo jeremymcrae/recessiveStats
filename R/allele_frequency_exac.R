@@ -130,7 +130,7 @@ standardise_multiple_alt_variants <- function(vars) {
 #'     count columns.
 #' @export
 #'
-#' @return dataframe of varinats with nonfunctional variants/alleles trimmed
+#' @return dataframe of variants with nonfunctional variants/alleles trimmed
 remove_nonfunctional_variants <- function(vars) {
     
     # define the VEP consequence types for loss of function and missense variants
