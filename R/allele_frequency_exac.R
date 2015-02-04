@@ -25,7 +25,7 @@ stringsAsFactors=FALSE)
 #' @export
 #'
 #' @return vep consequence string for the most severe consequence for the gene
-#'     of interest. If non of the predicted consequences lie within the gene of
+#'     of interest. If none of the predicted consequences lie within the gene of
 #'    interest, return "NA". If the variant has multiple alleles, return a
 #'    comma-separated list of VEP consequences for the alleles.
 parse_vep_output <- function(data, hgnc) {
