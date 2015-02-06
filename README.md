@@ -19,9 +19,8 @@
 
 #### Installation
 
-The package can be installed using R 3.1.0 or greater with:
+The package can be installed or updated using R 3.1.0 or greater with:
 ```R
-# obtain and install
 library(devtools) # if necessary install with install.packages("devtools")
 devtools::install_github("jeremymcrae/recessiveStats")
 

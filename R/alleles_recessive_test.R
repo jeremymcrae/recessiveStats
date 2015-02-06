@@ -11,7 +11,9 @@
 #' @return a vector of P values from tests using the DDD population, the ExAC
 #'     population, under LoF and functional tests.
 analyse_inherited_enrichment <- function(hgnc, chrom, lof_lof, lof_func) {
+    cat("extracting ddd frequencies\n")
     ddd = get_ddd_variants_for_gene(hgnc, chrom)
+    cat("extracting ExAC frequencies\n")
     exac = get_exac_variants_for_gene(hgnc, chrom)
     
     ddd = get_cumulative_frequencies(ddd)
