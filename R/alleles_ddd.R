@@ -193,7 +193,10 @@ reformat_chrX_genotypes <- function(vars, geno, ddd_parents) {
     names(x_par) = c("start", "end")
     
     # don't alter non-chrX variants
-    if (vars$CHROM[1] != "X") { return(geno) }
+    if (vars$CHROM[1] != "X") {
+        geno[geno == "./."] = NA
+        return(geno)
+    }
     
     # don't alter genes overlapping the pseudoautosomal regions
     start_pos = vars$POS[1]
@@ -223,6 +226,7 @@ reformat_chrX_genotypes <- function(vars, geno, ddd_parents) {
 #' @return dataframe of variants
 convert_genotypes <- function(vars) {
     
+    cat("converting DDD genotypes\n")
     # convert the genotype matrix to a dataframe where each column is for a
     # separate individual
     geno = data.frame(t(vars$GT), stringsAsFactors=FALSE)
@@ -234,6 +238,7 @@ convert_genotypes <- function(vars) {
     
     geno = reformat_chrX_genotypes(vars, geno, ddd_parents)
     
+    cat("tallying DDD allele counts\n")
     geno$AC = NA
     geno$AN = NA
     for (pos in 1:nrow(geno)) {
@@ -291,6 +296,7 @@ get_ddd_variants_for_gene <- function(hgnc, chrom) {
     start=rows$start
     end=rows$stop
     
+    cat(paste("loading DDD vcfs for ", hgnc, "\n", sep = ""))
     # extract variants within the region from the VCF
     vars = seqminer::readVCFToListByRange(fileName=vcf_path,
         range=paste(chrom, ":", start, "-", end, sep=""),
