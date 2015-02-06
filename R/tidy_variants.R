@@ -38,6 +38,9 @@ standardise_multiple_alt_variants <- function(vars, include_hgnc=FALSE) {
     
     vars = rbind(single_vars, new_vars)
     
+    # make sure the allele counts and totals are numeric, so that later
+    # calculations work seamlessly
+    vars$AN = as.numeric(as.character(vars$AN))
     vars$AC = as.numeric(as.character(vars$AC))
     
     return(vars)

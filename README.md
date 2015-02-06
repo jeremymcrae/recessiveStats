@@ -35,4 +35,10 @@ devtools::install_github("jeremymcrae/recessiveStats")
 ```R
 # load the package
 library(recessiveStats)
+
+hgnc ="DNAH14"
+chrom = "1"
+lof_lof = 5
+lof_func = 6
+analyse_inherited_enrichment(hgnc, chrom, lof_lof, lof_func)
 ```
