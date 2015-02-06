@@ -16,3 +16,23 @@
 - Manually curate dataset, any uncertainties are flagged clinical review.
 - Generate pairwise matrix of similarity based on exact matches between
   clinical syndromes and frequency with which each syndrome is suspected.
+
+#### Installation
+
+The package can be installed using R 3.1.0 or greater with:
+```R
+# obtain and install
+library(devtools) # if necessary install with install.packages("devtools")
+devtools::install_github("jeremymcrae/recessiveStats")
+
+# Alternatively, clone the repository, run R 3.1 from within the top level of
+# the repository and use the devtools::build() to build the package for other R
+# versions.
+```
+
+#### Usage
+
+```R
+# load the package
+library(recessiveStats)
+```

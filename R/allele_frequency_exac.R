@@ -15,7 +15,7 @@ consequences = c("transcript_ablation", "splice_donor_variant",
     "regulatory_region_variant", "feature_elongation", "feature_truncation",
     "intergenic_variant")
 severity = data.frame(consequence=consequences, rank=seq(1:length(consequences)),
-stringsAsFactors=FALSE)
+    stringsAsFactors=FALSE)
 
 #' parses VEP output
 #'
@@ -65,26 +65,19 @@ parse_vep_output <- function(data, hgnc) {
 
 #' get the most severe VEP consequence form a list of consequences
 #'
-#' @param consequences vector of VEP consequence strings.
+#' @param consequences vector of VEP consequence strings. Can be an empty vector
 #' @export
 #'
 #' @return most severe VEP consequence string, or NA if the consequences vector
-#'     has no entries.
+#'     is empty.
 get_most_severe_consequence <- function(consequences) {
     
-    most_severe = NA
-    best_severity = NA
+    # convert the consequence strings to their rank (in terms of severity)
+    ranks = severity$rank[severity$consequence %in% consequences]
     
-    ranks = severity$rank[severity$consequence %in% cq]
+    if (length(ranks) == 0) { return(NA) }
     
-    for (cq in consequences) {
-        
-        temp_severity = severity$rank[severity$consequence == cq]
-        if (is.na(best_severity) | temp_severity < best_severity) {
-            best_severity = temp_severity
-            most_severe = cq
-        }
-    }
+    most_severe = severity$consequence[severity$rank == min(ranks)]
     
     return(most_severe)
 }
@@ -96,11 +89,13 @@ get_most_severe_consequence <- function(consequences) {
 #'
 #' @param vars dataframe of variants, with consequence, alt allele, and allele
 #'     count columns.
+#' @param vars whether the dataframe also includes a HGNC column that needs to
+#'     be standardised.
 #' @export
 #'
 #' @return dataframe of variants with mutlple alt alleles spread across separate
 #'     rows.
-standardise_multiple_alt_variants <- function(vars) {
+standardise_multiple_alt_variants <- function(vars, include_hgnc=FALSE) {
     single_vars = vars[!(grepl(",", vars$CQ)), ]
     multi_vars = vars[grepl(",", vars$CQ), ]
     
@@ -115,11 +110,18 @@ standardise_multiple_alt_variants <- function(vars) {
             new_row$ALT = alts[j]
             new_row$CQ = unlist(strsplit(row$CQ, ","))[j]
             new_row$AC = unlist(strsplit(row$AC, ","))[j]
+            
+            if (include_hgnc) {
+                new_row$HGNC = unlist(strsplit(row$HGNC, ","))[j]
+            }
+            
             new_vars = rbind(new_vars, new_row)
         }
     }
     
     vars = rbind(single_vars, new_vars)
+    
+    vars$AC = as.numeric(as.character(vars$AC))
     
     return(vars)
 }
@@ -179,7 +181,9 @@ get_exac_variants_for_gene <- function(hgnc, chrom) {
     vars$CSQ = NULL
     
     vars = standardise_multiple_alt_variants(vars)
+    
     vars = remove_nonfunctional_variants(vars)
+    vars$frequency = vars$AC/vars$AN
     
     return(vars)
 }

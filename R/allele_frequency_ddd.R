@@ -1,22 +1,26 @@
 
-#' find the paths to the VCFs
+#' get the details of the DDD cohort
 #'
 #' @param parents boolean for whether to restrict to parents only.
 #' @param unaffected boolean for whether to restrict to unaffected only.
 #' @export
 #'
 #' @return vector of paths to VCFs
-get_vcf_paths <- function(parents=TRUE, unaffected=TRUE) {
+get_ddd_cohort <- function(parents=TRUE, unaffected=TRUE) {
     ped_path = file.path(DATAFREEZE_DIR, "family_relationships.txt")
+    sanger_id_path = file.path(DATAFREEZE_DIR, "person_sanger_decipher.txt")
     
     ped = read.table(ped_path, sep="\t", header=TRUE, stringsAsFactors=FALSE)
+    sanger_ids = read.table(sanger_id_path, sep="\t", header=TRUE, stringsAsFactors=FALSE)
     
     if (parents) { ped = ped[ped$dad_id == 0, ] }
     if (unaffected) { ped = ped[ped$affected == 1, ] }
     
-    vcf = ped$path_to_vcf
+    ped = merge(ped, sanger_ids, by.x="individual_id", by.y="person_stable_id", all.x=TRUE)
     
-    return(vcf)
+    # vcf = ped$path_to_vcf
+    
+    return(ped)
 }
 
 #' find where the required data lies within the file
@@ -137,6 +141,134 @@ get_ddd_vep_annotations <- function(chrom, start, end) {
     return(vep)
 }
 
+#' reformat to hemizygous chrX genotypes in a single column
+#'
+#' The column has previously been vetted as for a male, on chromosome X, not
+#' within a pseudoautosomal region.
+#'
+#' @param column column of genotypes
+#' @export
+#'
+#' @return column of variants, where male allosomal chrX genotypes have been
+#'     converted to hemizygous genotypes (e.g. "0/0" -> "0").
+get_hemizygous <- function(column) {
+    
+    # recode the NA values to avoid splitting or excluding NAs later
+    column[column == "./."] = "a/b"
+    
+    alleles = strsplit(column, "/")
+    first = sapply(alleles, "[", 1)
+    second = sapply(alleles, "[", 2)
+    
+    # Male chrX genotypes are assigned one of their alleles. We pick the first
+    # when both are identical, since that will convert "0/0" to "0" and "1/1" to
+    # "1", which suits the later purpose of getting the frequency of the alleles
+    # in the population. Reinsert the NA values.
+    column[first == second] = first[first == second]
+    column[column == "a/b"] = NA
+    
+    return(column)
+}
+
+#' reformat chrX genotypes for males to hemizygous
+#'
+#' Female chrX genotypes are untouched, as are genotypes on autosomal
+#' chromosomes. Males with heterozygous chrX genotypes are left unchanged, as we
+#' cannot be sure which genotype is correct. Possibly they should be removed. We
+#' also do not alter genotypes within pseduo-autosomal regions.
+#'
+#' @param vars seqminer::readVCFToListByRange output, list of values, which
+#'     includes a genotype matrix as "GT", and sample IDs as sampleId.
+#' @param geno dataframe of biallelic genotypes, one column per individual
+#' @param ddd_parents information about DDD individuals, including sex
+#' @export
+#'
+#' @return dataframe of variants, where male allosomal chrX genotypes have been
+#'     converted to hemizygous genotypes (e.g. "0/0" -> "0").
+reformat_chrX_genotypes <- function(vars, geno, ddd_parents) {
+    
+    # define the pseudoautosomal regions
+    x_par = data.frame(matrix(c(60001, 2699520, 154930290, 155260560,
+        88456802, 92375509), ncol=2, byrow=TRUE))
+    names(x_par) = c("start", "end")
+    
+    # don't alter non-chrX variants
+    if (vars$CHROM[1] != "X") { return(geno) }
+    
+    # don't alter genes overlapping the pseudoautosomal regions
+    start_pos = vars$POS[1]
+    end_pos = vars$POS[length(vars$POS)]
+    if (any(start_pos < x_par$end & end_pos > x_par$start)) { return(geno) }
+    
+    # convert biallelic male genotypes on chrX to hemizygous genotypes
+    is_male = names(geno) %in% ddd_parents$sanger_id[ddd_parents$sex == "M"]
+    geno[, is_male] = apply(geno[, is_male], 2, get_hemizygous)
+    
+    # convert the female null genotype codes to NA, since it's faster to do the
+    # males separately. This seems to be awkwardly constructed, perhaps there
+    # is a simpler way to express this.
+    female = geno[, !is_male]
+    female[female == "./."] = NA
+    geno[, !is_male] = female
+    
+    return(geno)
+}
+
+#' reformats the genotypes dataset
+#'
+#' @param vars seqminer::readVCFToListByRange output, list of values, which
+#'     includes a genotype matrix as "GT", and sample IDs as sampleId.
+#' @export
+#'
+#' @return dataframe of variants
+convert_genotypes <- function(vars) {
+    
+    # convert the genotype matrix to a dataframe where each column is for a
+    # separate individual
+    geno = data.frame(t(vars$GT), stringsAsFactors=FALSE)
+    names(geno) = vars$sampleId
+    
+    # restrict the genotypes to individuals who are unaffected parents
+    ddd_parents = get_ddd_cohort()
+    geno = geno[, names(geno) %in% ddd_parents$sanger_id]
+    
+    geno = reformat_chrX_genotypes(vars, geno, ddd_parents)
+    
+    geno$AC = NA
+    geno$AN = NA
+    for (pos in 1:nrow(geno)) {
+        variant = geno[pos, ]
+        variant = variant[!is.na(variant)]
+        variant = unlist(strsplit(variant, "/"))
+        counts = table(variant)
+        geno$AN[pos] = sum(counts)
+        alts = unlist(strsplit(vars$ALT[pos], ","))
+        
+        alt_positions = names(counts)[names(counts) != 0]
+        all_alts = 1:length(alts)
+        missing = all_alts[!(all_alts %in% alt_positions)]
+        counts = counts[names(counts) != 0]
+        
+        if (length(missing) > 0) {
+            new = rep(0, length(missing))
+            names(new) = missing
+            counts = c(counts, new)
+            counts = counts[order(names(counts))]
+        }
+        
+        geno$AC[pos] = paste(counts, collapse=",")
+    }
+    
+    vars$AC = geno$AC
+    vars$AN = geno$AN
+    vars$GT = NULL
+    vars$sampleId = NULL
+    
+    vars = data.frame(vars, stringsAsFactors=FALSE)
+    
+    return(vars)
+}
+
 #' loads the variants for a given gene from source VCFs
 #'
 #' @param hgnc hgnc symbol as character string
@@ -145,8 +277,6 @@ get_ddd_vep_annotations <- function(chrom, start, end) {
 #'
 #' @return dataframe of variants
 get_ddd_variants_for_gene <- function(hgnc, chrom) {
-    
-    # vcfs = get_vcf_paths()
     
     vcfs_dir = "/lustre/scratch114/projects/ddd/release/20140912/final"
     vcf_path = Sys.glob(file.path(vcfs_dir, paste(chrom, "\\:1-*.vcf.gz", sep="")))
@@ -169,6 +299,23 @@ get_ddd_variants_for_gene <- function(hgnc, chrom) {
         vcfInfo=c(),
         vcfIndv=c("GT"))
     
+    vars = convert_genotypes(vars)
     vep = get_ddd_vep_annotations(chrom, start, end)
     
+    vars = merge(vars, vep, by.x=c("CHROM", "POS", "REF", "ALT"),
+        by.y=c("chrom", "pos", "ref", "alt"), all.x=TRUE)
+        
+    vars = standardise_multiple_alt_variants(vars, include_hgnc=TRUE)
+    
+    # remove alleles with none observed in the unaffected DDD parents, and
+    # alleles not in the required gene
+    vars = vars[vars$AC > 0 & vars$HGNC == hgnc, ]
+    
+    # remove the HGNC column, to match the output for the ExAC functions
+    vars$HGNC = NULL
+    
+    vars = remove_nonfunctional_variants(vars)
+    vars$frequency = vars$AC/vars$AN
+        
+    return(vars)
 }
