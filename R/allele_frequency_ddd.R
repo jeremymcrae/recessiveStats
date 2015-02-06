@@ -313,9 +313,6 @@ get_ddd_variants_for_gene <- function(hgnc, chrom) {
     
     # remove the HGNC column, to match the output for the ExAC functions
     vars$HGNC = NULL
-    
-    vars = remove_nonfunctional_variants(vars)
-    vars$frequency = vars$AC/vars$AN
         
     return(vars)
 }
