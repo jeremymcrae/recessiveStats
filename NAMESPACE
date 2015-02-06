@@ -2,6 +2,7 @@
 
 export(convert_genotypes)
 export(find_file_pos)
+export(get_cumulative_frequencies)
 export(get_ddd_cohort)
 export(get_ddd_variants_for_gene)
 export(get_ddd_vep_annotations)

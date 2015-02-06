@@ -6,8 +6,8 @@
 #'
 #' @param vars dataframe of variants, with consequence, alt allele, and allele
 #'     count columns.
-#' @param vars whether the dataframe also includes a HGNC column that needs to
-#'     be standardised.
+#' @param include_hgnc whether the dataframe also includes a HGNC column that
+#'     needs to be standardised.
 #' @export
 #'
 #' @return dataframe of variants with mutlple alt alleles spread across separate
