@@ -4,8 +4,8 @@
 #'
 #' @param hgnc HGNC symbol for a gene.
 #' @param chrom chromosome that the gene is on.
-#' @param lof_lof number of inherited Lof/LoF events.
-#' @param lof_func number of inherited Lof/Func events.
+#' @param lof_lof number of probands with inherited Lof/LoF variants in the gene.
+#' @param lof_func number of probands with inherited Lof/Func variants in the gene.
 #' @export
 #'
 #' @return a vector of P values from tests using the DDD population, the ExAC
