@@ -23,8 +23,8 @@ get_cumulative_frequencies <- function(vars) {
     # find the loss of function variants
     lof_vars = vars[vars$CQ %in% lof_cq, ]
     
-    lof_freq = sum(lof_vars$frequency)
-    functional_freq = sum(vars$frequency)
+    lof_freq = sum(lof_vars$frequency, na.rm=TRUE)
+    functional_freq = sum(vars$frequency, na.rm=TRUE)
     
     # What do we do if the frequency is zero? We won't be able to get meaningful
     # estimates of the enrichment of inherited variants. Estimate the frequency
