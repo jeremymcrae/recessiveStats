@@ -31,7 +31,7 @@ analyse_inherited_enrichment <- function(hgnc, chrom, lof_lof, lof_func) {
     ddd_func_p = pbinom(lof_func - 1, 4297, prob=ddd$lof_func_rate, lower.tail=FALSE)
     exac_func_p = pbinom(lof_func - 1, 4297, prob=exac$lof_func_rate, lower.tail=FALSE)
     
-    p_values = c(ddd_lof_p, exac_lof_p, ddd_func_p, exac_func_p)
+    p_values = c(ddd_lof_p, exac_lof_p, ddd_func_p, exac_func_p, ddd$lof, ddd$func, exac$lof, exac$func)
     
     return(p_values)
 }
