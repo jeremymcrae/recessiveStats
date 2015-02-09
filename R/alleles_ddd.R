@@ -18,8 +18,6 @@ get_ddd_cohort <- function(parents=TRUE, unaffected=TRUE) {
     
     ped = merge(ped, sanger_ids, by.x="individual_id", by.y="person_stable_id", all.x=TRUE)
     
-    # vcf = ped$path_to_vcf
-    
     return(ped)
 }
 
@@ -217,14 +215,74 @@ reformat_chrX_genotypes <- function(vars, geno, ddd_parents) {
     return(geno)
 }
 
+#' count alleles for a variant
+#'
+#' @param variant single row of data frame of VCF genotypes
+#' @export
+#'
+#' @return dataframe of variants
+tally_alleles <- function(variant) {
+    alt_column = which(names(variant) == "ALT")
+    alts = unlist(strsplit(variant[alt_column], ","))
+    variant = variant[-alt_column]
+    
+    variant = variant[!is.na(variant)]
+    variant = unlist(strsplit(variant, "/"))
+    counts = table(variant)
+    
+    alt_positions = names(counts)[names(counts) != 0]
+    all_alts = 1:length(alts)
+    missing = all_alts[!(all_alts %in% alt_positions)]
+    non_ref = counts[names(counts) != 0]
+    
+    if (length(missing) > 0) {
+        new = rep(0, length(missing))
+        names(new) = missing
+        non_ref = c(non_ref, new)
+        non_ref = non_ref[order(names(non_ref))]
+    }
+    
+    values = c(paste(non_ref, collapse=","), sum(counts))
+    
+    return(values)
+}
+
+
+#' quickly strips out the varian ts which are obviously nonfunctional
+#'
+#' @param vars seqminer::readVCFToListByRange output, list of values, which
+#'     includes a genotype matrix as "GT", and sample IDs as sampleId.
+#' @param vep dataframe of VEP consequences for the vars entry
+#' @export
+#'
+#' @return dataframe of variants
+remove_easy_nonfunctional <- function(vars, vep) {
+    
+    nonfunc_cq = c("intron_variant", "5_prime_UTR_variant", "3_prime_UTR_variant")
+    
+    nonfunc = vep$CQ %in% nonfunc_cq
+    
+    # remove all the nonfunctional variants from the sections of the vars list
+    vars$CHROM = vars$CHROM[!nonfunc]
+    vars$POS = vars$POS[!nonfunc]
+    vars$REF = vars$REF[!nonfunc]
+    vars$ALT = vars$ALT[!nonfunc]
+    vars$sampleId = vars$sampleId[!nonfunc]
+    vars$GT = vars$GT[, !nonfunc]
+    
+    return(vars)
+}
+
 #' reformats the genotypes dataset
 #'
 #' @param vars seqminer::readVCFToListByRange output, list of values, which
 #'     includes a genotype matrix as "GT", and sample IDs as sampleId.
+#' @param vep dataframe of VEP consequences for the vars entry
 #' @export
 #'
 #' @return dataframe of variants
-convert_genotypes <- function(vars) {
+convert_genotypes <- function(vars, vep) {
+    vars = remove_easy_nonfunctional(vars, vep)
     
     cat("converting DDD genotypes\n")
     # convert the genotype matrix to a dataframe where each column is for a
@@ -237,35 +295,13 @@ convert_genotypes <- function(vars) {
     geno = geno[, names(geno) %in% ddd_parents$sanger_id]
     
     geno = reformat_chrX_genotypes(vars, geno, ddd_parents)
+    geno$ALT = vars$ALT
     
     cat("tallying DDD allele counts\n")
-    geno$AC = NA
-    geno$AN = NA
-    for (pos in 1:nrow(geno)) {
-        variant = geno[pos, ]
-        variant = variant[!is.na(variant)]
-        variant = unlist(strsplit(variant, "/"))
-        counts = table(variant)
-        geno$AN[pos] = sum(counts)
-        alts = unlist(strsplit(vars$ALT[pos], ","))
-        
-        alt_positions = names(counts)[names(counts) != 0]
-        all_alts = 1:length(alts)
-        missing = all_alts[!(all_alts %in% alt_positions)]
-        counts = counts[names(counts) != 0]
-        
-        if (length(missing) > 0) {
-            new = rep(0, length(missing))
-            names(new) = missing
-            counts = c(counts, new)
-            counts = counts[order(names(counts))]
-        }
-        
-        geno$AC[pos] = paste(counts, collapse=",")
-    }
+    counts = apply(geno, 1, tally_alleles)
     
-    vars$AC = geno$AC
-    vars$AN = geno$AN
+    vars$AC = counts[1, ]
+    vars$AN = counts[2, ]
     vars$GT = NULL
     vars$sampleId = NULL
     
@@ -305,8 +341,8 @@ get_ddd_variants_for_gene <- function(hgnc, chrom) {
         vcfInfo=c(),
         vcfIndv=c("GT"))
     
-    vars = convert_genotypes(vars)
     vep = get_ddd_vep_annotations(chrom, start, end)
+    vars = convert_genotypes(vars, vep)
     
     vars = merge(vars, vep, by.x=c("CHROM", "POS", "REF", "ALT"),
         by.y=c("chrom", "pos", "ref", "alt"), all.x=TRUE)
