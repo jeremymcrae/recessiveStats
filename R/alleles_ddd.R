@@ -278,10 +278,11 @@ remove_easy_nonfunctional <- function(vars, vep) {
 #' @param vars seqminer::readVCFToListByRange output, list of values, which
 #'     includes a genotype matrix as "GT", and sample IDs as sampleId.
 #' @param vep dataframe of VEP consequences for the vars entry
+#' @param probands vector of proband IDs, or NA
 #' @export
 #'
 #' @return dataframe of variants
-convert_genotypes <- function(vars, vep) {
+convert_genotypes <- function(vars, vep, probands) {
     vars = remove_easy_nonfunctional(vars, vep)
     
     cat("converting DDD genotypes\n")
@@ -291,8 +292,16 @@ convert_genotypes <- function(vars, vep) {
     names(geno) = vars$sampleId
     
     # restrict the genotypes to individuals who are unaffected parents
-    ddd_parents = get_ddd_cohort()
+    ddd = get_ddd_cohort(parents=FALSE, unaffacted=FALSE)
+    ddd_parents = ddd[ddd$dad_id == 0 & ddd$affected == 1, ]
     geno = geno[, names(geno) %in% ddd_parents$sanger_id]
+    
+    # remove any parents of the probands, since they could skew the allele
+    # frequencies
+    if (!is.na(proband)) {
+        proband_parents = ddd[ddd$individual_id %in% probands, ]
+        geno = geno[, !(names(geno) %in% proband_parents$sanger_id)]
+    }
     
     geno = reformat_chrX_genotypes(vars, geno, ddd_parents)
     geno$ALT = vars$ALT
@@ -314,10 +323,11 @@ convert_genotypes <- function(vars, vep) {
 #'
 #' @param hgnc hgnc symbol as character string
 #' @param chrom chromosome as character string
+#' @param probands vector of IDs for probands for the gene, or NA
 #' @export
 #'
 #' @return dataframe of variants
-get_ddd_variants_for_gene <- function(hgnc, chrom) {
+get_ddd_variants_for_gene <- function(hgnc, chrom, probands) {
     
     vcfs_dir = "/lustre/scratch114/projects/ddd/release/20140912/final"
     vcf_path = Sys.glob(file.path(vcfs_dir, paste(chrom, "\\:1-*.vcf.gz", sep="")))
