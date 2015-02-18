@@ -19,8 +19,7 @@ check_for_last_base_in_exon <- function(variant, exon_ends) {
     
     if (variant[["POS"]] %in% exon_ends) {
         variant[["CQ"]] = "splice_donor_variant"
-        print(paste(variant[["CHROM"]], ":", variant[["POS"]], " is non-LoF ref allele G at last base of exon", sep="")
-        }
+        print(paste(variant[["CHROM"]], ":", variant[["POS"]], " is non-LoF ref allele G at last base of exon", sep=""))
     }
     
     return(variant)
@@ -35,8 +34,8 @@ check_for_last_base_in_exon <- function(variant, exon_ends) {
 get_exon_ends <- function(hgnc_symbol) {
     base_url = "http://grch37.rest.ensembl.org/"
     
-    gene_ids = get_gene_ids_for_hgnc(base_url, hgnc)
-    transcript_ids = get_transcript_ids_for_ensembl_gene_ids(base_url, gene_ids, hgnc)
+    gene_ids = get_gene_ids_for_hgnc(base_url, hgnc_symbol)
+    transcript_ids = get_transcript_ids_for_ensembl_gene_ids(base_url, gene_ids, hgnc_symbol)
     
     all_ends = c()
     for (transcript_id in transcript_ids) {
