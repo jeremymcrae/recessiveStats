@@ -19,7 +19,7 @@ severity = data.frame(consequence=consequences, rank=seq(1:length(consequences))
 
 #' parses VEP output
 #'
-#' @param data single row dataframe containing allele column and VEP prediction
+#' @param variant single row dataframe containing allele column and VEP prediction
 #'     column.
 #' @param hgnc HGNC symbol for the gene that we are currently investigating.
 #' @export
@@ -28,16 +28,22 @@ severity = data.frame(consequence=consequences, rank=seq(1:length(consequences))
 #'     of interest. If none of the predicted consequences lie within the gene of
 #'    interest, return "NA". If the variant has multiple alleles, return a
 #'    comma-separated list of VEP consequences for the alleles.
-parse_vep_output <- function(data, hgnc) {
+parse_vep_output <- function(variant, hgnc) {
     
     # Sometimes the VEP prediction is a comma-separated list of VEP predictions.
     # This can occur for two reasons, when we have predictions for the different
     # transcripts that the variant lies within, and secondly, if the variant has
     # multiple alleles, as we need sepaarte predicitons for all the different
     # alleles.
-    vep_predictions = unlist(strsplit(data[["CSQ"]], ","))
+    vep_predictions = unlist(strsplit(variant[["CSQ"]], ","))
     
+    # make sure we have a consequence entry for each allele. If none of the
+    # predictions for an allele match the required HGNC symbol, then we will
+    # have a zero length vector, which should give NA when we look for the most
+    # severe consequence.
     consequences = list()
+    alleles = unlist(strsplit(variant[["ALT"]], ","))
+    
     for (prediction in vep_predictions) {
         prediction = unlist(strsplit(prediction, "\\|"))
         
@@ -45,16 +51,20 @@ parse_vep_output <- function(data, hgnc) {
         symbol = prediction[15]
         cq = prediction[5]
         
-        # make sure we have an entry for the allele. If non of the predictions
-        # for an allele match the required HGNC symbol, then we will have a zero
-        # length vector, which should give NA when we look for the most severe
-        # consequence.
-        if (!allele %in% names(consequences)) { consequences[[allele]] = c() }
-        
         if (symbol != hgnc) { next }
         
         cq = unlist(strsplit(cq, "&"))
         consequences[[allele]] = c(consequences[[allele]], cq)
+    }
+    
+    # sort the consequences by the alt alleles from the VCF field
+    # TODO: some indels cometimes have different allele names, and different
+    # allele orders to the alt allele codes. We should fix these, but some are
+    # not simple.
+    if (length(consequences) > 1) {
+        if (all(sort(names(consequences)) == sort(alleles))) {
+            consequences = consequences[alleles]
+        }
     }
     
     # get the most severe consequence for each allele

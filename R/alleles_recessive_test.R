@@ -6,6 +6,8 @@
 #' @param chrom chromosome that the gene is on.
 #' @param lof_lof number of probands with inherited Lof/LoF variants in the gene.
 #' @param lof_func number of probands with inherited Lof/Func variants in the gene.
+#' @param probands vector of probands who have inherited LoF/LoF or LoF/Func 
+#'     variants in the gene, or NA.
 #' @param cohort_n number of probands in population.
 #' @export
 #'
@@ -33,8 +35,8 @@ analyse_inherited_enrichment <- function(hgnc, chrom, lof_lof, lof_func, proband
     exac_func_p = pbinom(lof_func - 1, cohort_n, prob=exac$lof_func_rate, lower.tail=FALSE)
     
     p_values = list(ddd_lof_p=ddd_lof_p, exac_lof_p=exac_lof_p,
-        ddd_func_p=ddd_func_p, exac_func_p=exac_func_p, ddd$lof=ddd$lof,
-        ddd$func=ddd$func, exac$lof=exac$lof, exac$func=exac$func)
+        ddd_func_p=ddd_func_p, exac_func_p=exac_func_p, ddd_lof=ddd$lof,
+        ddd_func=ddd$func, exac_lof=exac$lof, exac_func=exac$func)
     
     return(p_values)
 }

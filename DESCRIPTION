@@ -9,6 +9,8 @@ License: file LICENSE
 LazyData: true
 Imports:
     reshape (>= 0.8.5),
-    seqminer
+    seqminer,
+    httr,
+    rjson
 Suggests:
     testthat

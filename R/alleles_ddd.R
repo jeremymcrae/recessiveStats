@@ -278,7 +278,7 @@ remove_easy_nonfunctional <- function(vars, vep) {
 #' @param vars seqminer::readVCFToListByRange output, list of values, which
 #'     includes a genotype matrix as "GT", and sample IDs as sampleId.
 #' @param vep dataframe of VEP consequences for the vars entry
-#' @param probands vector of proband IDs, or NA
+#' @param probands vector of proband IDs, or NA.
 #' @export
 #'
 #' @return dataframe of variants
@@ -292,13 +292,13 @@ convert_genotypes <- function(vars, vep, probands) {
     names(geno) = vars$sampleId
     
     # restrict the genotypes to individuals who are unaffected parents
-    ddd = get_ddd_cohort(parents=FALSE, unaffacted=FALSE)
+    ddd = get_ddd_cohort(parents=FALSE, unaffected=FALSE)
     ddd_parents = ddd[ddd$dad_id == 0 & ddd$affected == 1, ]
     geno = geno[, names(geno) %in% ddd_parents$sanger_id]
     
     # remove any parents of the probands, since they could skew the allele
     # frequencies
-    if (!is.na(proband)) {
+    if (!is.na(probands)) {
         proband_parents = ddd[ddd$individual_id %in% probands, ]
         geno = geno[, !(names(geno) %in% proband_parents$sanger_id)]
     }
@@ -358,6 +358,8 @@ get_ddd_variants_for_gene <- function(hgnc, chrom, probands) {
         by.y=c("chrom", "pos", "ref", "alt"), all.x=TRUE)
         
     vars = standardise_multiple_alt_variants(vars, include_hgnc=TRUE)
+    exon_ends = get_exon_ends(hgnc)
+    vars = apply(vars, 1, check_for_last_base_in_exon, exon_ends=exon_ends)
     
     # remove alleles with none observed in the unaffected DDD parents, and
     # alleles not in the required gene
