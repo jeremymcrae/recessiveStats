@@ -42,7 +42,7 @@ get_exac_variants_for_gene <- function(hgnc, chrom) {
     
     vars = standardise_multiple_alt_variants(vars)
     exon_ends = get_exon_ends(hgnc)
-    vars = apply(vars, 1, check_for_last_base_in_exon, exon_ends=exon_ends)
+    vars$CQ = apply(vars, 1, check_for_last_base_in_exon, exon_ends=exon_ends)
     
     return(vars)
 }

@@ -352,14 +352,14 @@ get_ddd_variants_for_gene <- function(hgnc, chrom, probands) {
         vcfIndv=c("GT"))
     
     vep = get_ddd_vep_annotations(chrom, start, end)
-    vars = convert_genotypes(vars, vep)
+    vars = convert_genotypes(vars, vep, probands)
     
     vars = merge(vars, vep, by.x=c("CHROM", "POS", "REF", "ALT"),
         by.y=c("chrom", "pos", "ref", "alt"), all.x=TRUE)
         
     vars = standardise_multiple_alt_variants(vars, include_hgnc=TRUE)
     exon_ends = get_exon_ends(hgnc)
-    vars = apply(vars, 1, check_for_last_base_in_exon, exon_ends=exon_ends)
+    vars$CQ = apply(vars, 1, check_for_last_base_in_exon, exon_ends=exon_ends)
     
     # remove alleles with none observed in the unaffected DDD parents, and
     # alleles not in the required gene

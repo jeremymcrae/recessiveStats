@@ -6,23 +6,23 @@
 #' @param exon_ends vector of exon end positions for the variants gene.
 #' @export
 #'
-#' @return dataframe where the consequence has been modified if appropriate.
+#' @return consequence for variant.
 check_for_last_base_in_exon <- function(variant, exon_ends) {
     
     allowed = c("missense_variant", "synonymous_variant")
     
     # ignore variants where the consequence isn't missense or synonymous
-    if (!variant[["CQ"]] %in% allowed) { return(variant) }
+    if (!variant[["CQ"]] %in% allowed) { return(variant[["CQ"]]) }
     
     # we don't modify variants that don't have G as reference allele
-    if (variant[["REF"]] != "G") { return(variant) }
+    if (variant[["REF"]] != "G") { return(variant[["CQ"]]) }
     
     if (variant[["POS"]] %in% exon_ends) {
         variant[["CQ"]] = "splice_donor_variant"
-        print(paste(variant[["CHROM"]], ":", variant[["POS"]], " is non-LoF ref allele G at last base of exon", sep=""))
+        cat(paste(variant[["CHROM"]], ":", variant[["POS"]], " is non-LoF ref allele G at last base of exon\n", sep=""))
     }
     
-    return(variant)
+    return(variant[["CQ"]])
 }
 
 #' gets all exon end positions for an HGNC symbol
