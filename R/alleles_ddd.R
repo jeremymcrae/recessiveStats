@@ -298,9 +298,11 @@ convert_genotypes <- function(vars, vep, probands) {
     
     # remove any parents of the probands, since they could skew the allele
     # frequencies
-    if (!is.na(probands) & length(probands) > 0) {
-        proband_parents = ddd[ddd$individual_id %in% probands, ]
-        geno = geno[, !(names(geno) %in% proband_parents$sanger_id)]
+    if (!is.null(probands)) {
+        if (!is.na(probands)) {
+            proband_parents = ddd[ddd$individual_id %in% probands, ]
+            geno = geno[, !(names(geno) %in% proband_parents$sanger_id)]
+        }
     }
     
     geno = reformat_chrX_genotypes(vars, geno, ddd_parents)
