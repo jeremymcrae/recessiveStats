@@ -267,7 +267,6 @@ remove_easy_nonfunctional <- function(vars, vep) {
     vars$POS = vars$POS[!nonfunc]
     vars$REF = vars$REF[!nonfunc]
     vars$ALT = vars$ALT[!nonfunc]
-    vars$sampleId = vars$sampleId[!nonfunc]
     vars$GT = vars$GT[, !nonfunc]
     
     return(vars)
@@ -278,7 +277,7 @@ remove_easy_nonfunctional <- function(vars, vep) {
 #' @param vars seqminer::readVCFToListByRange output, list of values, which
 #'     includes a genotype matrix as "GT", and sample IDs as sampleId.
 #' @param vep dataframe of VEP consequences for the vars entry
-#' @param probands vector of proband IDs, or NA.
+#' @param probands vector of proband IDs, or NA, or a zero-length vector.
 #' @export
 #'
 #' @return dataframe of variants
