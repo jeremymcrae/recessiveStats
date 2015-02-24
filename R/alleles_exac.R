@@ -4,10 +4,12 @@
 #'
 #' @param hgnc HGNC symbol for the gene that we want data for eg "ARID1B"
 #' @param chrom chromosome string e.g. "6"
+#' @param check_last_base boolean for whether to check if last base non-lofs can
+#'     be LoF.
 #' @export
 #'
 #' @return data frame of variants in gene
-get_exac_variants_for_gene <- function(hgnc, chrom) {
+get_exac_variants_for_gene <- function(hgnc, chrom, check_last_base=TRUE) {
     
     # find the gene coordinates, sometimes we have multiple genes with the same
     # HGNC symbol on different chromosomes, so we also need to restrict by
@@ -42,7 +44,10 @@ get_exac_variants_for_gene <- function(hgnc, chrom) {
     
     vars = standardise_multiple_alt_variants(vars)
     exon_ends = get_exon_ends(hgnc)
-    vars$CQ = apply(vars, 1, check_for_last_base_in_exon, exon_ends=exon_ends)
+    
+    if (check_last_base) {
+        vars$CQ = apply(vars, 1, check_for_last_base_in_exon, exon_ends=exon_ends)
+    }
     
     return(vars)
 }

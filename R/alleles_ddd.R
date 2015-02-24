@@ -325,10 +325,12 @@ convert_genotypes <- function(vars, vep, probands) {
 #' @param hgnc hgnc symbol as character string
 #' @param chrom chromosome as character string
 #' @param probands vector of IDs for probands for the gene, or NA
+#' @param check_last_base boolean for whether to check if last base non-lofs can
+#'     be LoF.
 #' @export
 #'
 #' @return dataframe of variants
-get_ddd_variants_for_gene <- function(hgnc, chrom, probands) {
+get_ddd_variants_for_gene <- function(hgnc, chrom, probands=NA, check_last_base=TRUE) {
     
     vcfs_dir = "/lustre/scratch114/projects/ddd/release/20140912/final"
     vcf_path = Sys.glob(file.path(vcfs_dir, paste(chrom, "\\:1-*.vcf.gz", sep="")))
@@ -360,7 +362,10 @@ get_ddd_variants_for_gene <- function(hgnc, chrom, probands) {
         
     vars = standardise_multiple_alt_variants(vars, include_hgnc=TRUE)
     exon_ends = get_exon_ends(hgnc)
-    vars$CQ = apply(vars, 1, check_for_last_base_in_exon, exon_ends=exon_ends)
+    
+    if (check_last_base) {
+        vars$CQ = apply(vars, 1, check_for_last_base_in_exon, exon_ends=exon_ends)
+    }
     
     # remove alleles with none observed in the unaffected DDD parents, and
     # alleles not in the required gene
