@@ -43,10 +43,12 @@ get_exac_variants_for_gene <- function(hgnc, chrom, check_last_base=TRUE) {
     vars$CSQ = NULL
     
     vars = standardise_multiple_alt_variants(vars)
-    exon_ends = get_exon_ends(hgnc)
+    ends = get_exon_ends(hgnc)
+    exon_ends = ends$all_ends
+    strand = ends$strand
     
     if (check_last_base) {
-        vars$CQ = apply(vars, 1, check_for_last_base_in_exon, exon_ends=exon_ends)
+        vars$CQ = apply(vars, 1, check_for_last_base_in_exon, exon_ends=exon_ends, strand=strand)
     }
     
     return(vars)

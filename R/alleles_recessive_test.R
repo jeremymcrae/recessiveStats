@@ -9,6 +9,8 @@
 #' @param probands vector of probands who have inherited LoF/LoF or LoF/Func
 #'     variants in the gene, or NA.
 #' @param cohort_n number of probands in population.
+#' @param check_last_base whether to correct missense or synonymous G alleles at
+#'     the last base of exons to a LoF consequence.
 #' @export
 #'
 #' @return a vector of P values from tests using the DDD population, the ExAC

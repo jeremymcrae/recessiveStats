@@ -4,18 +4,23 @@
 #'
 #' @param variant row of dataframe
 #' @param exon_ends vector of exon end positions for the variants gene.
+#' @param strand which chromosome strand the gene is on, 1 for plus strand, and
+#'     -1 for minus strand.
 #' @export
 #'
 #' @return consequence for variant.
-check_for_last_base_in_exon <- function(variant, exon_ends) {
+check_for_last_base_in_exon <- function(variant, exon_ends, strand) {
     
     allowed = c("missense_variant", "synonymous_variant")
     
     # ignore variants where the consequence isn't missense or synonymous
     if (!variant[["CQ"]] %in% allowed) { return(variant[["CQ"]]) }
     
-    # we don't modify variants that don't have G as reference allele
-    if (variant[["REF"]] != "G") { return(variant[["CQ"]]) }
+    # we don't modify variants that don't have G as reference allele (or C for
+    # genes on - strand)
+    required_base = "G"
+    if (strand == -1) { required_base = "C" }
+    if (variant[["REF"]] != required_base) { return(variant[["CQ"]]) }
     
     if (variant[["POS"]] %in% exon_ends) {
         variant[["CQ"]] = "splice_donor_variant"
@@ -38,6 +43,7 @@ get_exon_ends <- function(hgnc_symbol) {
     transcript_ids = get_transcript_ids_for_ensembl_gene_ids(base_url, gene_ids, hgnc_symbol)
     
     all_ends = c()
+    strand = 1
     for (transcript_id in transcript_ids) {
         ext = paste("/overlap/id/", transcript_id, "?feature=exon", sep="")
         url = paste(base_url, ext, sep="")
@@ -47,9 +53,10 @@ get_exon_ends <- function(hgnc_symbol) {
         # restrict to the exons for the transcript
         exons = json[sapply(json, function(x) x[["Parent"]] == transcript_id)]
         
+        strand = exons[[1]]$strand
         # get the final position of each exon
         ends = sapply(exons, function(x) x[["end"]])
-        if (exons[[1]]$strand == -1) {
+        if (strand == -1) {
             ends = sapply(exons, function(x) x[["start"]])
         }
         
@@ -57,10 +64,11 @@ get_exon_ends <- function(hgnc_symbol) {
     }
     
     # we only need a unique set of exon end positions, since we simply match
-    # against these positions
-    all_ends = unique(all_ends)
+    # against these positions. Also include the strand, so we can check if the
+    # base should be "G", or "C".
+    values = list(all_ends=unique(all_ends), strand=strand)
     
-    return(all_ends)
+    return(values)
 }
 
 #' gets the gene IDs for HGNC symbols

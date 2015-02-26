@@ -361,10 +361,12 @@ get_ddd_variants_for_gene <- function(hgnc, chrom, probands=NA, check_last_base=
         by.y=c("chrom", "pos", "ref", "alt"), all.x=TRUE)
         
     vars = standardise_multiple_alt_variants(vars, include_hgnc=TRUE)
-    exon_ends = get_exon_ends(hgnc)
+    ends = get_exon_ends(hgnc)
+    exon_ends = ends$all_ends
+    strand = ends$strand
     
     if (check_last_base) {
-        vars$CQ = apply(vars, 1, check_for_last_base_in_exon, exon_ends=exon_ends)
+        vars$CQ = apply(vars, 1, check_for_last_base_in_exon, exon_ends=exon_ends, strand=strand)
     }
     
     # remove alleles with none observed in the unaffected DDD parents, and
