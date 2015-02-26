@@ -74,13 +74,6 @@ show_missing_syndromes <- function(all_matches, pheno) {
     n_with_match = sum(has_match)
     cat(paste("n probands:", n_probands, "\nwith match:", n_with_match, "\n", sep=" "))
     
-    # # show the exact matches for each syndrome string. Note: this misses the
-    # # strings that did NOT match the regex.
-    # for (syndrome in names(all_matches)) {
-    #     cat(c("\n", syndrome, "\n")
-    #     print(pheno$syndrome[all_matches[[syndrome]]])
-    # }
-    
     return(missing)
 }
 

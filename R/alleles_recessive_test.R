@@ -29,7 +29,7 @@ analyse_inherited_enrichment <- function(hgnc, chrom, lof_lof, lof_func, proband
     exac$lof_rate = exac$lof * ddd$lof
     exac$lof_func_rate = exac$lof * (exac$lof + exac$functional)
     
-    # get the probability of o getting more than or equal to the number of
+    # get the probability of getting more than or equal to the number of
     # observed inherited events
     ddd_lof_p = pbinom(lof_lof - 1, cohort_n, prob=ddd$lof_rate, lower.tail=FALSE)
     exac_lof_p = pbinom(lof_lof - 1, cohort_n, prob=exac$lof_rate, lower.tail=FALSE)
