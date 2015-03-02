@@ -7,7 +7,15 @@
 #' @return list of probands, where each probandf has a vector of suspected
 #'     syndromes.
 open_suspected_syndromes <- function(path) {
-    syndromes = read.table(path, sep="\t", header=TRUE, stringsAsfactors=FALSE)
+    syndromes = read.table(path, sep="\t", header=TRUE, stringsAsFactors=FALSE, quote="")
+    
+    syndromes$syndrome = strsplit(syndromes$syndrome, ";")
+    
+    # convert the syndromes into a list, where the names of the list entries are
+    # the proband IDs, so that we can extract syndromes per proband by proband
+    # ID.
+    syndromes = split(syndromes, syndromes$patient_id)
+    syndromes = lapply(syndromes, function(x) as.vector(x[["syndrome"]])[[1]])
     
     return(syndromes)
 }
@@ -24,7 +32,10 @@ open_suspected_syndromes <- function(path) {
 #'     between 0 and 1.
 calculate_proband_similarity <- function(syndrome_rates, proband_1, proband_2) {
     
-    in_both = proband_1[proband_1 %in% proband_2]
+    proband_1 = unlist(proband_1)
+    proband_2 = unlist(proband_2)
+    
+    in_both = as.vector(proband_1[proband_1 %in% proband_2])
     
     # if none of the syndromes match between the two probands, return the
     # highest possible rate, which is 1
@@ -56,7 +67,7 @@ calculate_gene_similarity <- function(probands, syndrome_rates) {
         }
     }
     
-    similarity = sum(log10(similarity))
+    similarity = -sum(log10(similarity))
     
     return(similarity)
 }
@@ -69,19 +80,19 @@ calculate_gene_similarity <- function(probands, syndrome_rates) {
 #' @export
 #'
 #' @return P-value for the chance that the probands share their syndrome terms
-test_gene <- function(syndromes, probands, n_sims=1000) {
+test_gene <- function(syndromes, probands, n_sims=10000) {
     
     # calculate the rate at which each syndrome term is used within the population
-    syndrome_terms = unlist(syndromes)
-    syndrome_rates = data.frame(table(syndrome_terms))
-    syndrome_rates$syndrome = "XXX"
-    syndrome_rates$rate = syndrome_rates$count/sum(syndrome_rates$count)
+    term = unlist(syndromes)
+    syndrome_rates = data.frame(table(term))
+    syndrome_rates$syndrome = syndrome_rates$term
+    syndrome_rates$rate = syndrome_rates$Freq/sum(syndrome_rates$Freq)
     
     # calculate the similarity between the observed probands
-    proband_terms = syndromes[[probands]]
+    proband_terms = syndromes[probands]
     observed_similarity = calculate_gene_similarity(proband_terms, syndrome_rates)
     
-    distribution = c()
+    distribution = rep(NA, n_sims)
     for (x in 1:n_sims) {
         sampled = sample(syndromes, length(probands))
         distribution[x] = calculate_gene_similarity(sampled, syndrome_rates)
