@@ -1,3 +1,5 @@
+# script to tidy up the suspected syndromes for use in finding similarity
+# between suspected syndromes in groups of probands.
 
 #' open the phenotype data,
 #'
