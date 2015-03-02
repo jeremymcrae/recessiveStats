@@ -1,6 +1,4 @@
 
-
-
 #' open the phenotype data,
 #'
 #' @param path path to the proband's phenotype file.
