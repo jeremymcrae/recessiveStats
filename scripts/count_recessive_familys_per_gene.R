@@ -1,6 +1,6 @@
 # tally probands with recessive variants (as compound hets with
 # loss-of-function, or functional events). The inital list of variants comes
-# from clinical fitering output, run using all genes rather than restricting it
+# from clinical filtering output, run using all genes rather than restricting it
 # to the known developmental disorder genes.
 
 library(reshape)
@@ -10,12 +10,13 @@ DATAFREEZE_DIR = "/nfs/ddd0/Data/datafreeze/ddd_data_releases/2014-11-04"
 TRIOS_PATH = file.path(DATAFREEZE_DIR, "family_relationships.txt")
 PHENOTYPES_PATH = file.path(DATAFREEZE_DIR, "phenotypes_and_patient_info.txt")
 SANGER_IDS_PATH = file.path(DATAFREEZE_DIR, "person_sanger_decipher.txt")
-CLINICALFILTER_OUTPUT = "/nfs/users/nfs_j/jm33/clinical_reporting.2015-03-04.last_base_exon_tweaked.txt"
+CLINICALFILTER_OUTPUT = "/nfs/users/nfs_j/jm33/clinical_reporting.2015-03-06.all_genes.txt"
 LIKELY_DIAGNOSED = "/lustre/scratch113/projects/ddd/users/jm33/ddd_likely_diagnosed.txt"
 
-OUTPUT_COUNTS_PATH = "/nfs/users/nfs_j/jm33/apps/recessiveStats/data-raw/recessive_counts_per_gene.last_base_rule.txt"
-OUTPUT_PROBANDS_PATH = "/nfs/users/nfs_j/jm33/apps/recessiveStats/data-raw/recessive_probands_per_gene.last_base_rule.txt"
-OUTPUT_PROBANDS_JSON = "/nfs/users/nfs_j/jm33/apps/recessiveStats/data-raw/recessive_probands_per_gene.last_base_rule.json"
+DATA_DIR = "/nfs/users/nfs_j/jm33/apps/recessiveStats/data-raw"
+OUTPUT_COUNTS_PATH = file.path(DATA_DIR, "recessive_counts_by_gene.txt")
+OUTPUT_PROBANDS_PATH = file.path(DATA_DIR, "recessive_probands_by_gene.txt")
+OUTPUT_PROBANDS_JSON = file.path(DATA_DIR, "recessive_probands_by_gene.json")
 
 open_variants <- function() {
     diagnosed = read.table(LIKELY_DIAGNOSED, header=TRUE, stringsAsFactors=FALSE)
@@ -128,6 +129,10 @@ count_homozygous_lofs_per_gene <- function(variants) {
     # get the homozygous recessive single LoFs,
     single_lofs = single_lofs[sapply(strsplit(single_lofs$trio_genotype, "/"), "[", 1) == "2", ]
     
+    # and only count one per gene (ie if a proband has two homozygous recessive
+    # LoFs in a gene, we count that as a single proband)
+    single_lofs = single_lofs[!duplicated(single_lofs[, c("proband", "chrom", "gene")]), ]
+    
     single_lofs = single_lofs[, c("proband", "gene", "chrom")]
     single_lofs$category = "homozygous_lof"
     
@@ -182,9 +187,10 @@ count_probands_per_gene <- function(variants) {
 
 set_functional_state <- function(variants) {
     lof_cq = c("stop_gained", "splice_acceptor_variant", "splice_donor_variant",
-        "frameshift_variant", "coding_sequence_variant")
+        "frameshift_variant")
     missense_cq = c("missense_variant", "initiator_codon_variant", "stop_lost",
-        "inframe_deletion", "inframe_insertion", "splice_region_variant")
+        "inframe_deletion", "inframe_insertion", "splice_region_variant",
+        "coding_sequence_variant")
     
     # define the two functional categories, loss-of-function versus functional
     variants$functional = NA

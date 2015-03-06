@@ -1,10 +1,18 @@
 
 library(recessiveStats)
 
-RECESSIVE_COUNTS_PATH = "/nfs/users/nfs_j/jm33/apps/recessiveStats/data-raw/recessive_counts_per_gene.last_base_rule.txt"
-PROBANDS_PATH = "/nfs/users/nfs_j/jm33/apps/recessiveStats/data-raw/recessive_probands_per_gene.last_base_rule.txt"
-OUTPUT_PATH = "/nfs/users/nfs_j/jm33/apps/recessiveStats/results/recessive_frequency_testing.last_base_rule.txt"
 COHORT_N = 3072
+LAST_BASE_RULE = FALSE
+RECESSIVE_DIR = "/nfs/users/nfs_j/jm33/apps/recessiveStats"
+if (!LAST_BASE_RULE) {
+    RECESSIVE_COUNTS_PATH = file.path(RECESSIVE_DIR,"data-raw/recessive_counts_by_gene.txt")
+    PROBANDS_PATH = file.path(RECESSIVE_DIR,"data-raw/recessive_probands_by_gene.txt")
+    OUTPUT_PATH = file.path(RECESSIVE_DIR,"results/recessive.allele_frequency_tests.txt")
+} else {
+    RECESSIVE_COUNTS_PATH = file.path(RECESSIVE_DIR,"data-raw/recessive_counts_by_gene.last_base_rule.txt")
+    PROBANDS_PATH = file.path(RECESSIVE_DIR,"data-raw/recessive_probands_by_gene.last_base_rule.txt")
+    OUTPUT_PATH = file.path(RECESSIVE_DIR,"results/recessive.allele_frequency_tests.last_base_rule.txt")
+}
 
 # load the datasets
 recessive_genes = read.table(RECESSIVE_COUNTS_PATH, sep="\t", header=TRUE, stringsAsFactors=FALSE)
@@ -26,13 +34,14 @@ for (gene in sort(unique(recessive_genes$gene))) {
     lof_lof = row$lof_sum
     lof_func = row$lof_func
     
-    result = try( analyse_inherited_enrichment(gene, chrom, lof_lof, lof_func, probands=proband_ids, cohort_n=COHORT_N, check_last_base=TRUE))
+    result = try(analyse_inherited_enrichment(gene, chrom, lof_lof, lof_func,
+        probands=proband_ids, cohort_n=COHORT_N, check_last_base=LAST_BASE_RULE))
     
     if (class(result) == "try-error") { next }
     
     # join the result for the gene to the larger set of gene results
-    gene_data = data.frame(hgnc=gene, chrom=chrom, func_count=lof_func,
-        lof_count=lof_lof)
+    gene_data = data.frame(hgnc=gene, chrom=chrom, lof_func=lof_func,
+        lof_lof=lof_lof)
     result = cbind(gene_data, data.frame(result))
     results = rbind(results, result)
 }
