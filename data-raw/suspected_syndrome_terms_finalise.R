@@ -4,6 +4,7 @@
 library(gdata)
 
 SYNDROMES_PATH = "data-raw/syndromes_cleaned.xlsx"
+OUTPUT_PATH = "data-raw/syndromes_final.tsv"
 
 #' open the phenotype data,
 #'
@@ -42,7 +43,7 @@ get_syndrome_data <- function(path) {
 main <- function() {
     syndromes = get_syndrome_data(SYNDROMES_PATH)
     
-    write.table(syndromes, file="data-raw/syndromes_final.tsv", sep="\t", quote=FALSE, row.names=FALSE)
+    write.table(syndromes, file=OUTPUT_PATH, sep="\t", quote=FALSE, row.names=FALSE)
 }
 
 main()

@@ -1,24 +1,24 @@
 ### recessiveStats: analysis of recessive variation
 
-#### Estimating cumulative allele frequency rare lof and rare functional variants in each gene.
-- ExAC
+This package analyses genes suspecetd of having a recessive mode of inheritance.
+We test for enrichment of compound heterozygous variants in genes and similarity
+of suspected syndromes between probands. A combined test is calculated by
+incorporating results from testing for similarity of Human Phenotype Ontology
+(HPO) terms among probands (see https://github.com/jeremymcrae/hpo_similarity).
+
+##### Enrichment of recessive variants in genes
+
+- [ExAC](http://exac.broadinstitute.org/) version 0.3 datasets
 - DDD unaffected parents
-- INTERVAL (?)
 
-#### Estimating probability of HPO matching
-- Generate MaxIC scores.
-- Estimate p values of phenotype matching observed between N patients drawn from
-  M families by simulation.
-
-#### Estimate probability of ‘suspected syndrome’ matching
+##### Suspected syndrome matches
 - Inspect ‘suspected syndrome’ field and prepare it for manually curation to
   generate comma separated lists of correctly spelled clinical syndromes.
 - Manually curate dataset, any uncertainties are flagged clinical review.
 - Generate pairwise matrix of similarity based on exact matches between
   clinical syndromes and frequency with which each syndrome is suspected.
 
-#### Installation
-
+##### Installation
 The package can be installed or updated using R 3.1.0 or greater with:
 ```R
 library(devtools) # if necessary install with install.packages("devtools")
@@ -29,8 +29,7 @@ devtools::install_github("jeremymcrae/recessiveStats")
 # versions.
 ```
 
-#### Usage
-
+##### Usage
 ```R
 # load the package
 library(recessiveStats)
