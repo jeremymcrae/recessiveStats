@@ -10,13 +10,13 @@ DATAFREEZE_DIR = "/nfs/ddd0/Data/datafreeze/ddd_data_releases/2014-11-04"
 TRIOS_PATH = file.path(DATAFREEZE_DIR, "family_relationships.txt")
 PHENOTYPES_PATH = file.path(DATAFREEZE_DIR, "phenotypes_and_patient_info.txt")
 SANGER_IDS_PATH = file.path(DATAFREEZE_DIR, "person_sanger_decipher.txt")
-CLINICALFILTER_OUTPUT = "/nfs/users/nfs_j/jm33/clinical_reporting.2015-03-06.all_genes.txt"
+CLINICALFILTER_OUTPUT = "/nfs/users/nfs_j/jm33/clinical_reporting.2015-03-04.last_base_rule.txt"
 LIKELY_DIAGNOSED = "/lustre/scratch113/projects/ddd/users/jm33/ddd_likely_diagnosed.txt"
 
 DATA_DIR = "/nfs/users/nfs_j/jm33/apps/recessiveStats/data-raw"
-OUTPUT_COUNTS_PATH = file.path(DATA_DIR, "recessive_counts_by_gene.txt")
-OUTPUT_PROBANDS_PATH = file.path(DATA_DIR, "recessive_probands_by_gene.txt")
-OUTPUT_PROBANDS_JSON = file.path(DATA_DIR, "recessive_probands_by_gene.json")
+OUTPUT_COUNTS_PATH = file.path(DATA_DIR, "recessive_counts_by_gene.last_base_rule.txt")
+OUTPUT_PROBANDS_PATH = file.path(DATA_DIR, "recessive_probands_by_gene.last_base_rule.txt")
+OUTPUT_PROBANDS_JSON = file.path(DATA_DIR, "recessive_probands_by_gene.last_base_rule.json")
 
 open_variants <- function() {
     diagnosed = read.table(LIKELY_DIAGNOSED, header=TRUE, stringsAsFactors=FALSE)

@@ -17,14 +17,33 @@ from __future__ import print_function
 import sys
 import gzip
 import json
+import argparse
 
 from pyfaidx import Fasta
 
 IS_PYTHON3 = sys.version[0] == "3"
 
-FASTA_PATH = "/software/ddd/resources/v1.2/hs37d5.fasta"
-GENCODE_PATH = "/nfs/users/nfs_j/jm33/reference_data/gencode.v19.annotation.gtf.gz"
-OUTPUT_PATH = "/nfs/users/nfs_j/jm33/apps/recessiveStats/data-raw/last_base_sites.json"
+def get_options():
+    """ get the command line options
+    """
+    
+    parser = argparse.ArgumentParser(description="finds sites at the last base \
+        of exons (strand specific) with the correct base.")
+    parser.add_argument("--fasta",
+        default="/software/ddd/resources/v1.2/hs37d5.fasta",
+        help="genome reference assembly sequence to use.")
+    parser.add_argument("--gencode",
+        default="/nfs/users/nfs_j/jm33/reference_data/gencode.v19.annotation.gtf.gz", \
+        help="path to gencode positions (including exon coordinates)")
+    parser.add_argument("--base", default="G",
+        help="base that the reference genome must be at the last position of the exons")
+    parser.add_argument("--out",
+        default="/lustre/scratch113/projects/ddd/users/jm33/last_base_sites.json",
+        help="path to write sites to")
+    
+    args = parser.parse_args()
+    
+    return args
 
 def remove_header(handle):
     """ remove the header from the gencode file
@@ -67,8 +86,14 @@ def convert_chromosome(chrom):
     
     return(chrom)
 
-def check_site(genome, chrom, position, strand):
+def check_site(genome, chrom, position, strand, required="G"):
     """ check if a single genome position has a last base G
+    
+    Args:
+        genome: Fasta object, to extract sequence from
+        position: position of end of exon (gencode coordinate)
+        strand: "+" or "-", for the strand of the transcript
+        required: the required base to match, typically a guanine.
     """
     
     position = int(position) - 1
@@ -78,9 +103,9 @@ def check_site(genome, chrom, position, strand):
     if strand == "-":
         base = site.complement.seq
     
-    return base == "G"
+    return base == required
 
-def get_last_base_sites(genome, gencode, output_path):
+def get_last_base_sites(genome, gencode, output_path, base):
     """ find the last base in exons where the base is a G (strand specific).
     """
     
@@ -109,7 +134,7 @@ def get_last_base_sites(genome, gencode, output_path):
             if strand == "-":
                 pos = start
             
-            if check_site(genome, chrom, pos, strand):
+            if check_site(genome, chrom, pos, strand, base):
                 sites.append([chrom, pos])
             
             used.add(key)
@@ -122,14 +147,16 @@ def main():
     """
     """
     
-    gencode = gzip.open(GENCODE_PATH)
+    options = get_options()
+    
+    gencode = gzip.open(options.gencode)
     if IS_PYTHON3:
-        gencode = gzip.open(GENCODE_PATH, "rt")
+        gencode = gzip.open(options.gencode, "rt")
     remove_header(gencode)
     
-    genome = Fasta(FASTA_PATH)
+    genome = Fasta(options.fasta)
     
-    get_last_base_sites(genome, gencode, OUTPUT_PATH)
+    get_last_base_sites(genome, gencode, options.out, options.base)
 
 
 if __name__ == "__main__":
