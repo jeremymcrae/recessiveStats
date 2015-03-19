@@ -21,8 +21,15 @@ get_exac_variants_for_gene <- function(hgnc, chrom, check_last_base=TRUE) {
     start=rows$start
     end=rows$stop
     
+    if (!file.exists(get("EXAC", envir=exacPathEnv))) {
+        stop(paste("Cannot find the ExAC file. Check that the file exists at: ",
+            get("EXAC", envir=exacPathEnv), ", or obtain the ExAC datasets, ",
+            "then run set_exac_path(YOUR_PATH) before trying this function ",
+            "again.", sep=""))
+    }
+    
     # extract variants within the region from the VCF
-    vars = seqminer::readVCFToListByRange(fileName=EXAC_PATH,
+    vars = seqminer::readVCFToListByRange(fileName=get("EXAC", envir=exacPathEnv),
         range=paste(chrom, ":", start, "-", end, sep=""),
         annoType="",
         vcfColumn=c("CHROM", "POS", "REF", "ALT"),
