@@ -16,24 +16,27 @@
 #' @return a vector of P values from tests using the DDD population, the ExAC
 #'     population, under LoF and functional tests.
 analyse_inherited_enrichment <- function(hgnc, chrom, lof_lof, lof_func, probands=NA, cohort_n=3072, check_last_base=TRUE) {
+    
     cat("extracting ddd frequencies\n")
-    ddd = get_ddd_variants_for_gene(hgnc, chrom, probands, check_last_base=check_last_base)
+    ddd = try(get_ddd_variants_for_gene(hgnc, chrom, probands, check_last_base=check_last_base), silent=TRUE)
+    if (class(ddd) != "try-error") {
+        ddd = get_cumulative_frequencies(ddd)
+        ddd$lof_rate = ddd$lof * ddd$lof
+        ddd$lof_func_rate = ddd$lof * (ddd$lof + ddd$functional)
+        ddd_lof_p = pbinom(lof_lof - 1, cohort_n, prob=ddd$lof_rate, lower.tail=FALSE)
+        ddd_func_p = pbinom(lof_func + lof_lof - 1, cohort_n, prob=ddd$lof_func_rate, lower.tail=FALSE)
+    } else {
+        ddd_lof_p = NA; ddd_func_p = NA; ddd=list(lof=NA, func=NA)
+    }
+    
     cat("extracting ExAC frequencies\n")
     exac = get_exac_variants_for_gene(hgnc, chrom, check_last_base=check_last_base)
-    
-    ddd = get_cumulative_frequencies(ddd)
     exac = get_cumulative_frequencies(exac)
-    
-    ddd$lof_rate = ddd$lof * ddd$lof
-    ddd$lof_func_rate = ddd$lof * (ddd$lof + ddd$functional)
-    exac$lof_rate = exac$lof * ddd$lof
+    exac$lof_rate = exac$lof * exac$lof
     exac$lof_func_rate = exac$lof * (exac$lof + exac$functional)
-    
     # get the probability of getting more than or equal to the number of
     # observed inherited events
-    ddd_lof_p = pbinom(lof_lof - 1, cohort_n, prob=ddd$lof_rate, lower.tail=FALSE)
     exac_lof_p = pbinom(lof_lof - 1, cohort_n, prob=exac$lof_rate, lower.tail=FALSE)
-    ddd_func_p = pbinom(lof_func + lof_lof - 1, cohort_n, prob=ddd$lof_func_rate, lower.tail=FALSE)
     exac_func_p = pbinom(lof_func + lof_lof - 1, cohort_n, prob=exac$lof_func_rate, lower.tail=FALSE)
     
     p_values = list(ddd_lof_p=ddd_lof_p, exac_lof_p=exac_lof_p,
