@@ -34,10 +34,10 @@ from gencode v19). The frequencies of the variants in each gene for these
 classes were summed, to get an overall rate of rare functional and rare LoF
 variation for each gene.
 
-The baseline rate of LoF/LoF events in a gene is the rate of rare LoF variation
-squared, whereas the baseline rate of LoF/Func is the rate of Lof variation
-multiplied by the sum of the rate of LoF variation and functional variation
-(LoF/LoF * (LoF/LoF + LoF/Func)).
+The baseline rate of biallelic LoF events in a gene is the rate of rare LoF
+variation squared, whereas the baseline rate of LoF/Func is the rate of Lof
+variation multiplied by the sum of the rate of LoF variation and functional
+variation (LoF * (LoF + Func)).
 
 The probability of getting more than or equal to the number of the observed
 inherited events in each class was estimated using a binomial model where

@@ -1,6 +1,6 @@
 
 
-#' test for enrichment of inherited variants
+#' test for enrichment of inherited variants in the DDD and ExAC datasets
 #'
 #' @param hgnc HGNC symbol for a gene.
 #' @param chrom chromosome that the gene is on.
@@ -13,7 +13,7 @@
 #'     the last base of exons to a LoF consequence.
 #' @export
 #'
-#' @return a vector of P values from tests using the DDD population, the ExAC
+#' @return a list of P values from tests using the DDD population, the ExAC
 #'     population, under LoF and functional tests.
 analyse_inherited_enrichment <- function(hgnc, chrom, lof_lof, lof_func, probands=NA, cohort_n=3072, check_last_base=TRUE) {
     
@@ -21,27 +21,39 @@ analyse_inherited_enrichment <- function(hgnc, chrom, lof_lof, lof_func, proband
     ddd = try(get_ddd_variants_for_gene(hgnc, chrom, probands, check_last_base=check_last_base), silent=TRUE)
     if (class(ddd) != "try-error") {
         ddd = get_cumulative_frequencies(ddd)
-        ddd$lof_rate = ddd$lof * ddd$lof
-        ddd$lof_func_rate = ddd$lof * (ddd$lof + ddd$functional)
-        ddd_lof_p = pbinom(lof_lof - 1, cohort_n, prob=ddd$lof_rate, lower.tail=FALSE)
-        ddd_func_p = pbinom(lof_func + lof_lof - 1, cohort_n, prob=ddd$lof_func_rate, lower.tail=FALSE)
+        ddd = test_enrichment(ddd, lof_lof, lof_func, cohort_n)
     } else {
-        ddd_lof_p = NA; ddd_func_p = NA; ddd=list(lof=NA, func=NA)
+        ddd=list(lof=NA, func=NA, lof_p=NA, func_p=NA)
     }
     
     cat("extracting ExAC frequencies\n")
     exac = get_exac_variants_for_gene(hgnc, chrom, check_last_base=check_last_base)
     exac = get_cumulative_frequencies(exac)
-    exac$lof_rate = exac$lof * exac$lof
-    exac$lof_func_rate = exac$lof * (exac$lof + exac$functional)
-    # get the probability of getting more than or equal to the number of
-    # observed inherited events
-    exac_lof_p = pbinom(lof_lof - 1, cohort_n, prob=exac$lof_rate, lower.tail=FALSE)
-    exac_func_p = pbinom(lof_func + lof_lof - 1, cohort_n, prob=exac$lof_func_rate, lower.tail=FALSE)
+    exac = test_enrichment(exac, lof_lof, lof_func, cohort_n)
     
-    p_values = list(ddd_lof_p=ddd_lof_p, exac_lof_p=exac_lof_p,
-        ddd_func_p=ddd_func_p, exac_func_p=exac_func_p, ddd_lof=ddd$lof,
-        ddd_func=ddd$func, exac_lof=exac$lof, exac_func=exac$func)
+    p_values = list(ddd=ddd, exac=exac)
     
     return(p_values)
+}
+
+#' test for enrichment of inherited variants
+#'
+#' @param freq list of cumulative frequencies of variation in populations for
+#'     rare LoF variants, and rare functional variants.
+#' @param biallelic_lof number of probands with inherited Lof/LoF variants in the gene.
+#' @param lof_func number of probands with inherited Lof/Func variants in the gene.
+#' @param cohort_n number of probands in population.
+#' @export
+#'
+#' @return a list of P values from tests, under LoF and functional tests.
+test_enrichment <- function(freq, biallelic_lof, lof_func, cohort_n) {
+    lof_rate = freq$lof * freq$lof
+    lof_func_rate = freq$lof * (freq$lof + freq$functional)
+    
+    # get the probability of getting more than or equal to the number of
+    # observed inherited events
+    freq$lof_p = pbinom(biallelic_lof - 1, cohort_n, prob=lof_rate, lower.tail=FALSE)
+    freq$func_p = pbinom(lof_func + biallelic_lof - 1, cohort_n, prob=lof_func_rate, lower.tail=FALSE)
+    
+    return(freq)
 }

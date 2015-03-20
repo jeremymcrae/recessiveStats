@@ -18,7 +18,6 @@ OUTPUT_PATH = "/nfs/users/nfs_j/jm33/apps/recessiveStats/results/recessive.combi
 fishersMethod <- function(x) {
     x = x[!is.na(x)]
     if (length(x) == 0) { return(NA) }
-    # if (length(x) == 1) { return(x) }
     
     adjusted = pchisq(-2 * sum(log(x)), df=2 * length(x), lower.tail=FALSE)
     
@@ -30,7 +29,7 @@ plot_ddd_vs_exac <- function(genotypic_p) {
     # two are very correlated
     max_p = max(c(-log10(genotypic_p$ddd_lof_p), -log10(genotypic_p$exac_lof_p)))
     Cairo(EXAC_VS_DDD_PATH, type="pdf", height=15, width=15, units="cm")
-    plot(-log10(genotypic_p$ddd_lof_p), -log10(genotypic_p$exac_lof_p), las=1,
+    plot(-log10(genotypic_p$ddd.lof_p), -log10(genotypic_p$exac.lof_p), las=1,
         xlab="-log10(P) for DDD LoF", ylab="-log10(P) for ExAC LoF",
         xlim=c(0, max_p), ylim=c(0, max_p))
         
@@ -46,8 +45,8 @@ open_genotype_p_values <- function(path) {
     p_values = read.table(path, sep="\t", header=TRUE, stringsAsFactors=FALSE)
     
     # get the maximum P value from the DDD P value and the ExaC P values
-    p_values$p_lof = apply(p_values, 1, function(x) max(as.numeric(x[["ddd_lof_p"]]), as.numeric(x[["exac_lof_p"]])))
-    p_values$p_func = apply(p_values, 1, function(x) max(as.numeric(x[["ddd_func_p"]]), as.numeric(x[["exac_func_p"]])))
+    p_values$p_lof = apply(p_values, 1, function(x) max(as.numeric(x[["ddd.lof_p"]]), as.numeric(x[["exac.lof_p"]])))
+    p_values$p_func = apply(p_values, 1, function(x) max(as.numeric(x[["ddd.func_p"]]), as.numeric(x[["exac.func_p"]])))
     
     # select the most powerful test for each gene
     p_values$p_genotype = apply(p_values, 1, function(x) min(as.numeric(x[["p_lof"]]), as.numeric(x[["p_func"]])))
