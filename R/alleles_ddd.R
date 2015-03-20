@@ -303,10 +303,8 @@ convert_genotypes <- function(vars, vep, probands) {
     # remove any parents of the probands, since they could skew the allele
     # frequencies
     if (!is.null(probands)) {
-        if (!is.na(probands)) {
-            proband_parents = ddd[ddd$individual_id %in% probands, ]
-            geno = geno[, !(names(geno) %in% proband_parents$sanger_id)]
-        }
+        proband_parents = ddd[ddd$individual_id %in% probands, ]
+        geno = geno[, !(names(geno) %in% proband_parents$sanger_id)]
     }
     
     geno = reformat_chrX_genotypes(vars, geno, ddd_parents)
@@ -329,13 +327,13 @@ convert_genotypes <- function(vars, vep, probands) {
 #'
 #' @param hgnc hgnc symbol as character string
 #' @param chrom chromosome as character string
-#' @param probands vector of IDs for probands for the gene, or NA
+#' @param probands vector of IDs for probands for the gene, or NULL
 #' @param check_last_base boolean for whether to check if last base non-lofs can
 #'     be LoF.
 #' @export
 #'
 #' @return dataframe of variants
-get_ddd_variants_for_gene <- function(hgnc, chrom, probands=NA, check_last_base=TRUE) {
+get_ddd_variants_for_gene <- function(hgnc, chrom, probands=NULL, check_last_base=TRUE) {
     
     vcfs_dir = "/lustre/scratch114/projects/ddd/release/20140912/final"
     vcf_path = Sys.glob(file.path(vcfs_dir, paste(chrom, "\\:1-*.vcf.gz", sep="")))

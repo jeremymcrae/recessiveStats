@@ -4,10 +4,10 @@
 #'
 #' @param hgnc HGNC symbol for a gene.
 #' @param chrom chromosome that the gene is on.
-#' @param lof_lof number of probands with inherited Lof/LoF variants in the gene.
+#' @param lof_lof number of probands with inherited biallelic LoF variants in the gene.
 #' @param lof_func number of probands with inherited Lof/Func variants in the gene.
-#' @param probands vector of probands who have inherited LoF/LoF or LoF/Func
-#'     variants in the gene, or NA.
+#' @param probands vector of probands who have inherited recessive variants in
+#'     the gene, or NULL.
 #' @param cohort_n number of probands in population.
 #' @param check_last_base whether to correct missense or synonymous G alleles at
 #'     the last base of exons to a LoF consequence.
@@ -15,7 +15,7 @@
 #'
 #' @return a list of P values from tests using the DDD population, the ExAC
 #'     population, under LoF and functional tests.
-analyse_inherited_enrichment <- function(hgnc, chrom, lof_lof, lof_func, probands=NA, cohort_n=3072, check_last_base=TRUE) {
+analyse_inherited_enrichment <- function(hgnc, chrom, lof_lof, lof_func, probands=NULL, cohort_n=3072, check_last_base=TRUE) {
     
     cat("extracting ddd frequencies\n")
     ddd = try(get_ddd_variants_for_gene(hgnc, chrom, probands, check_last_base=check_last_base), silent=TRUE)
