@@ -11,12 +11,7 @@
 #' @return data frame of variants in gene
 get_exac_variants_for_gene <- function(hgnc, chrom, check_last_base=TRUE) {
     
-    # find the gene coordinates, sometimes we have multiple genes with the same
-    # HGNC symbol on different chromosomes, so we also need to restrict by
-    # chromosome
-    rows = recessiveStats::gencode[recessiveStats::gencode$gene == hgnc &
-        recessiveStats::gencode$chr == chrom, ]
-    stopifnot(nrow(rows) == 1)
+    rows = get_gene_coordinates(hgnc, chrom)
     
     start=rows$start
     end=rows$stop

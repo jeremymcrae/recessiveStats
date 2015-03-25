@@ -338,12 +338,7 @@ get_ddd_variants_for_gene <- function(hgnc, chrom, probands=NULL, check_last_bas
     vcfs_dir = "/lustre/scratch114/projects/ddd/release/20140912/final"
     vcf_path = Sys.glob(file.path(vcfs_dir, paste(chrom, "\\:1-*.vcf.gz", sep="")))
     
-    # find the gene coordinates, sometimes we have multiple genes with the same
-    # HGNC symbol on different chromosomes, so we also need to restrict by
-    # chromosome
-    rows = recessiveStats::gencode[recessiveStats::gencode$gene == hgnc &
-        recessiveStats::gencode$chr == chrom, ]
-    stopifnot(nrow(rows) == 1)
+    rows = get_gene_coordinates(hgnc, chrom)
     
     start=rows$start
     end=rows$stop
