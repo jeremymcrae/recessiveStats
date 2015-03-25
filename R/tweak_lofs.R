@@ -174,7 +174,7 @@ request_from_ensembl <- function(url, tries=0) {
         msg = paste("bad url request: ", url, sep = "")
         stop(msg)
     } else if (request$status_code != 200) { # other status errors
-        msg = paste("unknown status: ", request$status$code, " at: ", url, sep = "")
+        msg = paste("unknown status: ", request$status_code, " at: ", url, sep = "")
         stop(msg)
     }
     
