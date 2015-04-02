@@ -32,8 +32,8 @@ get_cumulative_frequencies <- function(vars) {
     # for the consequence type. Calculate this using the site with the fewest
     # total alleles. The total allele count is adjusted by two, as if a new
     # biallelic individual had been included in the population.
-    if (lof_freq == 0) { lof_freq = 1/min(vars$AN) + 2 }
-    if (functional_freq == 0) { functional_freq = 1/min(vars$AN) + 2 }
+    if (lof_freq == 0) { lof_freq = 1/(min(vars$AN) + 2) }
+    if (functional_freq == 0) { functional_freq = 1/(min(vars$AN) + 2) }
     
     frequencies = list(lof=lof_freq, functional=functional_freq)
     
