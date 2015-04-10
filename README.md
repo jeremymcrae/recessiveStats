@@ -69,8 +69,8 @@ library(recessiveStats)
 hgnc ="DNAH14"
 chrom = "1"
 biallelic_lof = 5
-biallelic func = 10
+biallelic_func = 10
 lof_func = 6
 probands = c("DDDP00000X", "DDDP00000Y", "DDDP00000Z")
-analyse_inherited_enrichment(hgnc, chrom, biallelic_lof, biallelic, lof_func, probands)
+analyse_inherited_enrichment(hgnc, chrom, biallelic_lof, biallelic_func, lof_func, probands)
 ```
