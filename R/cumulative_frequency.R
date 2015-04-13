@@ -12,7 +12,11 @@ get_cumulative_frequencies <- function(vars) {
     
     # define the VEP consequence types for loss of function and missense variants
     lof_cq = c("stop_gained", "splice_acceptor_variant", "splice_donor_variant",
-        "frameshift_variant")
+        "frameshift_variant", "transcript_ablation")
+    
+    functional_cq = c("stop_lost", "initiator_codon_variant",
+        "transcript_amplification", "inframe_insertion", "inframe_deletion",
+           "missense_variant", "coding_sequence_variant")
     
     vars$frequency = vars$AC/vars$AN
     
@@ -22,9 +26,10 @@ get_cumulative_frequencies <- function(vars) {
     
     # find the loss of function variants
     lof_vars = vars[vars$CQ %in% lof_cq, ]
+    functional_vars = vars[vars$CQ %in% functional_cq, ]
     
     lof_freq = sum(lof_vars$frequency, na.rm=TRUE)
-    functional_freq = sum(vars$frequency, na.rm=TRUE)
+    functional_freq = sum(functional_vars$frequency, na.rm=TRUE)
     
     # What do we do if the frequency is zero? We won't be able to get meaningful
     # estimates of the enrichment of inherited variants. Estimate the frequency
