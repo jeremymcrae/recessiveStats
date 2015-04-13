@@ -57,11 +57,13 @@ remove_nonfunctional_variants <- function(vars) {
     
     # define the VEP consequence types for loss of function and missense variants
     lof_cq = c("stop_gained", "splice_acceptor_variant", "splice_donor_variant",
-        "frameshift_variant")
-    missense_cq = c("missense_variant", "initiator_codon_variant", "stop_lost",
-        "inframe_deletion", "inframe_insertion", "splice_region_variant")
+        "frameshift_variant", "transcript_ablation")
     
-    vars = vars[vars$CQ %in% c(lof_cq, missense_cq), ]
+    functional_cq = c("stop_lost", "initiator_codon_variant",
+        "transcript_amplification", "inframe_insertion", "inframe_deletion",
+           "missense_variant", "coding_sequence_variant")
+    
+    vars = vars[vars$CQ %in% c(lof_cq, functional_cq), ]
     
     return(vars)
 }
