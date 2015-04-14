@@ -1,6 +1,6 @@
 Package: recessiveStats
 Title: Enrichment of recessive variants within genes
-Version: 0.2.0
+Version: 0.3.0
 Authors@R: "Jeremy McRae <jeremy.mcrae@sanger.ac.uk> [aut, cre]"
 Description: Tests for enrichment of recessive variants within genes
 Depends:
