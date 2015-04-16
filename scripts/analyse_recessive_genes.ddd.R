@@ -34,8 +34,9 @@ for (gene in sort(unique(recessive_genes$gene))) {
     chrom = row$chrom
     biallelic_lof = row$lof_sum
     lof_func = row$lof_func
+    biallelic_func = 0
     
-    result = try(analyse_inherited_enrichment(gene, chrom, biallelic_lof, lof_func,
+    result = try(analyse_inherited_enrichment(gene, chrom, biallelic_lof, biallelic_func, lof_func,
         probands=proband_ids, cohort_n=COHORT_N, check_last_base=LAST_BASE_RULE))
     
     if (class(result) == "try-error") { next }
