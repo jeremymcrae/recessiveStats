@@ -1,22 +1,23 @@
 
 library(recessiveStats)
+library(jsonlite)
 
 COHORT_N = 3072
 LAST_BASE_RULE = FALSE
 RECESSIVE_DIR = "/nfs/users/nfs_j/jm33/apps/recessiveStats"
 if (!LAST_BASE_RULE) {
     RECESSIVE_COUNTS_PATH = file.path(RECESSIVE_DIR,"data-raw/recessive_counts_by_gene.txt")
-    PROBANDS_PATH = file.path(RECESSIVE_DIR,"data-raw/recessive_probands_by_gene.txt")
-    OUTPUT_PATH = file.path(RECESSIVE_DIR,"results/recessive.allele_frequency_tests.txt")
+    PROBANDS_PATH = file.path(RECESSIVE_DIR,"data-raw/recessive_probands_by_gene.json")
+    OUTPUT_PATH = file.path(RECESSIVE_DIR,"results/recessive.allele_frequency_tests.adjusted_AC.txt")
 } else {
     RECESSIVE_COUNTS_PATH = file.path(RECESSIVE_DIR,"data-raw/recessive_counts_by_gene.last_base_rule.txt")
-    PROBANDS_PATH = file.path(RECESSIVE_DIR,"data-raw/recessive_probands_by_gene.last_base_rule.txt")
-    OUTPUT_PATH = file.path(RECESSIVE_DIR,"results/recessive.allele_frequency_tests.last_base_rule.txt")
+    PROBANDS_PATH = file.path(RECESSIVE_DIR,"data-raw/recessive_probands_by_gene.last_base_rule.json")
+    OUTPUT_PATH = file.path(RECESSIVE_DIR,"results/recessive.allele_frequency_tests.last_base_rule.adjusted_AC.txt")
 }
 
 # load the datasets
 recessive_genes = read.table(RECESSIVE_COUNTS_PATH, sep="\t", header=TRUE, stringsAsFactors=FALSE)
-probands = read.table(PROBANDS_PATH, sep="\t", header=TRUE, stringsAsFactors=FALSE)
+probands = fromJSON(PROBANDS_PATH)
 
 # start a blank dataframe for the results
 results = data.frame(gene=character(0), chrom=character(0),
@@ -29,7 +30,7 @@ results = data.frame(gene=character(0), chrom=character(0),
 for (gene in sort(unique(recessive_genes$gene))) {
     
     row = recessive_genes[recessive_genes$gene == gene, ]
-    proband_ids = probands$proband[probands$gene == gene]
+    proband_ids = probands[[gene]]
     
     chrom = row$chrom
     biallelic_lof = row$lof_sum
