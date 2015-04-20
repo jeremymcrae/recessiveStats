@@ -16,7 +16,7 @@
 #'
 #' @return a list of P values from tests using the DDD population, the ExAC
 #'     population, under LoF and functional tests.
-analyse_inherited_enrichment <- function(hgnc, chrom, biallelic_lof, biallelic_func, lof_func, probands=NULL, cohort_n=3072, check_last_base=TRUE) {
+analyse_inherited_enrichment <- function(hgnc, chrom, biallelic_lof, biallelic_func, lof_func, probands=NULL, cohort_n=3072, check_last_base=FALSE) {
     
     cat("extracting ddd frequencies\n")
     ddd = try(get_ddd_variants_for_gene(hgnc, chrom, probands, check_last_base=check_last_base), silent=TRUE)
