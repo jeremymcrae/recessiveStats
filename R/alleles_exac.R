@@ -9,7 +9,7 @@
 #' @export
 #'
 #' @return data frame of variants in gene
-get_exac_variants_for_gene <- function(hgnc, chrom, check_last_base=TRUE) {
+get_exac_variants_for_gene <- function(hgnc, chrom, check_last_base=FALSE) {
     
     rows = get_gene_coordinates(hgnc, chrom)
     
