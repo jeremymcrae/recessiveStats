@@ -2,12 +2,21 @@
 #' obtain cumulative allele frequency of rare lof and functional variants
 #'
 #' @param vars dataframe of variants (one row per allele), which includes the
-#'     number of times that allele was observed within the population, as well as
-#'     the total number of alleles in the population.
+#'        number of times that allele was observed within the population, as
+#'        well as the total number of alleles in the population.
 #' @export
 #'
 #' @return a list of loss of function cumulative frequency, and functional
-#'     cumulative frequency.
+#'         cumulative frequency.
+#'
+#' @examples
+#' vars = read.table(header = TRUE, text = "
+#'      AC  AN    CQ
+#'      1   1000  missense_variant
+#'      1   1000  stop_gained
+#'      1   1000  stop_lost
+#'      1   1000  synonymous_variant")
+#' get_cumulative_frequencies(vars)
 get_cumulative_frequencies <- function(vars) {
     
     # define the VEP consequence types for loss of function and missense variants
