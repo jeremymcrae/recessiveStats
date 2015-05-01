@@ -335,8 +335,7 @@ convert_genotypes <- function(vars, vep, probands) {
 #' @return dataframe of variants
 get_ddd_variants_for_gene <- function(hgnc, chrom, probands=NULL, check_last_base=FALSE) {
     
-    vcfs_dir = "/lustre/scratch114/projects/ddd/release/20140912/final"
-    vcf_path = Sys.glob(file.path(vcfs_dir, paste(chrom, "\\:1-*.vcf.gz", sep="")))
+    vcf_path = Sys.glob(file.path(DDD_VCFS_DIR, paste(chrom, "\\:1-*.vcf.gz", sep="")))
     
     rows = get_gene_coordinates(hgnc, chrom)
     
