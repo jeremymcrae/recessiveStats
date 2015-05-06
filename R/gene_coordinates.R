@@ -13,6 +13,10 @@ get_gene_coordinates <- function(hgnc, chrom) {
     rows = recessiveStats::gencode[recessiveStats::gencode$gene == hgnc &
         recessiveStats::gencode$chr == chrom, ]
     
+    # if there are multiple rows for the same symbol on the same chromosome
+    # drop the gene range duplicates
+    rows = rows[!duplicated(rows[, c("chr", "start", "stop")]), ]
+    
     # give reasonable error messages if we cannot find a single gene range
     if (nrow(rows) == 0) {
         stop(paste("Unable to find a gene range for ", hgnc, " on chrom ",
