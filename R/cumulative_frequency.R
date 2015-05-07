@@ -35,7 +35,12 @@ get_cumulative_frequencies <- function(vars) {
     
     # find the loss of function variants
     lof_vars = vars[vars$CQ %in% lof_cq, ]
-    functional_vars = vars[vars$CQ %in% functional_cq, ]
+    functional_vars = vars[vars$CQ %in% functional_cq & vars$frequency < 0.005, ]
+    
+    # select the functional variants with "probably_damaging" polyphen predictions
+    functional_vars$end = functional_vars$POS + nchar(functional_vars$REF) - 1
+    functional_vars$polyphen = apply(functional_vars, 1, function(x) get_polyphen(x[["CHROM"]], x[["POS"]], x[["end"]], x[["ALT"]]))
+    functional_vars = functional_vars[is.na(functional_vars$polyphen) | functional_vars$polyphen == "probably_damaging", ]
     
     lof_freq = sum(lof_vars$frequency, na.rm=TRUE)
     functional_freq = sum(functional_vars$frequency, na.rm=TRUE)

@@ -24,7 +24,7 @@ get_polyphen <- function(chrom, start, end, alt) {
     term = NA
     for (transcript in request$transcript_consequences) {
         # ignore non-missense consequences, since they won't have a polyphen prediction
-        if (transcript$consequence_terms != "missense_variant") { next }
+        if (!"missense_variant" %in% transcript$consequence_terms) { next }
 
         if ("polyphen_prediction" %in% names(transcript)) {
             if (transcript$polyphen_score > score) {
