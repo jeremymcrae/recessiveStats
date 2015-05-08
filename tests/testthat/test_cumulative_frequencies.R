@@ -70,3 +70,22 @@ test_that("correct cumulative frequencies when we lack a rare variants", {
     expect_equal(get_cumulative_frequencies(vars),
         list(lof=NA, functional=NA))
 })
+
+test_that("correct cumulative frequencies when we test a list of dataframes", {
+    vars1 = read.table(header = TRUE, text = "
+        AC AN CQ
+        1 1000  missense_variant
+        1 1000  stop_gained
+        ")
+    
+    vars2 = read.table(header = TRUE, text = "
+        AC AN CQ
+        1 1000  missense_variant
+        1 1000  stop_gained
+        ")
+    vars = list("first"=vars1, "second"=vars2)
+    
+    expect_identical(get_cumulative_frequencies(vars),
+        list("first"=list(lof=0.001, functional=0.001),
+            "second"=list(lof=0.001, functional=0.001)))
+})

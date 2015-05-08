@@ -21,6 +21,15 @@
 #'      1   1000  stop_lost
 #'      1   1000  synonymous_variant")
 #' get_cumulative_frequencies(vars)
+#'
+#' vars2 = read.table(header = TRUE, text = "
+#'      AC  AN    CQ
+#'      1   1000  missense_variant
+#'      1   1000  stop_gained
+#'      1   1000  stop_lost
+#'      1   1000  synonymous_variant")
+#' var_list = list("first"=vars, "second"=vars2)
+#' get_cumulative_frequencies(var_list)
 get_cumulative_frequencies <- function(vars) {
     
     # define the VEP consequence types for loss of function and missense variants
