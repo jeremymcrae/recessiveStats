@@ -52,7 +52,7 @@ get_exac_variants_for_gene <- function(hgnc, chrom, check_last_base=FALSE) {
     
     vars = get_list_of_population_frequencies(vars, populations)
     
-    return(groups)
+    return(vars)
 }
 
 #' create a list of allele frequency dataframes for each population.

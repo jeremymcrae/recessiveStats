@@ -27,6 +27,10 @@ get_cumulative_frequencies <- function(vars) {
         "transcript_amplification", "inframe_insertion", "inframe_deletion",
            "missense_variant", "coding_sequence_variant")
     
+    if (!is.data.frame(vars) & is.list(vars)) {
+        return(lapply(vars, get_cumulative_frequencies))
+    }
+    
     vars$frequency = vars$AC/vars$AN
     
     # select the rare variants (possibly this should be done on a site basis,
