@@ -29,6 +29,10 @@ get_undiagnosed_sanger_ids <- function(chrom, vcf_dir=DDD_VCFS_DIR) {
     diagnosed = read.table(diagnosed, header=TRUE)
     ddd = ddd[!ddd$individual_id %in% diagnosed$person_id, ]
     
+    # if the gene is on chrX, we can only estimate autozygosity for females, 
+    # since males are hemizygous for chrX.
+    if (chrom == "X") { ddd = ddd[ddd$sex == "F", ] }
+    
     # identify the chromosome-specific VCF to extract from
     vcf_path = Sys.glob(file.path(vcf_dir, paste(chrom, "\\:1-*.vcf.gz", sep="")))
     
