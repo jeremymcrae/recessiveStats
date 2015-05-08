@@ -3,11 +3,15 @@
 #'
 #' @param vars dataframe of variants (one row per allele), which includes the
 #'        number of times that allele was observed within the population, as
-#'        well as the total number of alleles in the population.
+#'        well as the total number of alleles in the population. Alternatively,
+#'        this can be a list of dataframe, each for a different population
+#         (e.g. list("EAS"=df(...), "SAS"=df(...))).
 #' @export
 #'
 #' @return a list of loss of function cumulative frequency, and functional
-#'         cumulative frequency.
+#'         cumulative frequency. Alternatively, if the function was prvoided
+#'         with a list of dataframe, return a list of frequency lists, named as
+#'         per the input list.
 #'
 #' @examples
 #' vars = read.table(header = TRUE, text = "
@@ -27,6 +31,8 @@ get_cumulative_frequencies <- function(vars) {
         "transcript_amplification", "inframe_insertion", "inframe_deletion",
            "missense_variant", "coding_sequence_variant")
     
+    # if we have provided a list of dataframes, then run this function on each
+    # of them in turn, and return a list of frequency lists.
     if (!is.data.frame(vars) & is.list(vars)) {
         return(lapply(vars, get_cumulative_frequencies))
     }
