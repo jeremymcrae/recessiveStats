@@ -94,8 +94,8 @@ get_lines_from_vep_vcf <- function(chrom, start, end) {
     
     # make sure we have captured variants that lie outside the gene sites,
     # otherwise we don't know if we have missed any variants inside the gene range
-    stopifnot(vep$pos[1] < start)
-    stopifnot(vep$pos[nrow(vep)] > end)
+    stopifnot(file_start == 0 | vep$pos[1] < start)
+    stopifnot(file_end == file.info(vep_path)$size | vep$pos[nrow(vep)] > end)
     
     return(vep)
 }
