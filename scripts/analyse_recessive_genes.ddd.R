@@ -5,15 +5,9 @@ library(jsonlite)
 COHORT_N = 3072
 LAST_BASE_RULE = FALSE
 RECESSIVE_DIR = "/nfs/users/nfs_j/jm33/apps/recessiveStats"
-if (!LAST_BASE_RULE) {
-    RECESSIVE_COUNTS_PATH = file.path(RECESSIVE_DIR,"data-raw/recessive_counts_by_gene.txt")
-    PROBANDS_PATH = file.path(RECESSIVE_DIR,"data-raw/recessive_probands_by_gene.json")
-    OUTPUT_PATH = file.path(RECESSIVE_DIR,"results/recessive.allele_frequency_tests.adjusted_AC.txt")
-} else {
-    RECESSIVE_COUNTS_PATH = file.path(RECESSIVE_DIR,"data-raw/recessive_counts_by_gene.last_base_rule.txt")
-    PROBANDS_PATH = file.path(RECESSIVE_DIR,"data-raw/recessive_probands_by_gene.last_base_rule.json")
-    OUTPUT_PATH = file.path(RECESSIVE_DIR,"results/recessive.allele_frequency_tests.last_base_rule.adjusted_AC.txt")
-}
+RECESSIVE_COUNTS_PATH = file.path(RECESSIVE_DIR,"data-raw/recessive_counts_by_gene.silent.txt")
+PROBANDS_PATH = file.path(RECESSIVE_DIR,"data-raw/recessive_probands_by_gene.silent.json")
+OUTPUT_PATH = file.path(RECESSIVE_DIR,"results/recessive.allele_frequency_tests.silent.txt")
 
 # load the datasets
 recessive_genes = read.table(RECESSIVE_COUNTS_PATH, sep="\t", header=TRUE, stringsAsFactors=FALSE)
@@ -33,11 +27,13 @@ for (gene in sort(unique(recessive_genes$gene))) {
     proband_ids = probands[[gene]]
     
     chrom = row$chrom
-    biallelic_lof = row$lof_sum
-    lof_func = row$lof_func
+    biallelic_lof = 0
+    lof_func = 0
     biallelic_func = 0
+    biallelic_silent = row$sum_silent
     
-    result = try(analyse_inherited_enrichment(gene, chrom, biallelic_lof, biallelic_func, lof_func,
+    result = try(analyse_inherited_enrichment(gene, chrom, biallelic_lof,
+        biallelic_func, biallelic_silent, lof_func,
         probands=proband_ids, cohort_n=COHORT_N, check_last_base=LAST_BASE_RULE))
     
     if (class(result) == "try-error") { next }

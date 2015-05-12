@@ -48,16 +48,18 @@ analyse_inherited_enrichment <- function(hgnc, chrom, biallelic_lof, biallelic_f
 #' @export
 #'
 #' @return a list of P values from tests, under LoF and functional tests.
-test_enrichment <- function(freq, biallelic_lof, biallelic_func, lof_func, cohort_n) {
+test_enrichment <- function(freq, biallelic_lof, biallelic_func, biallelic_silent, lof_func, cohort_n) {
     lof_rate = freq$lof ** 2
     lof_func_rate = freq$lof ** 2 + (2 * freq$lof * (1 - freq$lof) * freq$functional)
     func_rate = freq$functional ** 2
+    silent_rate = freq$synonymous ** 2
     
     # get the probability of getting more than or equal to the number of
     # observed inherited events
     freq$biallelic_lof_p = pbinom(biallelic_lof - 1, cohort_n, prob=lof_rate, lower.tail=FALSE)
     freq$lof_func_p = pbinom(lof_func + biallelic_lof - 1, cohort_n, prob=lof_func_rate, lower.tail=FALSE)
     freq$biallelic_func_p = pbinom(biallelic_func - 1, cohort_n, prob=func_rate, lower.tail=FALSE)
+    freq$biallelic_silent_p = pbinom(biallelic_silent - 1, cohort_n, prob=silent_rate, lower.tail=FALSE)
     
     return(freq)
 }

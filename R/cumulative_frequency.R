@@ -27,6 +27,8 @@ get_cumulative_frequencies <- function(vars) {
         "transcript_amplification", "inframe_insertion", "inframe_deletion",
            "missense_variant", "coding_sequence_variant")
     
+    silent_cq = c("synonymous_variant")
+    
     vars$frequency = vars$AC/vars$AN
     
     # select the rare variants (possibly this should be done on a site basis,
@@ -36,9 +38,11 @@ get_cumulative_frequencies <- function(vars) {
     # find the loss of function variants
     lof_vars = vars[vars$CQ %in% lof_cq, ]
     functional_vars = vars[vars$CQ %in% functional_cq, ]
+    synonymous_vars = vars[vars$CQ %in% silent_cq, ]
     
     lof_freq = sum(lof_vars$frequency, na.rm=TRUE)
     functional_freq = sum(functional_vars$frequency, na.rm=TRUE)
+    synonymous_freq = sum(synonymous_vars$frequency, na.rm=TRUE)
     
     # What do we do if the frequency is zero? We won't be able to get meaningful
     # estimates of the enrichment of inherited variants. Estimate the frequency
@@ -49,12 +53,15 @@ get_cumulative_frequencies <- function(vars) {
     if (length(vars$AN[!is.na(vars$AN)]) != 0) {
         if (lof_freq == 0) { lof_freq = 1/(min(vars$AN, na.rm=TRUE) + 2) }
         if (functional_freq == 0) { functional_freq = 1/(min(vars$AN) + 2) }
+        if (synonymous_freq == 0) { synonymous_freq = 1/(min(vars$AN) + 2) }
     } else {
         if (lof_freq == 0) { lof_freq = NA }
         if (functional_freq == 0) { functional_freq = NA }
+        if (synonymous_freq == 0) { synonymous_freq = NA }
     }
     
-    frequencies = list(lof=lof_freq, functional=functional_freq)
+    frequencies = list(lof=lof_freq, functional=functional_freq, 
+        synonymous=synonymous_freq)
     
     return(frequencies)
 }
