@@ -18,11 +18,13 @@ results = data.frame(gene=character(0), chrom=character(0),
     func_count=character(0), lof_count=character(0),
     silent_count=character(0),
     ddd.lof=character(0), ddd.functional=character(0),
-    ddd.lof_p=character(0), ddd.func_p=character(0),
-    ddd.synonymous=character(0), ddd.synonymous_p=character(0),
+    ddd.biallelic_lof_p=character(0), ddd.lof_func_p=character(0),
+    ddd.biallelic_func_p=character(0),
+    ddd.synonymous=character(0), ddd.biallelic_silent_p=character(0),
     exac.lof=character(0), exac.functional=character(0),
-    exac.lof_p=character(0), exac.func_p=character(0),
-    exac.synonymous=character(0), exac.synonymous_p=character(0))
+    exac.biallelic_lof_p=character(0), exac.lof_func_p=character(0),
+    exac.biallelic_func_p=character(0),
+    exac.synonymous=character(0), exac.biallelic_silent_p=character(0))
 
 for (gene in sort(unique(recessive_genes$gene))) {
     

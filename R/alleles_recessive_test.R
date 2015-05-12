@@ -25,8 +25,8 @@ analyse_inherited_enrichment <- function(hgnc, chrom, biallelic_lof, biallelic_f
         ddd = get_cumulative_frequencies(ddd)
         ddd = test_enrichment(ddd, biallelic_lof, biallelic_func, biallelic_silent, lof_func, cohort_n)
     } else {
-        ddd=list(lof=NA, func=NA, synonymous=NA, biallelic_lof_p=NA,
-            lof_func_p=NA, biallelic_func_p=NA, biallelic_silent_p=NA)
+        ddd=list(lof=NA, functional=NA, biallelic_lof_p=NA, lof_func_p=NA,
+            biallelic_func_p=NA, synonymous=NA, biallelic_silent_p=NA)
     }
     
     cat("extracting ExAC frequencies\n")
