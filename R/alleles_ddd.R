@@ -48,6 +48,9 @@ find_file_pos <- function(path, start_pos) {
         prev_pos = seek(file_con, mid_point, origin="start")
         
         read = scan(file_con, what=character(), skip=1, sep="\t", nmax=2, quiet=TRUE)
+        # if we have gone back into the VCF heaeader, then shift the mid point
+        # so we get out of it again
+        if (grepl("^#", read[1])) {upper = mid_point; next}
         temp_start = as.numeric(read[2])
         
         # narrow the boundaries to half the previous size
