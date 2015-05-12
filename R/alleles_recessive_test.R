@@ -6,6 +6,7 @@
 #' @param chrom chromosome that the gene is on.
 #' @param biallelic_lof number of probands with inherited biallelic LoF variants in the gene.
 #' @param biallelic_func number of probands with inherited biallelic functional variants in the gene.
+#' @param biallelic_silent number of probands with inherited biallelic synonymous variants in the gene.
 #' @param lof_func number of probands with inherited Lof/Func variants in the gene.
 #' @param probands vector of probands who have inherited recessive variants in
 #'     the gene, or NULL.
@@ -16,21 +17,22 @@
 #'
 #' @return a list of P values from tests using the DDD population, the ExAC
 #'     population, under LoF and functional tests.
-analyse_inherited_enrichment <- function(hgnc, chrom, biallelic_lof, biallelic_func, lof_func, probands=NULL, cohort_n=3072, check_last_base=FALSE) {
+analyse_inherited_enrichment <- function(hgnc, chrom, biallelic_lof, biallelic_func, biallelic_silent, lof_func, probands=NULL, cohort_n=3072, check_last_base=FALSE) {
     
     cat("extracting ddd frequencies\n")
     ddd = try(get_ddd_variants_for_gene(hgnc, chrom, probands, check_last_base=check_last_base), silent=TRUE)
     if (class(ddd) != "try-error") {
         ddd = get_cumulative_frequencies(ddd)
-        ddd = test_enrichment(ddd, biallelic_lof, biallelic_func, lof_func, cohort_n)
+        ddd = test_enrichment(ddd, biallelic_lof, biallelic_func, biallelic_silent, lof_func, cohort_n)
     } else {
-        ddd=list(lof=NA, func=NA, biallelic_lof_p=NA, lof_func_p=NA, biallelic_func_p=NA)
+        ddd=list(lof=NA, func=NA, synonymous=NA, biallelic_lof_p=NA,
+            lof_func_p=NA, biallelic_func_p=NA, biallelic_silent_p=NA)
     }
     
     cat("extracting ExAC frequencies\n")
     exac = get_exac_variants_for_gene(hgnc, chrom, check_last_base=check_last_base)
     exac = get_cumulative_frequencies(exac)
-    exac = test_enrichment(exac, biallelic_lof, biallelic_func, lof_func, cohort_n)
+    exac = test_enrichment(exac, biallelic_lof, biallelic_func, biallelic_silent, lof_func, cohort_n)
     
     p_values = list(ddd=ddd, exac=exac)
     
@@ -43,6 +45,7 @@ analyse_inherited_enrichment <- function(hgnc, chrom, biallelic_lof, biallelic_f
 #'     rare LoF variants, and rare functional variants.
 #' @param biallelic_lof number of probands with inherited Lof/LoF variants in the gene.
 #' @param biallelic_func number of probands with inherited func/func variants in the gene.
+#' @param biallelic_silent number of probands with inherited synonymous variants in the gene.
 #' @param lof_func number of probands with inherited Lof/Func variants in the gene.
 #' @param cohort_n number of probands in population.
 #' @export

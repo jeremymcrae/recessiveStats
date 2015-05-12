@@ -16,10 +16,13 @@ probands = fromJSON(PROBANDS_PATH)
 # start a blank dataframe for the results
 results = data.frame(gene=character(0), chrom=character(0),
     func_count=character(0), lof_count=character(0),
+    silent_count=character(0),
     ddd.lof=character(0), ddd.functional=character(0),
     ddd.lof_p=character(0), ddd.func_p=character(0),
+    ddd.synonymous=character(0), ddd.synonymous_p=character(0),
     exac.lof=character(0), exac.functional=character(0),
-    exac.lof_p=character(0), exac.func_p=character(0))
+    exac.lof_p=character(0), exac.func_p=character(0),
+    exac.synonymous=character(0), exac.synonymous_p=character(0))
 
 for (gene in sort(unique(recessive_genes$gene))) {
     
@@ -30,7 +33,7 @@ for (gene in sort(unique(recessive_genes$gene))) {
     biallelic_lof = 0
     lof_func = 0
     biallelic_func = 0
-    biallelic_silent = row$sum_silent
+    biallelic_silent = row$silent_sum
     
     result = try(analyse_inherited_enrichment(gene, chrom, biallelic_lof,
         biallelic_func, biallelic_silent, lof_func,
@@ -40,7 +43,7 @@ for (gene in sort(unique(recessive_genes$gene))) {
     
     # join the result for the gene to the larger set of gene results
     gene_data = data.frame(hgnc=gene, chrom=chrom, func_count=lof_func,
-        lof_count=biallelic_lof)
+        lof_count=biallelic_lof, silent_count=biallelic_silent)
     result = cbind(gene_data, data.frame(result))
     results = rbind(results, result)
 }
