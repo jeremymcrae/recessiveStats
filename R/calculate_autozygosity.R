@@ -29,7 +29,7 @@ get_undiagnosed_sanger_ids <- function(chrom, vcf_dir=DDD_VCFS_DIR) {
     diagnosed = read.table(diagnosed, header=TRUE)
     ddd = ddd[!ddd$individual_id %in% diagnosed$person_id, ]
     
-    # if the gene is on chrX, we can only estimate autozygosity for females, 
+    # if the gene is on chrX, we can only estimate autozygosity for females,
     # since males are hemizygous for chrX.
     if (chrom == "X") { ddd = ddd[ddd$sex == "F", ] }
     
@@ -120,7 +120,7 @@ check_sample_autozygosity <- function(bcf_path, chrom, start_pos, end_pos, proba
     # names(roh) = c("chrom", "pos", "state", "quality")
     
     # subset down to the variants that lie within the required region
-    roh = roh[roh$pos >= start_pos & roh$pos <= end_pos, ]
+    roh = roh[roh$chrom == chrom & roh$pos >= start_pos & roh$pos <= end_pos, ]
     
     # find whether any site shows evidence of autozygosity
     autozygous = any(roh$state != 0)
