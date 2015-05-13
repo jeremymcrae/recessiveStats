@@ -1,9 +1,9 @@
 language: r
-
 sudo: required
-
-# Be strict when checking our package
 warnings_are_errors: true
-
 r_binary_packages:
  - testthat
+notifications:
+  email:
+    on_success: never
+    on_failure: change
