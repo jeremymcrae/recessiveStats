@@ -48,6 +48,8 @@ find_file_pos <- function(path, start_pos) {
         prev_pos = seek(file_con, mid_point, origin="start")
         
         read = scan(file_con, what=character(), skip=1, sep="\t", nmax=2, quiet=TRUE)
+        # if we have entered the VCF header, shift the mid point up to exit
+        if (grepl("^#", read[1])) {upper = mid_point; next}
         temp_start = as.numeric(read[2])
         
         # narrow the boundaries to half the previous size
@@ -92,8 +94,8 @@ get_lines_from_vep_vcf <- function(chrom, start, end) {
     
     # make sure we have captured variants that lie outside the gene sites,
     # otherwise we don't know if we have missed any variants inside the gene range
-    stopifnot(vep$pos[1] < start)
-    stopifnot(vep$pos[nrow(vep)] > end)
+    stopifnot(file_start == 0 | vep$pos[1] < start)
+    stopifnot(file_end == file.info(vep_path)$size | vep$pos[nrow(vep)] > end)
     
     return(vep)
 }
@@ -358,11 +360,11 @@ get_ddd_variants_for_gene <- function(hgnc, chrom, probands=NULL, check_last_bas
         by.y=c("chrom", "pos", "ref", "alt"), all.x=TRUE)
         
     vars = standardise_multiple_alt_variants(vars, include_hgnc=TRUE)
-    ends = get_exon_ends(hgnc)
-    exon_ends = ends$all_ends
-    strand = ends$strand
     
     if (check_last_base) {
+        ends = get_exon_ends(hgnc)
+        exon_ends = ends$all_ends
+        strand = ends$strand
         vars$CQ = apply(vars, 1, check_for_last_base_in_exon, exon_ends=exon_ends, strand=strand)
     }
     
