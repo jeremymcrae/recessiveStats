@@ -22,7 +22,7 @@ analyse_inherited_enrichment <- function(hgnc, chrom, biallelic_lof, biallelic_f
     ddd = try(get_ddd_variants_for_gene(hgnc, chrom, probands, check_last_base=check_last_base), silent=TRUE)
     if (class(ddd) != "try-error") {
         ddd = get_cumulative_frequencies(ddd)
-        ddd = test_enrichment(ddd, biallelic_lof, biallelic_func, lof_func, cohort_n)
+        ddd = test_enrichment(ddd, biallelic_lof, biallelic_func, lof_func, sum(unlist(cohort_n)))
     } else {
         ddd=list(lof=NA, func=NA, biallelic_lof_p=NA, lof_func_p=NA, biallelic_func_p=NA)
     }
@@ -30,7 +30,32 @@ analyse_inherited_enrichment <- function(hgnc, chrom, biallelic_lof, biallelic_f
     cat("extracting ExAC frequencies\n")
     exac = get_exac_variants_for_gene(hgnc, chrom, check_last_base=check_last_base)
     exac = get_cumulative_frequencies(exac)
-    exac = test_enrichment(exac, biallelic_lof, biallelic_func, lof_func, cohort_n)
+    
+    if (!is.list(cohort_n)) {
+        exac = test_enrichment(exac, biallelic_lof, biallelic_func, lof_func, cohort_n)
+    } else {
+        
+        max_n = biallelic_lof
+        
+        # get all the possible combinations of spreading the probands amongst
+        # the ExAC different populations
+        combinations = expand.grid("AFR"=seq(0, max_n), "EAS"=seq(0, max_n),
+            "EUR"=seq(0, max_n), "SAS"=seq(0, max_n))
+        # select only the combinations where the families are dispersed
+        # correctly across the populations (each row should sum to the number of
+        # families, no more, no less).
+        combinations = combinations[rowSums(combinations) == max_n, ]
+        
+        for (pos in 1:nrow(combinations)) {
+            for (pop in names(combinations)) {
+                count = combinations[[pop]][pos]
+                frequency = exac[[pop]]
+                size = cohort_n[[pop]]
+                
+                p_values = test_enrichment(frequency, count, 0, 0, size)
+            }
+        }
+    }
     
     p_values = list(ddd=ddd, exac=exac)
     
