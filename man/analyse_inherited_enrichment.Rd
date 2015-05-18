@@ -5,7 +5,8 @@
 \title{test for enrichment of inherited variants in the DDD and ExAC datasets}
 \usage{
 analyse_inherited_enrichment(hgnc, chrom, biallelic_lof, biallelic_func,
-  lof_func, probands = NULL, cohort_n = 3072, check_last_base = FALSE)
+  biallelic_silent, lof_func, probands = NULL, cohort_n = 3072,
+  check_last_base = FALSE)
 }
 \arguments{
 \item{hgnc}{HGNC symbol for a gene.}
@@ -15,6 +16,8 @@ analyse_inherited_enrichment(hgnc, chrom, biallelic_lof, biallelic_func,
 \item{biallelic_lof}{number of probands with inherited biallelic LoF variants in the gene.}
 
 \item{biallelic_func}{number of probands with inherited biallelic functional variants in the gene.}
+
+\item{biallelic_silent}{number of probands with inherited biallelic synonymous variants in the gene.}
 
 \item{lof_func}{number of probands with inherited Lof/Func variants in the gene.}
 
