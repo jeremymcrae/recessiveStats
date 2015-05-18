@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/jeremymcrae/recessiveStats.svg?branch=master)]
+(https://travis-ci.org/jeremymcrae/recessiveStats)
+
 ### recessiveStats: analysis of recessive variation
 
 This package analyses genes suspected of having a recessive mode of inheritance.
