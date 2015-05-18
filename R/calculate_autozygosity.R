@@ -128,6 +128,42 @@ check_sample_autozygosity <- function(bcf_path, chrom, start_pos, end_pos, proba
     return(autozygous)
 }
 
+#' identify the genome regions where a proband has runs-of-homozygosity
+#'
+#' @param bcf_path path to a BCF for the full genome across all probands
+#' @param proband ID for the proband to analyse
+#' @export
+#'
+#' @return dataframe of proband ID, chromosome, start and end coordinates.
+check_sample_autozygosity_genome_wide <- function(bcf_path, proband) {
+    command = BCFTOOLS
+    args = c("roh",
+        "--biallelic-sites",
+        "--estimate-AF", "all",
+        "--GTs-only", 30,
+        "--skip-indels",
+        "--samples", proband,
+        bcf_path)
+    
+    # analyse ROH and get results for the proband
+    roh_output = system2(command, args, stdout=TRUE, stderr=FALSE)
+    roh = read.table(text=roh_output, sep="\t")
+    names(roh) = c("sample_id", "chrom", "pos", "p_value", "state")
+    
+    # identify the start and end positions of ROH ranges
+    row_positions = which(roh$state == 1)
+    ends = which(diff(row_positions) > 1)
+    starts = c(row_positions[1], row_positions[ends + 1])
+    ends = c(row_positions[ends], row_positions[length(row_positions)])
+    
+    # define a table of ROH ranges
+    coords = data.frame(sample_id=roh$sample_id[starts],
+        chrom=roh$chrom[starts], start_pos=roh$pos[starts],
+        end_pos=roh$pos[ends])
+    
+    return(coords)
+}
+
 #' identify whether a proband is autozygous within a genome region
 #'
 #' @param hgnc HGNC symbol for the gene of interest
@@ -145,7 +181,7 @@ get_autozygous_rate <- function(hgnc, chrom, vcf_dir=DDD_VCFS_DIR) {
     offset = 2000000
     
     probands = get_undiagnosed_sanger_ids(chrom, vcf_dir)
-    temp_bcf = extract_region(chrom, max(start - offset, 1), end + offset, vcf_dir)
+    temp_bcf = "/lustre/scratch113/projects/ddd/users/jm33/ddd_4k.bcf"
     
     autozygous = sapply(probands, function(x) check_sample_autozygosity(temp_bcf, chrom, start, end, x))
     autozygous_rate = sum(autozygous)/length(autozygous)
