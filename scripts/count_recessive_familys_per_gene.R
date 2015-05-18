@@ -200,7 +200,7 @@ count_probands_per_gene <- function(variants) {
     counts$silent_sum = rowSums(counts[, c("silent_silent", "homozygous_silent")])
     
     # only include recurrent genes
-    counts = counts[counts$silent_sum > 1, ]
+    counts = counts[counts$silent_sum > 0, ]
     
     # drop the func/func probands, since there are far too many of them, and we
     # currently don't use them in analyses
