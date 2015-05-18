@@ -38,10 +38,8 @@ get_running_jobs <- function() {
     return(bjobs = bjobs[bjobs$STAT == "RUN", ])
 }
 
-all_genes = list()
-for (hgnc in sort(genes)) {
-    chrom = recessiveStats::gencode$chr[recessiveStats::gencode$gene == hgnc &
-        recessiveStats::gencode$gene_type == "protein_coding"]
+probands = get_undiagnosed_sanger_ids("1")
+for (proband in probands) {
     
     while (nrow(get_bjobs()) > 500) { Sys.sleep(30) }
     
@@ -51,7 +49,7 @@ for (hgnc in sort(genes)) {
         "-R", "\"select[mem>100] rusage[mem=100]\"",
         "-M", 100,
         "bash", "-c",
-        "\"/software/R-3.1.2/bin/Rscript", "./scripts/autozygosity/gene_autozygosity.R",
+        "\"/software/R-3.1.2/bin/Rscript", "./scripts/autozygosity/proband_autozygosity.R",
         "--hgnc", hgnc,
         "--chrom", chrom,
         "--consang",
