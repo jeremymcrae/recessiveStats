@@ -92,8 +92,8 @@ test_enrichment_across_multiple_populations <- function(exac, biallelic_lof, bia
     lof_func_combos = combos$lof_func_combos
     
     # Since we check all combinations of the different functional counts, we
-    # we end up with duplicates. Find out which rows are duplicates, so we
-    # can exclude them later.
+    # we end up with duplicates within a functional group. Find out which rows
+    # are duplicates, so we can exclude them later.
     lof_dups = duplicated(biallelic_lof_combos)
     func_dups = duplicated(biallelic_func_combos)
     lof_func_dups = duplicated(cbind(biallelic_lof_combos, lof_func_combos))
@@ -110,13 +110,40 @@ test_enrichment_across_multiple_populations <- function(exac, biallelic_lof, bia
             size = cohort_n[[pop]]
             
             p_values = test_enrichment(frequency, lof_count, func_count, lof_func_count, size)
-            p_values$lof_n = lof_count
-            p_values$func_count = func_count
-            p_values$lof_func_n = lof_func_count
+            p_values$biallelic_lof = lof_count
+            p_values$biallelic_func = func_count
+            p_values$lof_func = lof_func_count
             p_values$cohort_n = size
             all_p_values[[pop]][[pos]] = p_values
         }
     }
+    
+    # find the P-values for the appropriate tests
+    biallelic_lof_p = 0
+    biallelic_func_p = 0
+    lof_func_p = 0
+    for (x in names(all_p_values)) {
+        pop = all_p_values[[x]]
+        for (pos in 1:length(pop)) {
+            stats = pop[[pos]]
+            # we are examining the values for one population, and for a single
+            # count combination. We want to use the values which are for the
+            # for the populations with non-zero counts, and where the row of
+            # counts for the population was not duplicated.
+            if (stats$biallelic_lof > 0 & !lof_dups[pos]) {
+                biallelic_lof_p = biallelic_lof_p + stats$biallelic_lof_p
+            }
+            if (stats$biallelic_func > 0 & !func_dups[pos]) {
+                biallelic_func_p = biallelic_func_p + stats$biallelic_func_p
+            }
+            if (stats$lof_func > 0 & !lof_func_dups[pos]) {
+                lof_func_p = lof_func_p + stats$lof_func_p
+            }
+        }
+    }
+    
+    p_values = list(lof=NA, functional=NA, biallelic_lof_p=biallelic_lof_p,
+        lof_func_p=biallelic_func_p, biallelic_func_p=lof_func_p)
     
     return(p_values)
 }
@@ -125,7 +152,7 @@ test_enrichment_across_multiple_populations <- function(exac, biallelic_lof, bia
 #'
 #' @param populations a vector of population names to be tested
 #' @param biallelic_lof number of probands with inherited biallelic LoF variants
-#'       in the gene.
+#'        in the gene.
 #' @param biallelic_func number of probands with inherited biallelic functional
 #'        variants in the gene.
 #' @param lof_func number of probands with inherited Lof/Func variants in the gene.
