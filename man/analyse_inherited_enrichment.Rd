@@ -12,9 +12,11 @@ analyse_inherited_enrichment(hgnc, chrom, biallelic_lof, biallelic_func,
 
 \item{chrom}{chromosome that the gene is on.}
 
-\item{biallelic_lof}{number of probands with inherited biallelic LoF variants in the gene.}
+\item{biallelic_lof}{number of probands with inherited biallelic LoF variants
+in the gene.}
 
-\item{biallelic_func}{number of probands with inherited biallelic functional variants in the gene.}
+\item{biallelic_func}{number of probands with inherited biallelic functional
+variants in the gene.}
 
 \item{lof_func}{number of probands with inherited Lof/Func variants in the gene.}
 

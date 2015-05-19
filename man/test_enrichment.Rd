@@ -10,9 +10,11 @@ test_enrichment(freq, biallelic_lof, biallelic_func, lof_func, cohort_n)
 \item{freq}{list of cumulative frequencies of variation in a population for
 rare LoF variants, and rare functional variants.}
 
-\item{biallelic_lof}{number of probands with inherited Lof/LoF variants in the gene.}
+\item{biallelic_lof}{number of probands with inherited Lof/LoF variants in
+the gene.}
 
-\item{biallelic_func}{number of probands with inherited func/func variants in the gene.}
+\item{biallelic_func}{number of probands with inherited func/func variants in
+the gene.}
 
 \item{lof_func}{number of probands with inherited Lof/Func variants in the gene.}
 
