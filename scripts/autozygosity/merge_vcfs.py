@@ -332,13 +332,19 @@ def merge_vcfs(vcfs, temp_dir):
     submit_bsub_job(command)
 
 def main():
-    vcfs = get_vcfs(DIAGNOSED_PATH, FAMILIES_PATH)
-    stripped, job_ids = generate_mergeable_vcfs(vcfs, TEMP_DIR)
-    
-    while has_current_jobs(job_ids):
-        time.sleep(30)
-    
-    merge_vcfs(stripped, TEMP_DIR)
+    try:
+        vcfs = get_vcfs(DIAGNOSED_PATH, FAMILIES_PATH)
+        stripped, job_ids = generate_mergeable_vcfs(vcfs, TEMP_DIR)
+        
+        while has_current_jobs(job_ids):
+            time.sleep(30)
+        
+        merge_vcfs(stripped, TEMP_DIR)
+    finally:
+        # make sure we clean up any temporary files
+        temp_vcfs = glob.glob(os.path.join(TEMP_DIR, "tmp_merge*"))
+        for path in temp_vcfs:
+            os.remove(path)
 
 if __name__ == "__main__":
     main()
