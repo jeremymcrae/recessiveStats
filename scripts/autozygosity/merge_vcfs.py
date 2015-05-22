@@ -39,7 +39,35 @@ BCFTOOLS = "/software/hgi/pkglocal/bcftools-1.2/bin/bcftools"
 VCFANNOTATE = "/software/hgi/pkglocal/vcftools-0.1.11/bin/vcf-annotate"
 TABIX = "/software/hgi/pkglocal/tabix-git-1ae158a/bin/tabix"
 TEMP_DIR = "/lustre/scratch113/projects/ddd/users/jm33/bcfs"
-EXCLUDE_FIELDS = "FORMAT/DP,FORMAT/AD,INFO/AFR_AF,INFO/Allele,INFO/Amino_acids,INFO/AMR_AF,INFO/AN,INFO/BaseQRankSum,INFO/BIOTYPE,INFO/CALLSOURCE,INFO/CANONICAL,INFO/CCC,INFO/CCDS,INFO/cDNA_position,INFO/CDS_position,INFO/CIEND,INFO/CIPOS,INFO/CLIN_SIG,INFO/ClippingRankSum,INFO/CNSOLIDATE_PASS,INFO/Codons,INFO/COMMON1KG,INFO/COMMONBACKWARDS,INFO/COMMONFORWARDS,INFO/Consequence,INFO/Conserved,INFO/CONVEX,INFO/CONVEX_PASS,INFO/CONVEXSCORE,INFO/CQ,INFO/CQ_TRANSCRIPT_COUNT_CQ,INFO/CQ_TRANSCRIPT_COUNT_GENE,INFO/culprit,INFO/DB,INFO/DDD_AF,INFO/DENOVO-INDEL,INFO/DENOVO-SNP,INFO/DISTANCE,FORMAT/DNM_CONFIG_child_mom_dad,INFO/DP,FORMAT/DP_CHILD,FORMAT/DP_FATHER,FORMAT/DP_MOTHER,FORMAT/DP4_CHILD,INFO/DP4_FATHER,INFO/DP4_MOTHER,INFO/DS,INFO/EAS_AF,INFO/END,INFO/Enhancer,INFO/ENSG,INFO/ENSP,INFO/ENSR,INFO/ENST,INFO/ESP_AF,INFO/EUR_AF,INFO/Existing_variation,INFO/EXON,INFO/FS,FORMAT/gatk_DP,FORMAT/GQ,INFO/GQ_MEAN,INFO/GQ_STDDEV,INFO/HaplotypeScore,INFO/Heart,INFO/HETSNPS,INFO/HGNC,INFO/HGNC_ALL,INFO/HGNC_ID,INFO/HGVSc,INFO/HGVSp,INFO/HIGH_INF_POS,INFO/HWP,INFO/IMPRECISE,INFO/InbreedingCoeff,INFO/inFatherVCF,FORMAT/INHERITANCE,FORMAT/INHERITANCEP,INFO/inMotherVCF,INFO/INTERNALFREQ,INFO/INTRON,INFO/MADL2R,INFO/MAX_AF,INFO/MEANLR2,FORMAT/MIN_DP,INFO/MLEAC,INFO/MLEAF,INFO/MOTIF_NAME,INFO/MOTIF_POS,INFO/MOTIF_SCORE_CHANGE,INFO/MQ,INFO/MQ0,INFO/MQRankSum,INFO/NCC,INFO/NEGATIVE_TRAIN_SITE,INFO/NOVEL,INFO/NUMBERPROBESCONVEX,FORMAT/PL,INFO/PolyPhen,INFO/POSITIVE_TRAIN_SITE,FORMAT/PP_DNM,INFO/Protein_position,INFO/PUBMED,INFO/QD,INFO/RARE,INFO/RAREBACKWARDS,INFO/RAREFORWARDS,INFO/RC50INTERNALFREQ,INFO/ReadPosRankSum,FORMAT/samtools_DP,INFO/SAS_AF,FORMAT/SB,INFO/segmentaldup,INFO/SIFT,INFO/SOMATIC,INFO/STRAND,INFO/SVLEN,INFO/SVTYPE,INFO/SYMBOL,INFO/SYMBOL_SOURCE,INFO/TRF,INFO/UK10K_cohort_AF,INFO/UK10KFREQ,INFO/VQSLOD,INFO/AC"
+
+# define all the fields to strip from the VCFs (this prevents problems when
+# merging)
+format_fields = ["AD", "DNM_CONFIG_child_mom_dad", "DP", "DP4_CHILD",
+    "DP_CHILD", "DP_FATHER", "DP_MOTHER", "gatk_DP", "GQ", "INHERITANCE",
+    "INHERITANCEP", "MIN_DP", "PL", "PP_DNM", "samtools_DP", "SB"]
+format_fields = ["FORMAT/{}".format(x) for x in format_fields]
+info_fields = ["AC", "AFR_AF", "Allele", "Amino_acids", "AMR_AF", "AN",
+    "BaseQRankSum", "BIOTYPE", "CALLSOURCE", "CANONICAL", "CCC", "CCDS",
+    "cDNA_position", "CDS_position", "CIEND", "CIPOS", "CLIN_SIG",
+    "ClippingRankSum", "CNSOLIDATE_PASS", "Codons", "COMMON1KG",
+    "COMMONBACKWARDS", "COMMONFORWARDS", "Consequence", "Conserved",
+    "CONVEX", "CONVEX_PASS", "CONVEXSCORE", "CQ", "CQ_TRANSCRIPT_COUNT_CQ",
+    "CQ_TRANSCRIPT_COUNT_GENE", "culprit", "DB", "DDD_AF", "DENOVO-INDEL",
+    "DENOVO-SNP", "DISTANCE", "DP", "DP4_FATHER", "DP4_MOTHER", "DS", "EAS_AF",
+    "END", "Enhancer", "ENSG", "ENSP", "ENSR", "ENST", "ESP_AF", "EUR_AF",
+    "Existing_variation", "EXON", "FS", "GQ_MEAN", "GQ_STDDEV",
+    "HaplotypeScore", "Heart", "HETSNPS", "HGNC", "HGNC_ALL", "HGNC_ID",
+    "HGVSc", "HGVSp", "HIGH_INF_POS", "HWP", "IMPRECISE", "InbreedingCoeff",
+    "inFatherVCF", "inMotherVCF", "INTERNALFREQ", "INTRON", "MADL2R", "MAX_AF",
+    "MEANLR2", "MLEAC", "MLEAF", "MOTIF_NAME", "MOTIF_POS",
+    "MOTIF_SCORE_CHANGE", "MQ", "MQ0", "MQRankSum", "NCC",
+    "NEGATIVE_TRAIN_SITE", "NOVEL", "NUMBERPROBESCONVEX", "PolyPhen",
+    "POSITIVE_TRAIN_SITE", "Protein_position", "PUBMED", "QD", "RARE",
+    "RAREBACKWARDS", "RAREFORWARDS", "RC50INTERNALFREQ", "ReadPosRankSum",
+    "SAS_AF", "segmentaldup", "SIFT", "SOMATIC", "STRAND", "SVLEN", "SVTYPE",
+    "SYMBOL", "SYMBOL_SOURCE", "TRF", "UK10K_cohort_AF", "UK10KFREQ", "VQSLOD"]
+info_fields = ["INFO/{}".format(x) for x in info_fields]
+EXCLUDE_FIELDS = ",".join(format_fields + info_fields)
 DIAGNOSED_PATH = "/lustre/scratch113/projects/ddd/users/jm33/ddd_likely_diagnosed.txt"
 FAMILIES_PATH = "/nfs/ddd0/Data/datafreeze/ddd_data_releases/2014-11-04/family_relationships.txt"
 
@@ -113,6 +141,13 @@ def is_number(string):
 
 def has_current_jobs(job_ids):
     """ find whether any of a list of job IDs are current jobs on the cluster
+    
+    Args:
+        job_ids: list of bsub job names
+    
+    Returns:
+        True/False for whether any of the listed job IDs are current jobs on the
+        cluster.
     """
     
     command = ["bjobs", "-o", "\"JOBID", "USER", "STAT", "QUEUE", "JOB_NAME", \
