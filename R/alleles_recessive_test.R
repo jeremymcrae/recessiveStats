@@ -185,6 +185,19 @@ get_count_combinations <- function(populations, biallelic_lof, biallelic_func, l
     biallelic_func_combos = biallelic_func_combos[rowSums(biallelic_func_combos) == biallelic_func, ]
     lof_func_combos = lof_func_combos[rowSums(lof_func_combos) == (lof_func + biallelic_lof), ]
     
+    # check if any of the rows have all populations with counts greater than one.
+    # if the row lacks this, then we need to add a final row where all the
+    # counts are one, to cover the scenario
+    if (!any(apply(biallelic_lof_combos, 1, function(x) all(x > 0)))) {
+        biallelic_lof_combos = rbind(biallelic_lof_combos, rep(1, length(populations)))
+    }
+    if (!any(apply(biallelic_func_combos, 1, function(x) all(x > 0)))) {
+        biallelic_func_combos = rbind(biallelic_func_combos, rep(1, length(populations)))
+    }
+    if (!any(apply(lof_func_combos, 1, function(x) all(x > 0)))) {
+        lof_func_combos = rbind(lof_func_combos, rep(1, length(populations)))
+    }
+    
     # name the combinations by the population names
     names(biallelic_lof_combos) = populations
     names(biallelic_func_combos) = populations
