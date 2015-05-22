@@ -9,13 +9,10 @@
 
 #' identify DDD probands to analyse
 #'
-#' @param vcf_path dpath to multi-sample VCFs for the population of interest.
+#' @param vcf_path path to multi-sample VCFs for the population of interest.
 #' @export
-get_undiagnosed_sanger_ids <- function(vcf_path="/lustre/scratch113/projects/ddd/users/jm33/ddd_4k.bcftools.bcf") {
-    
-    # if the gene is on chrX, we can only estimate autozygosity for females,
-    # since males are hemizygous for chrX.
-    if (chrom == "X") { ddd = ddd[ddd$sex == "F", ] }
+get_undiagnosed_sanger_ids <- function(
+    vcf_path="/lustre/scratch113/projects/ddd/users/jm33/ddd_4k.bcftools.bcf") {
     
     # extract the sample IDs from the multi-sample VCF
     command = BCFTOOLS

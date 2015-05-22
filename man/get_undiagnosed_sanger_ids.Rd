@@ -4,20 +4,13 @@
 \alias{get_undiagnosed_sanger_ids}
 \title{identify DDD probands to analyse}
 \usage{
-get_undiagnosed_sanger_ids(chrom, vcf_dir = DDD_VCFS_DIR)
+
+  get_undiagnosed_sanger_ids(vcf_path = "/lustre/scratch113/projects/ddd/users/jm33/ddd_4k.bcftools.bcf")
 }
 \arguments{
-\item{chrom}{chromosome of interest (this will only be important if we have
-different sets of probands for each chromosome file, which shouldn't
-be the case, but we might as well be sure.)}
-
-\item{vcf_dir}{directory containing multi-sample VCFs per-chromosome for the
-population of interest.}
+\item{vcf_path}{path to multi-sample VCFs for the population of interest.}
 }
 \description{
 identify DDD probands to analyse
-}
-\examples{
-get_undiagnosed_sanger_ids("14")
 }
 
