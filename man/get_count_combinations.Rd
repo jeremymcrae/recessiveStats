@@ -4,18 +4,12 @@
 \alias{get_count_combinations}
 \title{Get all the combinations of spreading the probands across populations.}
 \usage{
-get_count_combinations(populations, biallelic_lof, biallelic_func, lof_func)
+get_count_combinations(populations, count)
 }
 \arguments{
 \item{populations}{a vector of population names to be tested}
 
-\item{biallelic_lof}{number of probands with inherited biallelic LoF variants
-in the gene.}
-
-\item{biallelic_func}{number of probands with inherited biallelic functional
-variants in the gene.}
-
-\item{lof_func}{number of probands with inherited Lof/Func variants in the gene.}
+\item{count}{number of probands with inherited variants in the gene.}
 }
 \value{
 a list of count dataframes for each functional type

@@ -36,7 +36,7 @@ analyse_inherited_enrichment <- function(hgnc, chrom, biallelic_lof, biallelic_f
     if (!is.list(cohort_n)) {
         exac = test_enrichment(exac, biallelic_lof, biallelic_func, lof_func, cohort_n)
     } else {
-        test_enrichment_across_multiple_populations(exac, biallelic_lof, biallelic_func, lof_func, cohort_n)
+        exac = test_enrichment_across_multiple_populations(exac, biallelic_lof, biallelic_func, lof_func, cohort_n)
     }
     
     p_values = list(ddd=ddd, exac=exac)
@@ -86,17 +86,14 @@ test_enrichment_across_multiple_populations <- function(exac, biallelic_lof, bia
     # define the ExAC different populations (AFR="African/African American",
     # EAS="East Asian", NFE="Non-Finnish European", SAS="South Asian")
     populations = c("AFR", "EAS", "NFE", "SAS")
-    combos = get_count_combinations(populations, biallelic_lof, biallelic_func, lof_func)
-    biallelic_lof_combos = combos$biallelic_lof_combos
-    biallelic_func_combos = combos$biallelic_func_combos
-    lof_func_combos = combos$lof_func_combos
+    biallelic_lof_combos = get_count_combinations(populations, biallelic_lof)
+    biallelic_func_combos = get_count_combinations(populations, biallelic_func)
+    lof_func_combos = get_count_combinations(populations, lof_func)
     
-    biallelic_lof_p = sum_combo_tests(exac, populations, biallelic_lof_combos, "biallelic_lof_p")
-    biallelic_func_p = sum_combo_tests(exac, populations, biallelic_func_combos, "biallelic_func_p")
-    lof_func_p = sum_combo_tests(exac, populations, lof_func_combos, "lof_func_p")
-    
-    p_values = list(lof=NA, functional=NA, biallelic_lof_p=biallelic_lof_p,
-        lof_func_p=lof_func_p, biallelic_func_p=biallelic_func_p)
+    p_values = list(lof=NA, functional=NA)
+    p_values$biallelic_lof_p = sum_combo_tests(exac, populations, biallelic_lof_combos, "biallelic_lof_p")
+    p_values$biallelic_func_p = sum_combo_tests(exac, populations, biallelic_func_combos, "biallelic_func_p")
+    p_values$lof_func_p = sum_combo_tests(exac, populations, lof_func_combos, "lof_func_p")
     
     return(p_values)
 }
@@ -163,49 +160,27 @@ sum_combo_tests <- function(exac, cohort_n, populations, combos, p_name) {
 #' Get all the combinations of spreading the probands across populations.
 #'
 #' @param populations a vector of population names to be tested
-#' @param biallelic_lof number of probands with inherited biallelic LoF variants
-#'        in the gene.
-#' @param biallelic_func number of probands with inherited biallelic functional
-#'        variants in the gene.
-#' @param lof_func number of probands with inherited Lof/Func variants in the gene.
+#' @param count number of probands with inherited variants in the gene.
 #' @export
 #'
 #' @return a list of count dataframes for each functional type
-get_count_combinations <- function(populations, biallelic_lof, biallelic_func, lof_func) {
-    types = c("biallelic_lof", "biallelic_func", "lof_func")
-    
-    # get a matrix of count combinations for each functional type
-    biallelic_lof_combos = expand.grid(rep(list(seq(0, biallelic_lof)), each=length(populations)))
-    biallelic_func_combos = expand.grid(rep(list(seq(0, biallelic_func)), each=length(populations)))
-    lof_func_combos = expand.grid(rep(list(seq(0, (lof_func + biallelic_lof))), each=length(populations)))
+get_count_combinations <- function(populations, count) {
+    # get a matrix of count combinations
+    combos = expand.grid(rep(list(seq(0, count)), each=length(populations)))
     
     # make sure each of the rows sums to the correct value, so that we only use
     # rows where the counts are dispersed correctly amongst the populations
-    biallelic_lof_combos = biallelic_lof_combos[rowSums(biallelic_lof_combos) == biallelic_lof, ]
-    biallelic_func_combos = biallelic_func_combos[rowSums(biallelic_func_combos) == biallelic_func, ]
-    lof_func_combos = lof_func_combos[rowSums(lof_func_combos) == (lof_func + biallelic_lof), ]
+    combos = combos[rowSums(combos) == count, ]
     
     # check if any of the rows have all populations with counts greater than one.
     # if the row lacks this, then we need to add a final row where all the
     # counts are one, to cover the scenario
-    if (!any(apply(biallelic_lof_combos, 1, function(x) all(x > 0)))) {
-        biallelic_lof_combos = rbind(biallelic_lof_combos, rep(1, length(populations)))
-    }
-    if (!any(apply(biallelic_func_combos, 1, function(x) all(x > 0)))) {
-        biallelic_func_combos = rbind(biallelic_func_combos, rep(1, length(populations)))
-    }
-    if (!any(apply(lof_func_combos, 1, function(x) all(x > 0)))) {
-        lof_func_combos = rbind(lof_func_combos, rep(1, length(populations)))
+    if (!any(apply(combos, 1, function(x) all(x > 0)))) {
+        combos = rbind(combos, rep(1, length(populations)))
     }
     
     # name the combinations by the population names
-    names(biallelic_lof_combos) = populations
-    names(biallelic_func_combos) = populations
-    names(lof_func_combos) = populations
+    names(combos) = populations
     
-    values = list(biallelic_lof_combos=biallelic_lof_combos,
-        biallelic_func_combos=biallelic_func_combos,
-        lof_func_combos=lof_func_combos)
-    
-    return(values)
+    return(combos)
 }
