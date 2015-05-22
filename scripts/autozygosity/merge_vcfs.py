@@ -18,6 +18,13 @@ INFO fields, and all but for the GT field from the FORMAT. I use vcf-annotate to
 drop all the redundant fields (since "bcftools annotate" segfaults on the single
 sample VCFs.) I exclude all non-PASS variants with "bcftools view". The stripped
 down VCFs can then be merged with "bcftools merge".
+
+I found that it's best to merge the files in stages. Attempting to merge several
+thousand VCFs in one step is extremely slow. My strategy iteratively merges pairs
+of VCFs. So at the first step, only two samples are merged together, but in the
+next round, the VCFs containg two samples, so we get a merged VCF with four
+samples in it. We build up to a single VCF containing all the samples. This is
+much, much quicker than merging all samples.
 """
 
 import os
@@ -267,6 +274,7 @@ def merge_vcf_pairs(paths, temp_dir):
     
     Args:
         paths: list of paths for VCFs
+        temp_dir: path to directory to store intermediate merged VCFs
     
     Returns:
         list of paths to merged VCFs, and list of bsub job IDs, so that we can
@@ -310,6 +318,7 @@ def merge_vcfs(vcfs, temp_dir):
     
     Args:
         vcfs: list of paths to single-sample VCFs
+        temp_dir: path to directory to store intermediate merged VCFs
     """
     
     # merge the initial list of VCFs, which gives a smaller list of VCFs,
@@ -332,19 +341,19 @@ def merge_vcfs(vcfs, temp_dir):
     submit_bsub_job(command)
 
 def main():
+    vcfs = get_vcfs(DIAGNOSED_PATH, FAMILIES_PATH)
+    stripped, job_ids = generate_mergeable_vcfs(vcfs, TEMP_DIR)
+    
+    while has_current_jobs(job_ids):
+        time.sleep(30)
+    
+    merge_vcfs(stripped, TEMP_DIR)
+
+if __name__ == "__main__":
     try:
-        vcfs = get_vcfs(DIAGNOSED_PATH, FAMILIES_PATH)
-        stripped, job_ids = generate_mergeable_vcfs(vcfs, TEMP_DIR)
-        
-        while has_current_jobs(job_ids):
-            time.sleep(30)
-        
-        merge_vcfs(stripped, TEMP_DIR)
+        main()
     finally:
         # make sure we clean up any temporary files
         temp_vcfs = glob.glob(os.path.join(TEMP_DIR, "tmp_merge*"))
         for path in temp_vcfs:
             os.remove(path)
-
-if __name__ == "__main__":
-    main()
