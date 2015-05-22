@@ -73,7 +73,7 @@ test_enrichment <- function(freq, biallelic_lof, biallelic_func, lof_func, cohor
 
 #' test for enrichment of inherited variants in multiple populations
 #'
-#' @param exac list of frequency estimates for each ExAC population
+#' @param exac list of frequency estimates for each ExAC population.
 #' @param biallelic_lof number of probands with inherited biallelic LoF variants in the gene.
 #' @param biallelic_func number of probands with inherited biallelic functional variants in the gene.
 #' @param lof_func number of probands with inherited Lof/Func variants in the gene.
@@ -91,61 +91,73 @@ test_enrichment_across_multiple_populations <- function(exac, biallelic_lof, bia
     biallelic_func_combos = combos$biallelic_func_combos
     lof_func_combos = combos$lof_func_combos
     
-    # Since we check all combinations of the different functional counts, we
-    # we end up with duplicates within a functional group. Find out which rows
-    # are duplicates, so we can exclude them later.
-    lof_dups = duplicated(biallelic_lof_combos)
-    func_dups = duplicated(biallelic_func_combos)
-    lof_func_dups = duplicated(cbind(biallelic_lof_combos, lof_func_combos))
-    
-    # run through all the possible combinations of functional counts, and
-    # get a p-value for each population in each row.
-    all_p_values = list()
-    for (pos in 1:nrow(biallelic_lof_combos)) {
-        for (pop in populations) {
-            lof_count = biallelic_lof_combos[[pop]][pos]
-            func_count = biallelic_func_combos[[pop]][pos]
-            lof_func_count = lof_func_combos[[pop]][pos]
-            frequency = exac[[pop]]
-            size = cohort_n[[pop]]
-            
-            p_values = test_enrichment(frequency, lof_count, func_count, lof_func_count, size)
-            p_values$biallelic_lof = lof_count
-            p_values$biallelic_func = func_count
-            p_values$lof_func = lof_func_count
-            p_values$cohort_n = size
-            all_p_values[[pop]][[pos]] = p_values
-        }
-    }
-    
-    # find the P-values for the appropriate tests
-    biallelic_lof_p = 0
-    biallelic_func_p = 0
-    lof_func_p = 0
-    for (x in names(all_p_values)) {
-        pop = all_p_values[[x]]
-        for (pos in 1:length(pop)) {
-            stats = pop[[pos]]
-            # we are examining the values for one population, and for a single
-            # count combination. We want to use the values which are for the
-            # for the populations with non-zero counts, and where the row of
-            # counts for the population was not duplicated.
-            if (stats$biallelic_lof > 0 & !lof_dups[pos]) {
-                biallelic_lof_p = biallelic_lof_p + stats$biallelic_lof_p
-            }
-            if (stats$biallelic_func > 0 & !func_dups[pos]) {
-                biallelic_func_p = biallelic_func_p + stats$biallelic_func_p
-            }
-            if (stats$lof_func > 0 & !lof_func_dups[pos]) {
-                lof_func_p = lof_func_p + stats$lof_func_p
-            }
-        }
-    }
+    biallelic_lof_p = sum_combo_tests(exac, populations, biallelic_lof_combos, "biallelic_lof_p")
+    biallelic_func_p = sum_combo_tests(exac, populations, biallelic_func_combos, "biallelic_func_p")
+    lof_func_p = sum_combo_tests(exac, populations, lof_func_combos, "lof_func_p")
     
     p_values = list(lof=NA, functional=NA, biallelic_lof_p=biallelic_lof_p,
-        lof_func_p=biallelic_func_p, biallelic_func_p=lof_func_p)
+        lof_func_p=lof_func_p, biallelic_func_p=biallelic_func_p)
     
     return(p_values)
+}
+
+#' get a p-value that sums across different population possibilities
+#'
+#' @param exac list of frequency estimates for each ExAC population.
+#' @param populations a vector of population names to be tested.
+#' @param combos a dataframe of the possible count combinations for a functional
+#'        type.
+#' @param cohort_n list of number of probands in each population.
+#' @param p_name the name of the p-value to extract (e.g. "biallelic_lof_p").
+#' @export
+#'
+#' @return a p-value from testing for
+sum_combo_tests <- function(exac, cohort_n, populations, combos, p_name) {
+    # define a list of counts for each of the functional types. I've arbitrarily
+    # given them the names of the resulting p-values, but that is because we
+    # pass in the name of the p-value that we want, so we can easily modify the
+    # count using that name.
+    counts = list(biallelic_lof_p=0, biallelic_func_p=0, lof_func_p=0)
+    
+    summed_p_value = 0
+    for (pos in 1:nrow(combos)) {
+        row_p_value = 1
+        for (pop in populations) {
+            # insert the count for the population into the correct functional
+            # count position
+            counts[[p_name]] = combos[[pop]][pos]
+            
+            # for populations with a count of zero, we want to exact probability
+            # of the population having zero families. To do this, we adjust the
+            # count to 1 (as "test_enrichment" uses count - 1), and later
+            # calculate 1 - p-value to get the exact p-value.
+            zero = FALSE
+            if (counts[[p_name]] == 0) { counts[[p_name]] = 1 ; zero = TRUE }
+            
+            # define the function arguments
+            args = list(freq=exac[[pop]],
+                biallelic_lof=counts[["biallelic_lof_p"]],
+                biallelic_func=counts[["biallelic_func_p"]],
+                lof_func=counts[["lof_func_p"]],
+                cohort_n=cohort_n[[pop]])
+            
+            # call the function using the arguments, then pull out the p-value
+            # for the functional type we are looking at.
+            p_values = do.call("test_enrichment", args)
+            p_value = p_values[[p_name]]
+            
+            # for zero counts, get 1 - p-value to obtain the exact p-value.
+            if (zero) {p_value = 1 - p_value}
+            
+            # the p-value for the row is the product of the p-values for every
+            # population
+            row_p_value = row_p_value * p_value
+        }
+        # the overall p-value is the sum of p-values for each row
+        summed_p_value = summed_p_value + row_p_value
+    }
+    
+    return(summed_p_value)
 }
 
 #' Get all the combinations of spreading the probands across populations.
@@ -161,32 +173,22 @@ test_enrichment_across_multiple_populations <- function(exac, biallelic_lof, bia
 #' @return a list of count dataframes for each functional type
 get_count_combinations <- function(populations, biallelic_lof, biallelic_func, lof_func) {
     types = c("biallelic_lof", "biallelic_func", "lof_func")
-    combinations = expand.grid(rep(lapply(c(biallelic_lof, biallelic_func,
-        lof_func), function(x) seq(0, x)), each=length(populations)))
-    names(combinations) = paste(rep(populations, length(types)),
-        sort(rep(types, length(populations))), sep=".")
     
-    # split the combinations out by functional type, and rename the columns
-    # to the corresponding population
-    biallelic_lof_combos = combinations[, grepl("biallelic_lof", names(combinations))]
-    biallelic_func_combos = combinations[, grepl("biallelic_func", names(combinations))]
-    lof_func_combos = combinations[, grepl("lof_func", names(combinations))]
+    # get a matrix of count combinations for each functional type
+    biallelic_lof_combos = expand.grid(rep(list(seq(0, biallelic_lof)), each=length(populations)))
+    biallelic_func_combos = expand.grid(rep(list(seq(0, biallelic_func)), each=length(populations)))
+    lof_func_combos = expand.grid(rep(list(seq(0, (lof_func + biallelic_lof))), each=length(populations)))
+    
+    # make sure each of the rows sums to the correct value, so that we only use
+    # rows where the counts are dispersed correctly amongst the populations
+    biallelic_lof_combos = biallelic_lof_combos[rowSums(biallelic_lof_combos) == biallelic_lof, ]
+    biallelic_func_combos = biallelic_func_combos[rowSums(biallelic_func_combos) == biallelic_func, ]
+    lof_func_combos = lof_func_combos[rowSums(lof_func_combos) == (lof_func + biallelic_lof), ]
+    
+    # name the combinations by the population names
     names(biallelic_lof_combos) = populations
     names(biallelic_func_combos) = populations
     names(lof_func_combos) = populations
-    
-    # select only the combinations where the families are dispersed
-    # correctly across the populations (each row should sum to the number of
-    # families, no more, no less).
-    use_rows = rowSums(biallelic_func_combos) == biallelic_func &
-        rowSums(biallelic_lof_combos) == biallelic_lof &
-        rowSums(lof_func_combos) == lof_func
-    
-    # drop the functional groups to the rows that are correct across all
-    # groups.
-    biallelic_lof_combos = biallelic_lof_combos[use_rows, ]
-    biallelic_func_combos = biallelic_func_combos[use_rows, ]
-    lof_func_combos = lof_func_combos[use_rows, ]
     
     values = list(biallelic_lof_combos=biallelic_lof_combos,
         biallelic_func_combos=biallelic_func_combos,

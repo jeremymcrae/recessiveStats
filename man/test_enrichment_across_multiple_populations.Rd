@@ -8,7 +8,7 @@ test_enrichment_across_multiple_populations(exac, biallelic_lof, biallelic_func,
   lof_func, cohort_n)
 }
 \arguments{
-\item{exac}{list of frequency estimates for each ExAC population}
+\item{exac}{list of frequency estimates for each ExAC population.}
 
 \item{biallelic_lof}{number of probands with inherited biallelic LoF variants in the gene.}
 
