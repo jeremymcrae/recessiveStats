@@ -51,7 +51,7 @@ TEMP_DIR = "/lustre/scratch113/projects/ddd/users/jm33/bcfs"
 # merging)
 format_fields = ["AD", "DNM_CONFIG_child_mom_dad", "DP", "DP4_CHILD",
     "DP_CHILD", "DP_FATHER", "DP_MOTHER", "gatk_DP", "GQ", "INHERITANCE",
-    "INHERITANCEP", "MIN_DP", "PL", "PP_DNM", "samtools_DP", "SB"]
+    "INHERITANCEP", "MIN_DP", "PP_DNM", "samtools_DP", "SB"]
 format_fields = ["FORMAT/{}".format(x) for x in format_fields]
 info_fields = ["AC", "AFR_AF", "Allele", "Amino_acids", "AMR_AF", "AN",
     "BaseQRankSum", "BIOTYPE", "CALLSOURCE", "CANONICAL", "CCC", "CCDS",
@@ -262,8 +262,8 @@ def generate_mergeable_vcfs(vcfs, temp_dir):
             ";", TABIX, "-p", "vcf", "-f", stripped_vcf]
         
         job_id = get_random_string()
-        submit_bsub_job(command, job_id)
-        time.sleep(0.5)
+        submit_bsub_job(command, job_id, memory=100)
+        time.sleep(0.25)
         stripped_vcfs.append(stripped_vcf)
         job_ids.append(job_id)
     
@@ -306,7 +306,7 @@ def merge_vcf_pairs(paths, temp_dir):
             command = [BCFTOOLS, "merge", "--output-type", "z", "--output", \
                 path, pair[0],  pair[1], ";", BCFTOOLS, "index", "--tbi", path]
         
-        submit_bsub_job(command, job_id)
+        submit_bsub_job(command, job_id, memory=100)
         time.sleep(0.5)
         
         job_ids.append(job_id)
@@ -338,7 +338,7 @@ def merge_vcfs(vcfs, temp_dir):
         "--output", \
             os.path.join(os.path.dirname(temp_dir)[0], "ddd_4k.bcftools.bcf"), \
         vcfs[0]]
-    submit_bsub_job(command)
+    submit_bsub_job(command, memory=100)
 
 def main():
     vcfs = get_vcfs(DIAGNOSED_PATH, FAMILIES_PATH)
