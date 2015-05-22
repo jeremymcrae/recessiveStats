@@ -9,32 +9,13 @@
 
 #' identify DDD probands to analyse
 #'
-#' @param chrom chromosome of interest (this will only be important if we have
-#'        different sets of probands for each chromosome file, which shouldn't
-#'        be the case, but we might as well be sure.)
-#' @param vcf_dir directory containing multi-sample VCFs per-chromosome for the
-#'        population of interest.
+#' @param vcf_path dpath to multi-sample VCFs for the population of interest.
 #' @export
-#'
-#' @examples
-#' get_undiagnosed_sanger_ids("14")
-get_undiagnosed_sanger_ids <- function(chrom, vcf_dir=DDD_VCFS_DIR) {
-    # get the probands from the DDD study
-    ddd = get_ddd_cohort(parents=FALSE, unaffected=FALSE)
-    ddd = ddd[!duplicated(ddd), ]
-    ddd = ddd[ddd$dad_id != 0, ]
-    
-    # remove the diagnosed probands
-    diagnosed = "/lustre/scratch113/projects/ddd/users/jm33/ddd_likely_diagnosed.txt"
-    diagnosed = read.table(diagnosed, header=TRUE)
-    ddd = ddd[!ddd$individual_id %in% diagnosed$person_id, ]
+get_undiagnosed_sanger_ids <- function(vcf_path="/lustre/scratch113/projects/ddd/users/jm33/ddd_4k.bcftools.bcf") {
     
     # if the gene is on chrX, we can only estimate autozygosity for females,
     # since males are hemizygous for chrX.
     if (chrom == "X") { ddd = ddd[ddd$sex == "F", ] }
-    
-    # identify the chromosome-specific VCF to extract from
-    vcf_path = Sys.glob(file.path(vcf_dir, paste(chrom, "\\:1-*.vcf.gz", sep="")))
     
     # extract the sample IDs from the multi-sample VCF
     command = BCFTOOLS
@@ -42,9 +23,7 @@ get_undiagnosed_sanger_ids <- function(chrom, vcf_dir=DDD_VCFS_DIR) {
         "-l", vcf_path)
     samples = system2(command, args, stdout=TRUE)
     
-    proband_ids = samples[samples %in% ddd$sanger_id]
-    
-    return(proband_ids)
+    return(samples)
 }
 
 #' create a BCF for a small genome region, for a limited number of probands
@@ -63,7 +42,7 @@ extract_region <- function(chrom, start_pos, end_pos, vcf_dir) {
     vcf_path = Sys.glob(file.path(vcf_dir, paste(chrom, "\\:1-*.vcf.gz", sep="")))
     
     # identify the samples to select, and where to put the resulting file
-    probands = get_undiagnosed_sanger_ids(chrom, vcf_dir)
+    probands = get_undiagnosed_sanger_ids()
     temp_bcf = tempfile(fileext=".bcf")
     
     command = BCFTOOLS
@@ -180,7 +159,7 @@ get_autozygous_rate <- function(hgnc, chrom, vcf_dir=DDD_VCFS_DIR) {
     end=rows$stop
     offset = 2000000
     
-    probands = get_undiagnosed_sanger_ids(chrom, vcf_dir)
+    probands = get_undiagnosed_sanger_ids()
     temp_bcf = "/lustre/scratch113/projects/ddd/users/jm33/ddd_4k.bcf"
     
     autozygous = sapply(probands, function(x) check_sample_autozygosity(temp_bcf, chrom, start, end, x))
