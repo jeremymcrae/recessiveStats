@@ -131,7 +131,7 @@ test_enrichment_across_multiple_populations <- function(exac, biallelic_lof, bia
     
     p_values = list(lof=NA, functional=NA)
     p_values$biallelic_lof_p = sum_combo_tests(exac, cohort_n,
-        , biallelic_lof_enrichment)
+        biallelic_lof, biallelic_lof_enrichment)
     p_values$biallelic_func_p = sum_combo_tests(exac, cohort_n,
         biallelic_func_combos, biallelic_func_enrichment)
     p_values$lof_func_p = sum_combo_tests(exac, cohort_n,
