@@ -161,7 +161,6 @@ sum_combo_tests <- function(exac, cohort_n, combos, enrich_function) {
             # For populations where the count is not the highest in the row, we
             # want the probability of the population having that count families.
             # Otherwise we want the probability of having that count or greater.
-            exact = FALSE
             if (count == max(combos[pos, ])) {
                 p_value = enrich_function(exac[[pop]], count, cohort_n[[pop]])
             } else {
