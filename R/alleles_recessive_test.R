@@ -58,17 +58,56 @@ analyse_inherited_enrichment <- function(hgnc, chrom, biallelic_lof, biallelic_f
 #'
 #' @return a list of P values from tests, under LoF and functional tests.
 test_enrichment <- function(freq, biallelic_lof, biallelic_func, lof_func, cohort_n) {
-    lof_rate = freq$lof ** 2
-    lof_func_rate = freq$lof ** 2 + (2 * freq$lof * (1 - freq$lof) * freq$functional)
-    func_rate = freq$functional ** 2
     
     # get the probability of getting more than or equal to the number of
     # observed inherited events
-    freq$biallelic_lof_p = pbinom(biallelic_lof - 1, cohort_n, prob=lof_rate, lower.tail=FALSE)
-    freq$lof_func_p = pbinom(lof_func + biallelic_lof - 1, cohort_n, prob=lof_func_rate, lower.tail=FALSE)
-    freq$biallelic_func_p = pbinom(biallelic_func - 1, cohort_n, prob=func_rate, lower.tail=FALSE)
+    freq$biallelic_lof_p = biallelic_lof_enrichment(freq, biallelic_lof, cohort_n)
+    freq$lof_func_p = lof_func_enrichment(freq, biallelic_lof + lof_func, cohort_n)
+    freq$biallelic_func_p = biallelic_func_enrichment(freq, biallelic_func, cohort_n)
     
     return(freq)
+}
+
+#' test for enrichment of biallelic LoF inherited variants
+#'
+#' @param freq list of cumulative frequencies of variation in a population for
+#'        rare LoF variants, and rare functional variants.
+#' @param count number of probands with inherited variants in the gene.
+#' @param cohort_n number of probands in population.
+#' @export
+#'
+#' @return P-value from testing for biallelic LoF variants.
+biallelic_lof_enrichment <- function(freq, count, cohort_n) {
+    rate = freq$lof ** 2
+    return(pbinom(count - 1, cohort_n, prob=rate, lower.tail=FALSE))
+}
+
+#' test enrichment of inherited biallelic LoF and compound heterozygous LoF/Func
+#'
+#' @param freq list of cumulative frequencies of variation in a population for
+#'        rare LoF variants, and rare functional variants.
+#' @param count number of probands with inherited variants in the gene.
+#' @param cohort_n number of probands in population.
+#' @export
+#'
+#' @return P-value from testing for biallelic LoF and Lof/Func variants.
+lof_func_enrichment <- function(freq, count, cohort_n) {
+    rate = freq$lof ** 2 + (2 * freq$lof * (1 - freq$lof) * freq$functional)
+    return(pbinom(count - 1, cohort_n, prob=rate, lower.tail=FALSE))
+}
+
+#' test enrichment of inherited biallelic functional variants
+#'
+#' @param freq list of cumulative frequencies of variation in a population for
+#'        rare LoF variants, and rare functional variants.
+#' @param count number of probands with inherited variants in the gene.
+#' @param cohort_n number of probands in population.
+#' @export
+#'
+#' @return P-value from testing for biallelic functional variants.
+biallelic_func_enrichment <- function(freq, count, cohort_n) {
+    rate = freq$functional ** 2
+    return(pbinom(count - 1, cohort_n, prob=rate, lower.tail=FALSE))
 }
 
 #' test for enrichment of inherited variants in multiple populations
@@ -85,15 +124,18 @@ test_enrichment <- function(freq, biallelic_lof, biallelic_func, lof_func, cohor
 test_enrichment_across_multiple_populations <- function(exac, biallelic_lof, biallelic_func, lof_func, cohort_n) {
     # define the ExAC different populations (AFR="African/African American",
     # EAS="East Asian", NFE="Non-Finnish European", SAS="South Asian")
-    populations = c("AFR", "EAS", "NFE", "SAS")
+    populations = names(cohort_n)
     biallelic_lof_combos = get_count_combinations(populations, biallelic_lof)
     biallelic_func_combos = get_count_combinations(populations, biallelic_func)
-    lof_func_combos = get_count_combinations(populations, lof_func)
+    lof_func_combos = get_count_combinations(populations, biallelic_lof + lof_func)
     
     p_values = list(lof=NA, functional=NA)
-    p_values$biallelic_lof_p = sum_combo_tests(exac, populations, biallelic_lof_combos, "biallelic_lof_p")
-    p_values$biallelic_func_p = sum_combo_tests(exac, populations, biallelic_func_combos, "biallelic_func_p")
-    p_values$lof_func_p = sum_combo_tests(exac, populations, lof_func_combos, "lof_func_p")
+    p_values$biallelic_lof_p = sum_combo_tests(exac, cohort_n, populations,
+        biallelic_lof_combos, biallelic_lof_enrichment)
+    p_values$biallelic_func_p = sum_combo_tests(exac, cohort_n, populations,
+        biallelic_func_combos, biallelic_func_enrichment)
+    p_values$lof_func_p = sum_combo_tests(exac, cohort_n, populations, 
+        lof_func_combos, lof_func_enrichment)
     
     return(p_values)
 }
@@ -105,46 +147,30 @@ test_enrichment_across_multiple_populations <- function(exac, biallelic_lof, bia
 #' @param combos a dataframe of the possible count combinations for a functional
 #'        type.
 #' @param cohort_n list of number of probands in each population.
-#' @param p_name the name of the p-value to extract (e.g. "biallelic_lof_p").
+#' @param enrich_function function to test enrichment.
 #' @export
 #'
 #' @return a p-value from testing for
-sum_combo_tests <- function(exac, cohort_n, populations, combos, p_name) {
-    # define a list of counts for each of the functional types. I've arbitrarily
-    # given them the names of the resulting p-values, but that is because we
-    # pass in the name of the p-value that we want, so we can easily modify the
-    # count using that name.
-    counts = list(biallelic_lof_p=0, biallelic_func_p=0, lof_func_p=0)
-    
+sum_combo_tests <- function(exac, cohort_n, populations, combos, enrich_function) {
     summed_p_value = 0
     for (pos in 1:nrow(combos)) {
         row_p_value = 1
         for (pop in populations) {
-            # insert the count for the population into the correct functional
-            # count position
-            counts[[p_name]] = combos[[pop]][pos]
+            # get the functional variants for the population from the row
+            count = combos[[pop]][pos]
             
             # for populations with a count of zero, we want to exact probability
             # of the population having zero families. To do this, we adjust the
-            # count to 1 (as "test_enrichment" uses count - 1), and later
-            # calculate 1 - p-value to get the exact p-value.
-            zero = FALSE
-            if (counts[[p_name]] == 0) { counts[[p_name]] = 1 ; zero = TRUE }
+            # count to 1 (as the enrichment tests use count - 1), and later
+            # calculate 1 - p-value to get the p-value for that exact count.
+            exact = FALSE
+            if (count != max(combos[pos, ])) { count = count + 1 ; exact = TRUE }
             
-            # define the function arguments
-            args = list(freq=exac[[pop]],
-                biallelic_lof=counts[["biallelic_lof_p"]],
-                biallelic_func=counts[["biallelic_func_p"]],
-                lof_func=counts[["lof_func_p"]],
-                cohort_n=cohort_n[[pop]])
+            p_value = enrich_function(exac[[pop]], count, cohort_n[[pop]])
             
-            # call the function using the arguments, then pull out the p-value
-            # for the functional type we are looking at.
-            p_values = do.call("test_enrichment", args)
-            p_value = p_values[[p_name]]
-            
-            # for zero counts, get 1 - p-value to obtain the exact p-value.
-            if (zero) {p_value = 1 - p_value}
+            # for counts that are not the largest in each row, get 1 - p-value
+            # to obtain the p-value for that exact count.
+            if (exact) {p_value = 1 - p_value}
             
             # the p-value for the row is the product of the p-values for every
             # population
@@ -168,16 +194,10 @@ get_count_combinations <- function(populations, count) {
     # get a matrix of count combinations
     combos = expand.grid(rep(list(seq(0, count)), each=length(populations)))
     
+    n_parity = ceiling(count/length(populations))
     # make sure each of the rows sums to the correct value, so that we only use
     # rows where the counts are dispersed correctly amongst the populations
-    combos = combos[rowSums(combos) == count, ]
-    
-    # check if any of the rows have all populations with counts greater than one.
-    # if the row lacks this, then we need to add a final row where all the
-    # counts are one, to cover the scenario
-    if (!any(apply(combos, 1, function(x) all(x > 0)))) {
-        combos = rbind(combos, rep(1, length(populations)))
-    }
+    combos = combos[rowSums(combos) == count | (rowSums(combos) > count & apply(combos, 1, max) <= n_parity), ]
     
     # name the combinations by the population names
     names(combos) = populations
