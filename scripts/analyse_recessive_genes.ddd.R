@@ -2,18 +2,17 @@
 library(recessiveStats)
 library(jsonlite)
 
-COHORT_N = 3072
 COHORT_N = list("AFR"=109, "EAS"=15, "NFE"=2799, "SAS"=297)
-LAST_BASE_RULE = FALSE
+LAST_BASE_RULE = TRUE
 RECESSIVE_DIR = "/nfs/users/nfs_j/jm33/apps/recessiveStats"
 if (!LAST_BASE_RULE) {
     RECESSIVE_COUNTS_PATH = file.path(RECESSIVE_DIR,"data-raw/recessive_counts_by_gene.txt")
     PROBANDS_PATH = file.path(RECESSIVE_DIR,"data-raw/recessive_probands_by_gene.json")
-    OUTPUT_PATH = file.path(RECESSIVE_DIR,"results/recessive.allele_frequency_tests.adjusted_AC.txt")
+    OUTPUT_PATH = file.path(RECESSIVE_DIR,"results/recessive.allele_frequency_tests.exac_populations.txt")
 } else {
     RECESSIVE_COUNTS_PATH = file.path(RECESSIVE_DIR,"data-raw/recessive_counts_by_gene.last_base_rule.txt")
     PROBANDS_PATH = file.path(RECESSIVE_DIR,"data-raw/recessive_probands_by_gene.last_base_rule.json")
-    OUTPUT_PATH = file.path(RECESSIVE_DIR,"results/recessive.allele_frequency_tests.last_base_rule.adjusted_AC.txt")
+    OUTPUT_PATH = file.path(RECESSIVE_DIR,"results/recessive.allele_frequency_tests.last_base_rule.exac_populations.txt")
 }
 
 # load the datasets
