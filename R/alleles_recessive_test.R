@@ -188,6 +188,9 @@ sum_combo_tests <- function(exac, cohort_n, combos, enrich_function) {
 #'
 #' @return a list of count dataframes for each functional type
 get_count_combinations <- function(populations, count) {
+    
+    stopifnot(count >= 0)
+    
     # get a matrix of count combinations
     combos = expand.grid(rep(list(seq(0, count)), each=length(populations)))
     
@@ -196,6 +199,10 @@ get_count_combinations <- function(populations, count) {
     # rows where the counts are dispersed correctly amongst the populations
     combos = combos[rowSums(combos) == count |
         (rowSums(combos) > count & apply(combos, 1, max) <= n_parity), ]
+    
+    # tidy up the dataframe so that it is of a standard format
+    combos = data.frame(combos)
+    row.names(combos) = 1:nrow(combos)
     
     # name the combinations by the population names
     names(combos) = populations
