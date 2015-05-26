@@ -158,19 +158,17 @@ sum_combo_tests <- function(exac, cohort_n, combos, enrich_function) {
             # get the functional variants for the population from the row
             count = combos[[pop]][pos]
             
-            # for populations where the count is not the highest in the row, we
+            # For populations where the count is not the highest in the row, we
             # want the probability of the population having that count families.
-            # Adjust the count up by 1 (as the enrichment tests use count - 1),
-            # and later calculate 1 - p-value to get the p-value for that exact
-            # count.
+            # Otherwise we want the probability of having that count or greater.
             exact = FALSE
-            if (count != max(combos[pos, ])) { count = count + 1 ; exact = TRUE }
-            
-            p_value = enrich_function(exac[[pop]], count, cohort_n[[pop]])
-            
-            # for counts that are not the largest in each row, get 1 - p-value
-            # to obtain the p-value for that exact count.
-            if (exact) {p_value = 1 - p_value}
+            if (count == max(combos[pos, ])) {
+                p_value = enrich_function(exac[[pop]], count, cohort_n[[pop]])
+            } else {
+                inclusive = enrich_function(exac[[pop]], count, cohort_n[[pop]])
+                exclusive = enrich_function(exac[[pop]], count + 1, cohort_n[[pop]])
+                p_value = inclusive - exclusive
+            }
             
             # the p-value for the row is the product of the p-values for every
             # population
