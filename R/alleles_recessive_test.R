@@ -130,11 +130,11 @@ test_enrichment_across_multiple_populations <- function(exac, biallelic_lof, bia
     lof_func_combos = get_count_combinations(populations, biallelic_lof + lof_func)
     
     p_values = list(lof=NA, functional=NA)
-    p_values$biallelic_lof_p = sum_combo_tests(exac, cohort_n, populations,
-        biallelic_lof_combos, biallelic_lof_enrichment)
-    p_values$biallelic_func_p = sum_combo_tests(exac, cohort_n, populations,
+    p_values$biallelic_lof_p = sum_combo_tests(exac, cohort_n,
+        , biallelic_lof_enrichment)
+    p_values$biallelic_func_p = sum_combo_tests(exac, cohort_n,
         biallelic_func_combos, biallelic_func_enrichment)
-    p_values$lof_func_p = sum_combo_tests(exac, cohort_n, populations, 
+    p_values$lof_func_p = sum_combo_tests(exac, cohort_n,
         lof_func_combos, lof_func_enrichment)
     
     return(p_values)
@@ -143,26 +143,26 @@ test_enrichment_across_multiple_populations <- function(exac, biallelic_lof, bia
 #' get a p-value that sums across different population possibilities
 #'
 #' @param exac list of frequency estimates for each ExAC population.
-#' @param populations a vector of population names to be tested.
+#' @param cohort_n list of number of probands in each population.
 #' @param combos a dataframe of the possible count combinations for a functional
 #'        type.
-#' @param cohort_n list of number of probands in each population.
 #' @param enrich_function function to test enrichment.
 #' @export
 #'
 #' @return a p-value from testing for
-sum_combo_tests <- function(exac, cohort_n, populations, combos, enrich_function) {
+sum_combo_tests <- function(exac, cohort_n, combos, enrich_function) {
     summed_p_value = 0
     for (pos in 1:nrow(combos)) {
         row_p_value = 1
-        for (pop in populations) {
+        for (pop in names(cohort_n)) {
             # get the functional variants for the population from the row
             count = combos[[pop]][pos]
             
-            # for populations with a count of zero, we want to exact probability
-            # of the population having zero families. To do this, we adjust the
-            # count to 1 (as the enrichment tests use count - 1), and later
-            # calculate 1 - p-value to get the p-value for that exact count.
+            # for populations where the count is not the highest in the row, we
+            # want the probability of the population having that count families.
+            # Adjust the count up by 1 (as the enrichment tests use count - 1),
+            # and later calculate 1 - p-value to get the p-value for that exact
+            # count.
             exact = FALSE
             if (count != max(combos[pos, ])) { count = count + 1 ; exact = TRUE }
             
@@ -197,7 +197,8 @@ get_count_combinations <- function(populations, count) {
     n_parity = ceiling(count/length(populations))
     # make sure each of the rows sums to the correct value, so that we only use
     # rows where the counts are dispersed correctly amongst the populations
-    combos = combos[rowSums(combos) == count | (rowSums(combos) > count & apply(combos, 1, max) <= n_parity), ]
+    combos = combos[rowSums(combos) == count |
+        (rowSums(combos) > count & apply(combos, 1, max) <= n_parity), ]
     
     # name the combinations by the population names
     names(combos) = populations

@@ -4,19 +4,17 @@
 \alias{sum_combo_tests}
 \title{get a p-value that sums across different population possibilities}
 \usage{
-sum_combo_tests(exac, cohort_n, populations, combos, p_name)
+sum_combo_tests(exac, cohort_n, combos, enrich_function)
 }
 \arguments{
 \item{exac}{list of frequency estimates for each ExAC population.}
 
 \item{cohort_n}{list of number of probands in each population.}
 
-\item{populations}{a vector of population names to be tested.}
-
 \item{combos}{a dataframe of the possible count combinations for a functional
 type.}
 
-\item{p_name}{the name of the p-value to extract (e.g. "biallelic_lof_p").}
+\item{enrich_function}{function to test enrichment.}
 }
 \value{
 a p-value from testing for
