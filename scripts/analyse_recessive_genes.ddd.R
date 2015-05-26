@@ -3,6 +3,7 @@ library(recessiveStats)
 library(jsonlite)
 
 COHORT_N = 3072
+COHORT_N = list("AFR"=109, "EAS"=15, "NFE"=2799, "SAS"=297)
 LAST_BASE_RULE = FALSE
 RECESSIVE_DIR = "/nfs/users/nfs_j/jm33/apps/recessiveStats"
 if (!LAST_BASE_RULE) {
