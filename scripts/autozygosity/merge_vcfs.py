@@ -257,6 +257,7 @@ def generate_mergeable_vcfs(vcfs, temp_dir):
             vcf, "|", \
             BCFTOOLS, "view", \
             "--apply-filters", "PASS", \
+            "--max-alleles", "2", \
             "--output-type"," z", \
             "--output-file", stripped_vcf,
             ";", TABIX, "-p", "vcf", "-f", stripped_vcf]
@@ -303,7 +304,7 @@ def merge_vcf_pairs(paths, temp_dir):
             shutil.copyfile(pair[0], path)
             command = [BCFTOOLS, "index", "--tbi", path]
         else:
-            command = [BCFTOOLS, "merge", "--output-type", "z", "--output", \
+            command = [BCFTOOLS, "merge", "--merge", "none", "--output-type", "z", "--output", \
                 path, pair[0],  pair[1], ";", BCFTOOLS, "index", "--tbi", path]
         
         submit_bsub_job(command, job_id, memory=100)
