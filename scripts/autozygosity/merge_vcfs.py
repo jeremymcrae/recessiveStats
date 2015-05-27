@@ -262,11 +262,11 @@ def generate_mergeable_vcfs(vcfs, temp_dir):
             "--output-file", stripped_vcf,
             ";", TABIX, "-p", "vcf", "-f", stripped_vcf]
         
-        job_id = get_random_string()
-        submit_bsub_job(command, job_id, memory=100)
-        time.sleep(0.25)
+        # job_id = get_random_string()
+        # submit_bsub_job(command, job_id, memory=100)
+        # time.sleep(0.25)
         stripped_vcfs.append(stripped_vcf)
-        job_ids.append(job_id)
+        # job_ids.append(job_id)
     
     return stripped_vcfs, job_ids
 
@@ -333,11 +333,14 @@ def merge_vcfs(vcfs, temp_dir):
         while has_current_jobs(job_ids):
             time.sleep(30)
     
+    shutil.copyfile(vcfs[0], os.path.join(os.path.dirname(temp_dir)[0], "ddd_4k.bcftools.bcf"))
+    
+    os.environ["BCFTOOLS_PLUGINS"] = "/nfs/users/nfs_j/jm33/apps/bcftools/plugins"
     # finally, swap the missing genotypes to reference alleles, and convert to BCF
     command = [BCFTOOLS, "+missing2ref", \
         "--output-type", "b",
         "--output", \
-            os.path.join(os.path.dirname(temp_dir)[0], "ddd_4k.bcftools.bcf"), \
+            os.path.join(os.path.dirname(temp_dir)[0], "ddd_4k.bcftools.missing_converted.bcf"), \
         vcfs[0]]
     submit_bsub_job(command, memory=100)
 
