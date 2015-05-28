@@ -5,7 +5,7 @@
 \title{identify DDD probands to analyse}
 \usage{
 
-  get_undiagnosed_sanger_ids(vcf_path = "/lustre/scratch113/projects/ddd/users/jm33/ddd_4k.bcftools.bcf")
+  get_undiagnosed_sanger_ids(vcf_path = "/lustre/scratch113/projects/ddd/users/jm33/ddd_4k.bcftools.vcf.gz")
 }
 \arguments{
 \item{vcf_path}{path to multi-sample VCFs for the population of interest.}

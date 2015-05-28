@@ -12,7 +12,7 @@
 #' @param vcf_path path to multi-sample VCFs for the population of interest.
 #' @export
 get_undiagnosed_sanger_ids <- function(
-    vcf_path="/lustre/scratch113/projects/ddd/users/jm33/ddd_4k.bcftools.bcf") {
+    vcf_path="/lustre/scratch113/projects/ddd/users/jm33/ddd_4k.bcftools.vcf.gz") {
     
     # extract the sample IDs from the multi-sample VCF
     command = BCFTOOLS
