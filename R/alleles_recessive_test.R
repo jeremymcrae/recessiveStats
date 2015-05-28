@@ -51,9 +51,9 @@ analyse_inherited_enrichment <- function(hgnc, chrom, biallelic_lof, biallelic_f
 #' @return a list of P values from tests, under LoF and functional tests.
 test_enrichment <- function(freq, biallelic_lof, biallelic_func, lof_func, cohort_n, autozygous_rate=0) {
     lof_rate = (freq$lof ** 2) * (1 - autozygous_rate) + freq$lof * autozygous_rate
-    # TODO: make sure that this equation is correct
-    lof_func_rate = (freq$lof ** 2 + (2 * freq$lof * (1 - freq$lof) * freq$functional)) * (1 - autozygous_rate) +
-        freq$lof * autozygous_rate + 2 * freq$functional * autozygous_rate
+    lof_func_rate = (freq$lof ** 2) * (1 - autozygous_rate) +
+        (freq$lof) * autozygous_rate +
+        (2 * freq$lof * (1 - freq$lof) * freq$functional)
     func_rate = (freq$functional ** 2) * (1 - autozygous_rate) + freq$functional * autozygous_rate
     
     # get the probability of getting more than or equal to the number of
