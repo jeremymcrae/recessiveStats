@@ -126,6 +126,13 @@ check_sample_autozygosity_genome_wide <- function(bcf_path, proband) {
     roh = read.table(text=roh_output, sep="\t")
     names(roh) = c("sample_id", "chrom", "pos", "p_value", "state")
     
+    # if there aren't any ROH regions predicted in the output, then return a
+    # blank dataframe
+    if (!any(roh$state == 1)) {
+        return(data.frame(sample_id=character(0), chrom=character(0),
+            start_pos=numeric(0),end_pos=numeric(0)))
+    }
+    
     # identify the start and end positions of ROH ranges
     row_positions = which(roh$state == 1)
     ends = which(diff(row_positions) > 1)
