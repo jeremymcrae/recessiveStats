@@ -13,4 +13,4 @@ proband = check_sample_autozygosity_genome_wide(bcf, args$proband)
 write.table(proband, file=file.path("data-raw", args$proband) sep="\t", row.names=FALSE, quote=FALSE)
 
 
-# /software/hgi/pkglocal/bcftools-1.0/bin/bcftools roh --biallelic-sites --estimate-AF all --GTs-only 30 --skip-indels --samples DDDP110714 /lustre/scratch113/projects/ddd/users/jm33/ddd_4k.bcftools.bcf
+# /software/hgi/pkglocal/bcftools-1.0/bin/bcftools roh --biallelic-sites --estimate-AF all --GTs-only 30 --skip-indels --samples DDDP110714 /lustre/scratch113/projects/ddd/users/jm33/ddd_4k.bcftools.vcf.gz

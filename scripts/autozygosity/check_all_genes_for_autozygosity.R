@@ -50,9 +50,7 @@ for (proband in probands) {
         "-M", 100,
         "bash", "-c",
         "\"/software/R-3.1.2/bin/Rscript", "./scripts/autozygosity/proband_autozygosity.R",
-        "--hgnc", hgnc,
-        "--chrom", chrom,
-        "--consang",
+        "--proband", hgnc,
         "\"")
     
     system2(command, args)
