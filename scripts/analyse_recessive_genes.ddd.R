@@ -35,6 +35,10 @@ for (gene in sort(unique(recessive_genes$gene))) {
     row = recessive_genes[recessive_genes$gene == gene, ]
     proband_ids = probands[[gene]]
     autozygosity = autozygous_rates$rate[autozygous_rates$hgnc == gene]
+    # allow for mising autozygosity rate estimates
+    if (length(autozygosity) == 0) {
+        autozygosity = 0
+    }
     
     chrom = row$chrom
     biallelic_lof = row$lof_sum
