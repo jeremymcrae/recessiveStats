@@ -12,17 +12,18 @@
 #' @param cohort_n number of probands in population.
 #' @param check_last_base whether to correct missense or synonymous G alleles at
 #'     the last base of exons to a LoF consequence.
+#' @param autozygous_rate rate of autozygosity within the gene in the probands.
 #' @export
 #'
 #' @return a list of P values from tests using the DDD population, the ExAC
 #'     population, under LoF and functional tests.
-analyse_inherited_enrichment <- function(hgnc, chrom, biallelic_lof, biallelic_func, lof_func, probands=NULL, cohort_n=3072, check_last_base=FALSE) {
+analyse_inherited_enrichment <- function(hgnc, chrom, biallelic_lof, biallelic_func, lof_func, probands=NULL, cohort_n=3072, check_last_base=FALSE, autozygous_rate=0) {
     
     cat("extracting ddd frequencies\n")
     ddd = try(get_ddd_variants_for_gene(hgnc, chrom, probands, check_last_base=check_last_base), silent=TRUE)
     if (class(ddd) != "try-error") {
         ddd = get_cumulative_frequencies(ddd)
-        ddd = test_enrichment(ddd, biallelic_lof, biallelic_func, lof_func, cohort_n)
+        ddd = test_enrichment(ddd, biallelic_lof, biallelic_func, lof_func, cohort_n, autozygous_rate)
     } else {
         ddd=list(lof=NA, func=NA, biallelic_lof_p=NA, lof_func_p=NA, biallelic_func_p=NA)
     }
@@ -30,7 +31,7 @@ analyse_inherited_enrichment <- function(hgnc, chrom, biallelic_lof, biallelic_f
     cat("extracting ExAC frequencies\n")
     exac = get_exac_variants_for_gene(hgnc, chrom, check_last_base=check_last_base)
     exac = get_cumulative_frequencies(exac)
-    exac = test_enrichment(exac, biallelic_lof, biallelic_func, lof_func, cohort_n)
+    exac = test_enrichment(exac, biallelic_lof, biallelic_func, lof_func, cohort_n, autozygous_rate)
     
     p_values = list(ddd=ddd, exac=exac)
     

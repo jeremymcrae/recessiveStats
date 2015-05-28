@@ -19,6 +19,9 @@ if (!LAST_BASE_RULE) {
 recessive_genes = read.table(RECESSIVE_COUNTS_PATH, sep="\t", header=TRUE, stringsAsFactors=FALSE)
 probands = fromJSON(PROBANDS_PATH)
 
+autozygous_rates = read.table(file.path(RECESSIVE_DIR, "results/autozygosity.all_genes.all_probands.tsv"),
+    sep="\t", header=TRUE, stringsAsFactors=FALSE)
+
 # start a blank dataframe for the results
 results = data.frame(gene=character(0), chrom=character(0),
     func_count=character(0), lof_count=character(0),
@@ -31,6 +34,7 @@ for (gene in sort(unique(recessive_genes$gene))) {
     
     row = recessive_genes[recessive_genes$gene == gene, ]
     proband_ids = probands[[gene]]
+    autozygosity = autozygous_rates$rate[autozygous_rates$hgnc == gene]
     
     chrom = row$chrom
     biallelic_lof = row$lof_sum
@@ -38,7 +42,8 @@ for (gene in sort(unique(recessive_genes$gene))) {
     biallelic_func = 0
     
     result = try(analyse_inherited_enrichment(gene, chrom, biallelic_lof, biallelic_func, lof_func,
-        probands=proband_ids, cohort_n=COHORT_N, check_last_base=LAST_BASE_RULE))
+        probands=proband_ids, cohort_n=COHORT_N, check_last_base=LAST_BASE_RULE,
+        autozygous_rate=autozygosity))
     
     if (class(result) == "try-error") { next }
     
