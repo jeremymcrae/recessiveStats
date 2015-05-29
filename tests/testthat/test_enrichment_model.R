@@ -88,7 +88,7 @@ test_that("get_count_combinations is correct for more cohorts", {
         0 0 4",
         colClasses=c("integer", "integer"))
     
-        expect_equal(get_count_combinations(populations, count), result)
+    expect_equal(get_count_combinations(populations, count), result)
 })
 
 context("Enrichment tests return the correct P-values")
@@ -107,6 +107,13 @@ test_that("sum_combo_tests is correct", {
     combos = get_count_combinations(names(cohort_n), count=7)
     expect_equal(sum_combo_tests(exac, cohort_n, combos,
         biallelic_lof_enrichment), 0.00429554232885157)
+    
+    # check that summing across populations where the frequencies are the same
+    # gives the same answer as for the single population p-value, even if the
+    # population sizes differ between ethnicities.
+    cohort_n = list("A"=20, "B"=180)
+    expect_equal(sum_combo_tests(exac, cohort_n, combos, biallelic_lof_enrichment),
+        pbinom(6, 200, 0.01, lower.tail=FALSE))
 })
 
 test_that("single enrichment tests are correct", {
@@ -122,7 +129,7 @@ test_that("single enrichment tests are correct", {
     # make sure the calculation gives us the exact value we expect
     expect_equal(biallelic_lof_enrichment(freq, count, cohort_n),
         0.264238021077044)
-        
+    
     # a count of zero should have a p-value of 1
     expect_equal(biallelic_lof_enrichment(freq, 0, cohort_n), 1)
     
@@ -133,7 +140,7 @@ test_that("single enrichment tests are correct", {
     # check the functional enrichment calculation
     expect_equal(biallelic_func_enrichment(freq, count, cohort_n),
         0.91283668331261)
-        
+    
     # check that NA counts return NA values
     expect_identical(biallelic_func_enrichment(freq, NA, cohort_n),
         as.numeric(NA))
