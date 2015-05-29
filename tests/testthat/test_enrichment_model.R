@@ -113,7 +113,7 @@ test_that("sum_combo_tests is correct", {
     # population sizes differ between ethnicities.
     cohort_n = list("A"=20, "B"=180)
     expect_equal(sum_combo_tests(exac, cohort_n, combos, biallelic_lof_enrichment),
-        pbinom(6, 200, 0.01, lower.tail=FALSE))
+        pbinom(6, sum(unlist(cohort_n)), exac[[1]][["lof"]]**2, lower.tail=FALSE))
 })
 
 test_that("single enrichment tests are correct", {
