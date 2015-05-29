@@ -9,11 +9,14 @@ get_cumulative_frequencies(vars)
 \arguments{
 \item{vars}{dataframe of variants (one row per allele), which includes the
 number of times that allele was observed within the population, as
-well as the total number of alleles in the population.}
+well as the total number of alleles in the population. Alternatively,
+this can be a list of dataframe, each for a different population}
 }
 \value{
 a list of loss of function cumulative frequency, and functional
-        cumulative frequency.
+        cumulative frequency. Alternatively, if the function was prvoided
+        with a list of dataframe, return a list of frequency lists, named as
+        per the input list.
 }
 \description{
 obtain cumulative allele frequency of rare lof and functional variants
@@ -26,5 +29,14 @@ vars = read.table(header = TRUE, text = "
      1   1000  stop_lost
      1   1000  synonymous_variant")
 get_cumulative_frequencies(vars)
+
+vars2 = read.table(header = TRUE, text = "
+     AC  AN    CQ
+     1   1000  missense_variant
+     1   1000  stop_gained
+     1   1000  stop_lost
+     1   1000  synonymous_variant")
+var_list = list("first"=vars, "second"=vars2)
+get_cumulative_frequencies(var_list)
 }
 
