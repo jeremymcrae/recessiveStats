@@ -4,7 +4,7 @@
 \alias{sum_combo_tests}
 \title{get a p-value that sums across different population possibilities}
 \usage{
-sum_combo_tests(exac, cohort_n, combos, enrich_function)
+sum_combo_tests(exac, cohort_n, combos, enrich_function, autozygous_rate = 0)
 }
 \arguments{
 \item{exac}{list of frequency estimates for each ExAC population.}
@@ -15,6 +15,8 @@ sum_combo_tests(exac, cohort_n, combos, enrich_function)
 type.}
 
 \item{enrich_function}{function to test enrichment.}
+
+\item{autozygous_rate}{rate of autozygosity in the cohort being investigated.}
 }
 \value{
 a p-value from testing for

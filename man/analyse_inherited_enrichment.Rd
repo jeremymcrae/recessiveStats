@@ -5,7 +5,8 @@
 \title{test for enrichment of inherited variants in the DDD and ExAC datasets}
 \usage{
 analyse_inherited_enrichment(hgnc, chrom, biallelic_lof, biallelic_func,
-  lof_func, probands = NULL, cohort_n = 3072, check_last_base = FALSE)
+  lof_func, probands = NULL, cohort_n = 3072, check_last_base = FALSE,
+  autozygous_rate = 0)
 }
 \arguments{
 \item{hgnc}{HGNC symbol for a gene.}
@@ -27,6 +28,8 @@ the gene, or NULL.}
 
 \item{check_last_base}{whether to correct missense or synonymous G alleles at
 the last base of exons to a LoF consequence.}
+
+\item{autozygous_rate}{rate of autozygosity within the gene in the probands.}
 }
 \value{
 a list of P values from tests using the DDD population, the ExAC

@@ -4,7 +4,7 @@
 \alias{lof_func_enrichment}
 \title{test enrichment of inherited biallelic LoF and compound heterozygous LoF/Func}
 \usage{
-lof_func_enrichment(freq, count, cohort_n)
+lof_func_enrichment(freq, count, cohort_n, autozygous_rate = 0)
 }
 \arguments{
 \item{freq}{list of cumulative frequencies of variation in a population for
@@ -13,6 +13,8 @@ rare LoF variants, and rare functional variants.}
 \item{count}{number of probands with inherited variants in the gene.}
 
 \item{cohort_n}{number of probands in population.}
+
+\item{autozygous_rate}{rate of autozygosity in the cohort being investigated.}
 }
 \value{
 P-value from testing for biallelic LoF and Lof/Func variants.

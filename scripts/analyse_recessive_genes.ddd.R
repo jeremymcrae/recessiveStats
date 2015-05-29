@@ -8,16 +8,19 @@ RECESSIVE_DIR = "/nfs/users/nfs_j/jm33/apps/recessiveStats"
 if (!LAST_BASE_RULE) {
     RECESSIVE_COUNTS_PATH = file.path(RECESSIVE_DIR,"data-raw/recessive_counts_by_gene.txt")
     PROBANDS_PATH = file.path(RECESSIVE_DIR,"data-raw/recessive_probands_by_gene.json")
-    OUTPUT_PATH = file.path(RECESSIVE_DIR,"results/recessive.allele_frequency_tests.exac_populations.txt")
+    OUTPUT_PATH = file.path(RECESSIVE_DIR,"results/recessive.allele_frequency_tests.exac_and_autozygosity.txt")
 } else {
     RECESSIVE_COUNTS_PATH = file.path(RECESSIVE_DIR,"data-raw/recessive_counts_by_gene.last_base_rule.txt")
     PROBANDS_PATH = file.path(RECESSIVE_DIR,"data-raw/recessive_probands_by_gene.last_base_rule.json")
-    OUTPUT_PATH = file.path(RECESSIVE_DIR,"results/recessive.allele_frequency_tests.last_base_rule.exac_populations.txt")
+    OUTPUT_PATH = file.path(RECESSIVE_DIR,"results/recessive.allele_frequency_tests.last_base_rule.exac_and_autozygosity.txt")
 }
 
 # load the datasets
 recessive_genes = read.table(RECESSIVE_COUNTS_PATH, sep="\t", header=TRUE, stringsAsFactors=FALSE)
 probands = fromJSON(PROBANDS_PATH)
+
+autozygous_rates = read.table(file.path(RECESSIVE_DIR, "results/autozygosity.all_genes.all_probands.tsv"),
+    sep="\t", header=TRUE, stringsAsFactors=FALSE)
 
 # start a blank dataframe for the results
 results = data.frame(gene=character(0), chrom=character(0),
@@ -31,6 +34,11 @@ for (gene in sort(unique(recessive_genes$gene))) {
     
     row = recessive_genes[recessive_genes$gene == gene, ]
     proband_ids = probands[[gene]]
+    autozygosity = autozygous_rates$rate[autozygous_rates$hgnc == gene]
+    # allow for mising autozygosity rate estimates
+    if (length(autozygosity) == 0) {
+        autozygosity = 0
+    }
     
     chrom = row$chrom
     biallelic_lof = row$lof_sum
@@ -38,7 +46,8 @@ for (gene in sort(unique(recessive_genes$gene))) {
     biallelic_func = 0
     
     result = try(analyse_inherited_enrichment(gene, chrom, biallelic_lof, biallelic_func, lof_func,
-        probands=proband_ids, cohort_n=COHORT_N, check_last_base=LAST_BASE_RULE))
+        probands=proband_ids, cohort_n=COHORT_N, check_last_base=LAST_BASE_RULE,
+        autozygous_rate=autozygosity))
     
     if (class(result) == "try-error") { next }
     

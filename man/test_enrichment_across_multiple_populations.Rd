@@ -5,7 +5,7 @@
 \title{test for enrichment of inherited variants in multiple populations}
 \usage{
 test_enrichment_across_multiple_populations(exac, biallelic_lof, biallelic_func,
-  lof_func, cohort_n)
+  lof_func, cohort_n, autozygous_rate)
 }
 \arguments{
 \item{exac}{list of frequency estimates for each ExAC population.}
@@ -17,6 +17,8 @@ test_enrichment_across_multiple_populations(exac, biallelic_lof, biallelic_func,
 \item{lof_func}{number of probands with inherited Lof/Func variants in the gene.}
 
 \item{cohort_n}{list of number of probands in each population.}
+
+\item{autozygous_rate}{rate of autozygosity in the cohort being investigated.}
 }
 \value{
 a list of P values from tests across the populations, under LoF and
