@@ -6,7 +6,7 @@ COHORT_N = list("AFR"=109, "EAS"=15, "NFE"=2799, "SAS"=297)
 LAST_BASE_RULE = FALSE
 RECESSIVE_DIR = "/nfs/users/nfs_j/jm33/apps/recessiveStats"
 RECESSIVE_COUNTS_PATH = file.path(RECESSIVE_DIR,"data-raw/recessive_counts_by_gene.silent.txt")
-PROBANDS_PATH = file.path(RECESSIVE_DIR,"data-raw/recessive_probands_by_gene.json")
+PROBANDS_PATH = file.path(RECESSIVE_DIR,"data-raw/recessive_probands_by_gene.silent.json")
 OUTPUT_PATH = file.path(RECESSIVE_DIR,"results/recessive.allele_frequency_tests.silent.exac_and_autozygosity.txt")
 
 # load the datasets
@@ -35,8 +35,8 @@ for (gene in sort(unique(recessive_genes$gene))) {
     }
     
     chrom = row$chrom
-    biallelic_lof = row$lof_sum
-    lof_func = row$lof_func
+    biallelic_lof = 0
+    lof_func = 0
     biallelic_silent = row$silent_sum
     biallelic_func = 0
     
