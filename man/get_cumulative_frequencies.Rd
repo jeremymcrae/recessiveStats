@@ -23,19 +23,19 @@ obtain cumulative allele frequency of rare lof and functional variants
 }
 \examples{
 vars = read.table(header = TRUE, text = "
-     AC  AN    CQ
-     1   1000  missense_variant
-     1   1000  stop_gained
-     1   1000  stop_lost
-     1   1000  synonymous_variant")
+    CHROM  POS  REF  ALT  AC  AN    CQ
+    1      1    A    G    1   1000  missense_variant
+    1      2    G    C    1   1000  stop_gained
+    1      3    T    A    1   1000  stop_lost
+    1      4    G    T    1   1000  synonymous_variant")
 get_cumulative_frequencies(vars)
 
 vars2 = read.table(header = TRUE, text = "
-     AC  AN    CQ
-     1   1000  missense_variant
-     1   1000  stop_gained
-     1   1000  stop_lost
-     1   1000  synonymous_variant")
+    CHROM  POS  REF  ALT  AC  AN    CQ
+    1      1    A    G    1   1000  missense_variant
+    1      2    G    C    1   1000  stop_gained
+    1      3    T    A    1   1000  stop_lost
+    1      4    G    T    1   1000  synonymous_variant")
 var_list = list("first"=vars, "second"=vars2)
 get_cumulative_frequencies(var_list)
 }
