@@ -15,19 +15,19 @@
 #'
 #' @examples
 #' vars = read.table(header = TRUE, text = "
-#'      AC  AN    CQ
-#'      1   1000  missense_variant
-#'      1   1000  stop_gained
-#'      1   1000  stop_lost
-#'      1   1000  synonymous_variant")
+#'     CHROM  POS  REF  ALT  AC  AN    CQ
+#'     1      1    A    G    1   1000  missense_variant
+#'     1      2    G    C    1   1000  stop_gained
+#'     1      3    T    A    1   1000  stop_lost
+#'     1      4    G    T    1   1000  synonymous_variant")
 #' get_cumulative_frequencies(vars)
 #'
 #' vars2 = read.table(header = TRUE, text = "
-#'      AC  AN    CQ
-#'      1   1000  missense_variant
-#'      1   1000  stop_gained
-#'      1   1000  stop_lost
-#'      1   1000  synonymous_variant")
+#'     CHROM  POS  REF  ALT  AC  AN    CQ
+#'     1      1    A    G    1   1000  missense_variant
+#'     1      2    G    C    1   1000  stop_gained
+#'     1      3    T    A    1   1000  stop_lost
+#'     1      4    G    T    1   1000  synonymous_variant")
 #' var_list = list("first"=vars, "second"=vars2)
 #' get_cumulative_frequencies(var_list)
 get_cumulative_frequencies <- function(vars) {
@@ -42,17 +42,37 @@ get_cumulative_frequencies <- function(vars) {
     
     silent_cq = c("synonymous_variant")
     
+    if (!is.data.frame(vars) & is.list(vars)) {
+        # add a frequency column to each population dataset
+        freqs = lapply(vars, function(x) x[["AC"]]/x[["AN"]])
+        vars = Map(cbind, vars, frequency=freqs)
+        
+        # get keys for all of the variants that fail the frequency threshold in
+        # any population
+        keys = lapply(vars, function(x)
+            x[x[["frequency"]] > 0.01, c("CHROM", "POS", "REF", "ALT")])
+        
+        keys = do.call("rbind", keys)
+        keys = keys[!duplicated(keys), ]
+        keys = na.omit(keys)
+        if (nrow(keys) > 0) { keys$remove = TRUE
+        } else { keys$remove = logical(0) }
+        
+        vars = lapply(vars, function(x) merge(x, keys, by=c("CHROM", "POS", "REF", "ALT"), all.x=TRUE))
+        vars = lapply(vars, function(x) x[is.na(x$remove), ])
+    } else {
+        vars$frequency = vars$AC/vars$AN
+        
+        # select the rare variants (possibly this should be done on a site basis,
+        # rather than per allele?)
+        vars = vars[vars$frequency < 0.01, ]
+    }
+    
     # if we have provided a list of dataframes, then run this function on each
     # of them in turn, and return a list of frequency lists.
     if (!is.data.frame(vars) & is.list(vars)) {
         return(lapply(vars, get_cumulative_frequencies))
     }
-    
-    vars$frequency = vars$AC/vars$AN
-    
-    # select the rare variants (possibly this should be done on a site basis,
-    # rather than per allele?)
-    vars = vars[vars$frequency < 0.01, ]
     
     # find the loss of function variants
     lof_vars = vars[vars$CQ %in% lof_cq, ]
