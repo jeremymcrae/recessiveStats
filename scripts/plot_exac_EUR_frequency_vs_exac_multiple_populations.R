@@ -13,8 +13,10 @@ MULTIPLE_ETHNICITIES_AND_AUTOZYGOSITY_FREQUENCIES_PATH = "/nfs/users/nfs_j/jm33/
 # define the paths to the tests results using rare synonymous variants
 INITIAL_SYNONYMOUS_PATH = "/nfs/users/nfs_j/jm33/apps/recessiveStats/results/recessive.allele_frequency_tests.silent.txt"
 MULTIPLE_ETHNICITIES_SYNONYMOUS_PATH = "/nfs/users/nfs_j/jm33/apps/recessiveStats/results/recessive.allele_frequency_tests.silent.exac.txt"
+MULTIPLE_ETHNICITIES_SYNONYMOUS_UPDATED_PATH = "/nfs/users/nfs_j/jm33/apps/recessiveStats/results/recessive.allele_frequency_tests.silent.exac.take2.txt"
 AUTOZYGOSITY_SYNONYMOUS_PATH = "/nfs/users/nfs_j/jm33/apps/recessiveStats/results/recessive.allele_frequency_tests.silent.autozygosity.txt"
 MULTIPLE_ETHNICITIES_AUTOZYGOSITY_SYNONYMOUS_PATH = "/nfs/users/nfs_j/jm33/apps/recessiveStats/results/recessive.allele_frequency_tests.silent.exac_and_autozygosity.txt"
+MULTIPLE_ETHNICITIES_AUTOZYGOSITY_SYNONYMOUS_UPDATED_PATH = "/nfs/users/nfs_j/jm33/apps/recessiveStats/results/recessive.allele_frequency_tests.silent.exac_and_autozygosity.take2.txt"
 LOWER_AF_SYNONYMOUS_PATH = "/nfs/users/nfs_j/jm33/apps/recessiveStats/results/recessive.allele_frequency_tests.lower_af.silent.exac_and_autozygosity.txt"
 
 # load all the subsets from the modified tests
@@ -26,8 +28,10 @@ multiple_ethnicities_and_autozygosity = read.table(MULTIPLE_ETHNICITIES_AND_AUTO
 # load the results for the synonymous tests
 initial_silent = read.table(INITIAL_SYNONYMOUS_PATH, sep="\t", header=TRUE, stringsAsFactors=FALSE)
 multiple_ethnicities_silent = read.table(MULTIPLE_ETHNICITIES_SYNONYMOUS_PATH, sep="\t", header=TRUE, stringsAsFactors=FALSE)
+multiple_ethnicities_silent_updated = read.table(MULTIPLE_ETHNICITIES_SYNONYMOUS_UPDATED_PATH, sep="\t", header=TRUE, stringsAsFactors=FALSE)
 autozygosity_silent = read.table(AUTOZYGOSITY_SYNONYMOUS_PATH, sep="\t", header=TRUE, stringsAsFactors=FALSE)
 multiple_ethnicities_and_autozygosity_silent = read.table(MULTIPLE_ETHNICITIES_AUTOZYGOSITY_SYNONYMOUS_PATH, sep="\t", header=TRUE, stringsAsFactors=FALSE)
+multiple_ethnicities_and_autozygosity_silent_updated = read.table(MULTIPLE_ETHNICITIES_AUTOZYGOSITY_SYNONYMOUS_UPDATED_PATH, sep="\t", header=TRUE, stringsAsFactors=FALSE)
 lower_af_silent = read.table(LOWER_AF_SYNONYMOUS_PATH, sep="\t", header=TRUE, stringsAsFactors=FALSE)
 
 plot_frequency_comparison <-function(initial, updated, p_name, title) {
@@ -71,21 +75,31 @@ plot_frequency_comparison(multiple_ethnicities_and_autozygosity_silent, lower_af
 dev.off()
 
 # and make QQ plots of the results from testing the synonymous variants
-Cairo(file="exac_single_vs_multiple.qq_plot.pdf", type="pdf", height=15, width=15, units="cm")
+Cairo(file="initial_vs_updated_tests.qq_plot.pdf", type="pdf", height=15, width=15, units="cm")
 qq(initial_silent$exac.biallelic_silent_p, las=1, xlim=c(0, 5), ylim=c(0,5))
 par(new=TRUE)
 qq(multiple_ethnicities_silent$exac.biallelic_silent_p,
     xlim=c(0, 5), ylim=c(0,5), col="red", axes=FALSE, xlab=NA, ylab=NA)
+par(new=TRUE)
+qq(multiple_ethnicities_silent_updated$exac.biallelic_silent_p,
+    xlim=c(0, 5), ylim=c(0,5), col="brown", axes=FALSE, xlab=NA, ylab=NA)
 par(new=TRUE)
 qq(autozygosity_silent$exac.biallelic_silent_p,
     xlim=c(0, 5), ylim=c(0,5), col="green", axes=FALSE, xlab=NA, ylab=NA)
 par(new=TRUE)
 qq(multiple_ethnicities_and_autozygosity_silent$exac.biallelic_silent_p,
     xlim=c(0, 5), ylim=c(0,5), col="gray", axes=FALSE, xlab=NA, ylab=NA)
+par(new=TRUE)
+qq(multiple_ethnicities_and_autozygosity_silent_updated$exac.biallelic_silent_p,
+    xlim=c(0, 5), ylim=c(0,5), col="gold", axes=FALSE, xlab=NA, ylab=NA)
 legend("topleft",
-    legend=c("initial", "adjusted for multiple ethnicities",
-        "adjusted for autozygosity rates", "adjusted for multiple ethnicities and autozygosity"),
-    col=c("black", "red", "green", "gray"), pch=19, bty="n", cex=0.8)
+    legend=c("initial",
+        "adjusted for multiple ethnicities",
+        "adjusted for autozygosity rates",
+        "adjusted for multiple ethnicities and autozygosity",
+        "multiple ethnicities updated",
+        "multiple ethnicities and autozygosity, updated"),
+    col=c("black", "red", "green", "gray", "brown", "gold"), pch=19, bty="n", cex=0.8)
 
 qq(multiple_ethnicities_and_autozygosity_silent$exac.biallelic_silent_p,
     xlim=c(0, 5), ylim=c(0,5), col="gray", las=1)
