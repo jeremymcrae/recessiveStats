@@ -68,6 +68,7 @@ devtools::install_github("jeremymcrae/recessiveStats")
 ```R
 # load the package
 library(recessiveStats)
+cohort_n = 1000
 
 hgnc ="DNAH14"
 chrom = "1"
@@ -75,5 +76,34 @@ biallelic_lof = 5
 biallelic_func = 10
 lof_func = 6
 probands = c("DDDP00000X", "DDDP00000Y", "DDDP00000Z")
-analyse_inherited_enrichment(hgnc, chrom, biallelic_lof, biallelic_func, lof_func, probands)
+analyse_inherited_enrichment(hgnc, chrom, biallelic_lof, biallelic_func, lof_func, probands, cohort_n)
 ```
+
+You can also take the autozygosity into account. Calculate the proportion of
+probands who have an autozygous region overlapping the gene `bcftools roh` is
+recommended). Then you can include the rate as:
+```R
+RATE=0.005
+analyse_inherited_enrichment(hgnc, chrom, biallelic_lof, biallelic_func, lof_func, probands, autozygous_rate=RATE)
+```
+
+Also, if your probands are of multiple ethnicities, you can account for 
+differences in allele frequencies between ethnicities by specifying the number
+of probands that would be classified as belonging to each ExAC population. For
+example:
+```R
+cohort_n = list("AFR"=100, "EAS"=50, "NFE"=800, "SAS"=50)
+analyse_inherited_enrichment(hgnc, chrom, biallelic_lof, biallelic_func, lof_func, probands, cohort_n)
+```
+
+The populations available in ExAC are:
+
+ code | description
+----- | --------------------
+ AFR  | African/African American
+ AMR  | American
+ EAS  | East Asian
+ FIN  | Finnish
+ NFE  | Non-Finnish European
+ OTH  | Other
+ SAS  | South Asian
