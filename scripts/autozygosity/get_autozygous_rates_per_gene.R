@@ -48,7 +48,7 @@ get_autozygosity_per_gene <- function(path, regions, subset=NULL) {
         regions = regions[regions$sample_id %in% subset, ]
     }
     
-    rates = data.frame(hgnc=genes$gene, chrom=genes$chr, rate=NA)
+    rates = data.frame(hgnc=genes$gene, chrom=genes$chr, count=NA, rate=NA)
     for (pos in 1:nrow(genes)) {
         # get the coordinates for the gene
         chrom = genes$chr[pos]
@@ -60,7 +60,8 @@ get_autozygosity_per_gene <- function(path, regions, subset=NULL) {
         overlapping = in_chrom[in_chrom$end_pos > start_pos
             & in_chrom$start_pos < end_pos, ]
         
-        rates$rate[pos] = length(unique(overlapping$sample_id))/probands_n
+        rates$count[pos] = length(unique(overlapping$sample_id))
+        rates$rate[pos] = rates$count[pos]/probands_n
     }
     
     # remove the chrX rates, since all of the male probands appear autozygous
@@ -92,7 +93,6 @@ plot_autozygosity <- function(all_probands, consang) {
     legend("topright", legend=c("all probands", "consanguinous probands"),
         col=c("black", "red"), bty="n", lwd=1)
     dev.off()
-
 }
 
 consanguinous = get_consanguinous_probands(KINSHIP_PATH)
