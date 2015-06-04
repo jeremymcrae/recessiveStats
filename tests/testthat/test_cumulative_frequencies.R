@@ -18,11 +18,11 @@ test_that("get_cumulative_frequencies output is correct for simplest table", {
 
 test_that("correct cumulative frequencies with larger table", {
     vars = read.table(header = TRUE, text = "
-        AC AN CQ
-        1 1000  missense_variant
-        1 1000  stop_gained
-        1 1000  stop_lost
-        1 1000  synonymous_variant
+        CHROM  POS  REF  ALT  AC AN CQ
+        1      1    A    G    1 1000  missense_variant
+        1      2    G    C    1 1000  stop_gained
+        1      3    T    A    1 1000  stop_lost
+        1      4    G    T    1 1000  synonymous_variant
         ")
     
     expect_equal(get_cumulative_frequencies(vars),
@@ -31,11 +31,11 @@ test_that("correct cumulative frequencies with larger table", {
 
 test_that("correct cumulative frequencies with higher MAF", {
     vars = read.table(header = TRUE, text = "
-        AC AN CQ
-        1 1000  missense_variant
-        1 1000  stop_gained
-        20 1000  stop_lost
-        1 1000  synonymous_variant
+        CHROM  POS  REF  ALT  AC AN    CQ
+        1      1    A    G    1  1000  missense_variant
+        1      2    G    C    1  1000  stop_gained
+        1      3    T    A    20 1000  stop_lost
+        1      4    G    T    1  1000  synonymous_variant
         ")
     
     expect_equal(get_cumulative_frequencies(vars),
@@ -44,11 +44,11 @@ test_that("correct cumulative frequencies with higher MAF", {
 
 test_that("correct cumulative frequencies without rare functional variants", {
     vars = read.table(header = TRUE, text = "
-        AC AN CQ
-        20 1000  missense_variant
-        1 500  stop_gained
-        20 1000  stop_lost
-        1 1000  synonymous_variant
+        CHROM  POS  REF  ALT  AC AN    CQ
+        1      1    A    G    20 1000  missense_variant
+        1      2    G    C    1  500   stop_gained
+        1      3    T    A    20 1000  stop_lost
+        1      4    G    T    1  1000  synonymous_variant
         ")
     
     # if we don't have any rare functional vars, the number is determined from
@@ -59,11 +59,11 @@ test_that("correct cumulative frequencies without rare functional variants", {
 
 test_that("correct cumulative frequencies when we lack a rare variants", {
     vars = read.table(header = TRUE, text = "
-        AC AN CQ
-        20 1000  missense_variant
-        20 500  stop_gained
-        20 1000  stop_lost
-        20 1000  synonymous_variant
+        CHROM  POS  REF  ALT  AC AN    CQ
+        1      1    A    G    20 1000  missense_variant
+        1      2    G    C    20 500   stop_gained
+        1      3    T    A    20 1000  stop_lost
+        1      4    G    T    20 1000  synonymous_variant
         ")
     
     # if we don't have any rare variants, then we get NA values
@@ -73,15 +73,15 @@ test_that("correct cumulative frequencies when we lack a rare variants", {
 
 test_that("correct cumulative frequencies when we test a list of dataframes", {
     vars1 = read.table(header = TRUE, text = "
-        AC AN CQ
-        1 1000  missense_variant
-        1 1000  stop_gained
+        CHROM  POS  REF  ALT  AC AN   CQ
+        1      1    A    G    1 1000  missense_variant
+        1      2    G    C    1 1000  stop_gained
         ")
     
     vars2 = read.table(header = TRUE, text = "
-        AC AN CQ
-        1 1000  missense_variant
-        1 1000  stop_gained
+        CHROM  POS  REF  ALT  AC AN   CQ
+        1      1    A    G    1 1000  missense_variant
+        1      2    G    C    1 1000  stop_gained
         ")
     vars = list("first"=vars1, "second"=vars2)
     
