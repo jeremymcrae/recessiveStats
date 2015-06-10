@@ -29,6 +29,26 @@ test_that("test_enrichment output is correct for NA input", {
     expect_identical(test_enrichment(freq, 1, 4, 2, 1000), result)
 })
 
+test_that("test_enrichment output is correct when correcting for autozygosity", {
+    
+    freq = list(lof=0.001, functional=0.1)
+    
+    result = list(lof=0.001, functional=0.1,
+        biallelic_lof_p=0.0019970053242,
+        lof_func_p=0.0011751598957,
+        biallelic_func_p=0.99057656658)
+    
+    expect_equal(test_enrichment(freq, 1, 4, 2, 1000, autozygous_rate=0.001), result)
+    
+    # also try the test when we explicitly state the autozygous rate is zero
+    result = list(lof=0.001, functional=0.1,
+        biallelic_lof_p=0.000999500666126,
+        lof_func_p=0.001158649871933,
+        biallelic_func_p=0.989927345227986)
+    
+    expect_equal(test_enrichment(freq, 1, 4, 2, 1000, autozygous_rate=0), result)
+})
+
 context("Population combination generation checks")
 
 test_that("get_count_combinations is correct", {
@@ -67,28 +87,32 @@ test_that("get_count_combinations is correct for more cohorts", {
     
     result = read.table(header=TRUE, text="
         A B C
-        4 0 0
-        3 1 0
-        2 2 0
-        1 3 0
-        0 4 0
-        3 0 1
-        2 1 1
-        1 2 1
-        2 2 1
-        0 3 1
-        2 0 2
-        1 1 2
-        2 1 2
-        0 2 2
-        1 2 2
-        2 2 2
-        1 0 3
+        0 0 4
         0 1 3
-        0 0 4",
+        0 2 2
+        0 3 1
+        0 4 0
+        1 0 3
+        1 1 2
+        1 2 1
+        1 2 2
+        1 3 0
+        2 0 2
+        2 1 1
+        2 1 2
+        2 2 0
+        2 2 1
+        2 2 2 # this is the extra row that captures the remaining possibilities
+        3 0 1
+        3 1 0
+        4 0 0",
         colClasses=c("integer", "integer"))
     
-    expect_equal(get_count_combinations(populations, count), result)
+    # get the combos out, and make sure it is sorted correctly
+    combos = get_count_combinations(populations, count)
+    combos = combos[ do.call(order, as.list(combos)), ]
+    row.names(combos) = 1:nrow(combos)
+    expect_equal(combos, result)
 })
 
 context("Enrichment tests return the correct P-values")
