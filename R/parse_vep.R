@@ -67,6 +67,9 @@ parse_vep_output <- function(variant, hgnc) {
         }
     }
     
+    # if we haven't found any consequences, retun NA
+    if (length(consequences) == 0) { return(NA) }
+    
     # get the most severe consequence for each allele
     cq = paste(sapply(consequences, get_most_severe_consequence), collapse=",")
     
