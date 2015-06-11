@@ -3,7 +3,11 @@ sudo: required
 warnings_are_errors: true
 r_binary_packages:
  - testthat
+r_github_packages:
+ - jimhester/covr
 notifications:
   email:
     on_success: never
     on_failure: change
+after_success:
+ - Rscript -e 'library(covr);coveralls()'
