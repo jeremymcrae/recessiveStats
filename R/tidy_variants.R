@@ -18,21 +18,23 @@ standardise_multiple_alt_variants <- function(vars, include_hgnc=FALSE) {
     
     # spread the multiple alts into individual rows
     new_vars = multi_vars[0, ]
-    for (i in 1:nrow(multi_vars)) {
-        row = multi_vars[i, ]
-        alts = unlist(strsplit(row$ALT, ","))
-        
-        for (j in 1:length(alts)) {
-            new_row = row
-            new_row$ALT = alts[j]
-            new_row$CQ = unlist(strsplit(row$CQ, ","))[j]
-            new_row$AC = unlist(strsplit(row$AC, ","))[j]
+    if (nrow(multi_vars) > 0) {
+        for (i in 1:nrow(multi_vars)) {
+            row = multi_vars[i, ]
+            alts = unlist(strsplit(row$ALT, ","))
             
-            if (include_hgnc) {
-                new_row$HGNC = unlist(strsplit(row$HGNC, ","))[j]
+            for (j in 1:length(alts)) {
+                new_row = row
+                new_row$ALT = alts[j]
+                new_row$CQ = unlist(strsplit(row$CQ, ","))[j]
+                new_row$AC = unlist(strsplit(row$AC, ","))[j]
+                
+                if (include_hgnc) {
+                    new_row$HGNC = unlist(strsplit(row$HGNC, ","))[j]
+                }
+                
+                new_vars = rbind(new_vars, new_row)
             }
-            
-            new_vars = rbind(new_vars, new_row)
         }
     }
     
