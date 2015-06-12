@@ -1,10 +1,10 @@
 
 library(Cairo)
-library(recessiveStats)
 library(dplyr)
 
 AUTOZYGOSITY_DIR = "/nfs/users/nfs_j/jm33/apps/recessiveStats/data-raw/autozygosity"
 KINSHIP_PATH = "/nfs/ddd0/Data/datafreeze/ddd_data_releases/2014-11-04/kinship_and_pca_trios.txt"
+FAMILIES_PATH = "/nfs/ddd0/Data/datafreeze/ddd_data_releases/2014-11-04/family_relationships.txt"
 
 #' identify the probands from consanguinous parents.
 get_consanguinous_probands <- function(path) {
@@ -32,7 +32,29 @@ get_autozygous_regions <- function(path) {
     return(regions)
 }
 
-get_autozygosity_per_gene <- function(path, regions, subset=NULL) {
+#' load a dataframe of family IDs andf individual IDs
+get_families <- function(path) {
+    families = read.table(path, sep="\t", header=TRUE, stringsAsFactors=FALSE)
+    families = families[, c("family_id", "individual_id")]
+    
+    return(families)
+}
+
+#' for a list of probands, make sure we only count one proband from each family
+get_independent_probands <- function(families, probands) {
+    
+    # find the family IDs for all the probands, then get the subset of probands
+    # where the family ID is not a duplicate.
+    family_ids = families$family_id[families$individual_id %in% probands]
+    
+    if (any(duplicated(family_ids))) { print("some sibs found") }
+    
+    independent_probands = probands[!duplicated(family_ids)]
+    
+    return(independent_probands)
+}
+
+get_autozygosity_per_gene <- function(path, regions, families, subset=NULL) {
     genes = recessiveStats::gencode[recessiveStats::gencode$gene_type == "protein_coding", ]
     genes = genes[order(genes$gene), ]
     
@@ -60,7 +82,9 @@ get_autozygosity_per_gene <- function(path, regions, subset=NULL) {
         overlapping = in_chrom[in_chrom$end_pos > start_pos
             & in_chrom$start_pos < end_pos, ]
         
-        rates$count[pos] = length(unique(overlapping$sample_id))
+        probands = unique(overlapping$sample_id)
+        probands = get_independent_probands(families, probands)
+        rates$count[pos] = length(probands)
         rates$rate[pos] = rates$count[pos]/probands_n
     }
     
@@ -95,10 +119,11 @@ plot_autozygosity <- function(all_probands, consang) {
     dev.off()
 }
 
+families = get_families(FAMILIES_PATH)
 consanguinous = get_consanguinous_probands(KINSHIP_PATH)
 regions_per_proband = get_autozygous_regions(AUTOZYGOSITY_DIR)
-all_autozygous = get_autozygosity_per_gene(AUTOZYGOSITY_DIR, regions_per_proband)
-consang_autozygous = get_autozygosity_per_gene(AUTOZYGOSITY_DIR, regions_per_proband, subset=consanguinous)
+all_autozygous = get_autozygosity_per_gene(AUTOZYGOSITY_DIR, regions_per_proband, families)
+consang_autozygous = get_autozygosity_per_gene(AUTOZYGOSITY_DIR, regions_per_proband, families, subset=consanguinous)
 
 write.table(all_autozygous, file="autozygosity.all_genes.all_probands.tsv", sep="\t", row.names=FALSE, quote=FALSE)
 write.table(consang_autozygous, file="autozygosity.all_genes.consanguinous_probands.tsv", sep="\t", row.names=FALSE, quote=FALSE)
