@@ -1,6 +1,6 @@
 # the intention is to run this as a LSF job array:
 # bsub \
-#   -J alleles[1-20350]%100 \
+#   -J alleles[1-2685]%100 \
 #   -o recessive.bjob_output.%I.txt \
 #   -R "select[mem>15000] rusage[mem=15000]" \
 #   -M 15000 \
@@ -18,7 +18,7 @@ LAST_BASE_RULE = FALSE
 RECESSIVE_DIR = "/nfs/users/nfs_j/jm33/apps/recessiveStats"
 RECESSIVE_COUNTS_PATH = file.path(RECESSIVE_DIR,"data-raw/recessive_counts_by_gene.silent.txt")
 PROBANDS_PATH = file.path(RECESSIVE_DIR,"data-raw/recessive_probands_by_gene.silent.json")
-OUTPUT_PATH = file.path(RECESSIVE_DIR,paste()"results/recessive.allele_frequency_tests.silent.exac_and_autozygosity.", opt$position, ".txt", sep=""))
+OUTPUT_PATH = file.path(RECESSIVE_DIR,paste("results/recessive.allele_frequency_tests.silent.exac_and_autozygosity.", opt$position, ".txt", sep=""))
 
 # load the datasets
 recessive_genes = read.table(RECESSIVE_COUNTS_PATH, sep="\t", header=TRUE, stringsAsFactors=FALSE)
