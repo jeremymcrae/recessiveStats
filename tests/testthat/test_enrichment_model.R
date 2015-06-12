@@ -117,6 +117,28 @@ test_that("get_count_combinations is correct for more cohorts", {
 
 context("Enrichment tests return the correct P-values")
 
+test_that("test_enrichment_across_multiple_populations is correct", {
+    
+    exac = list("AFR"=list("lof"=0.01, "functional"=0.1),
+        "EAS"=list("lof"=0.02, "functional"=0.1))
+    cohort_n = list("AFR"=50, "EAS"=150)
+    autozygous_rate = 0.005
+    biallelic_lof = 4
+    biallelic_func = 6
+    lof_func = 3
+    
+    # define the values that would be obtained for all the individual tests.
+    # We get NA values for the cumulative loF and functional frequencies, since
+    # this test operates on multiple populations, so we can't get a single value
+    # for the frequencies.
+    result = list(lof=NA, functional=NA, biallelic_lof_p=1.721856125e-06,
+        lof_func_p=1.4797290028e-05, biallelic_func_p=0.019410324318)
+    
+    expect_equal(test_enrichment_across_multiple_populations(exac,
+        biallelic_lof, biallelic_func, lof_func, cohort_n,
+        autozygous_rate), result)
+})
+
 test_that("sum_combo_tests is correct", {
     
     exac = list("A"=list("lof"=0.1, "functional"=0.1),
