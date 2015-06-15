@@ -7,7 +7,7 @@ PHENOTYPES_PATH = "/nfs/users/nfs_j/jm33/apps/hpo_similarity/results/recessive.h
 # GENOTYPES_PATH = "/nfs/users/nfs_j/jm33/apps/recessiveStats/results/recessive.allele_frequency_tests.txt"
 # PHENOTYPES_PATH = "/nfs/users/nfs_j/jm33/apps/hpo_similarity/results/recessive.hpo_similarity.txt"
 EXAC_VS_DDD_PATH = "/nfs/users/nfs_j/jm33/apps/recessiveStats/results/exac_vs_ddd.pdf"
-OUTPUT_PATH = "/nfs/users/nfs_j/jm33/apps/recessiveStats/results/recessive.combined_tests.txt"
+OUTPUT_PATH = "/nfs/users/nfs_j/jm33/apps/recessiveStats/results/recessive.combined_tests.ver2.txt"
 
 #' function to combine p values, using Fisher's method
 #'
@@ -44,9 +44,9 @@ open_genotype_p_values <- function(path) {
     
     p_values = read.table(path, sep="\t", header=TRUE, stringsAsFactors=FALSE)
     
-    # get the maximum P value from the DDD P value and the ExaC P values
-    p_values$p_lof = apply(p_values, 1, function(x) max(as.numeric(x[["ddd.biallelic_lof_p"]]), as.numeric(x[["exac.biallelic_lof_p"]])))
-    p_values$p_func = apply(p_values, 1, function(x) max(as.numeric(x[["ddd.lof_func_p"]]), as.numeric(x[["exac.lof_func_p"]])))
+    # get the ExAC P values
+    p_values$p_lof = p_values$exac.biallelic_lof_p
+    p_values$p_func =  p_values$exac.lof_func_p
     
     # select the most powerful test for each gene
     p_values$p_genotype = apply(p_values, 1, function(x) min(as.numeric(x[["p_lof"]]), as.numeric(x[["p_func"]])))
