@@ -306,6 +306,8 @@ convert_genotypes <- function(vars, vep, probands) {
     # frequencies
     if (!is.null(probands)) {
         proband_parents = ddd[ddd$individual_id %in% probands, ]
+        proband_parents = c(proband_parents$dad_id, proband_parents$mum_id)
+        proband_parents = ddd[ddd$individual_id %in% proband_parents, ]
         geno = geno[, !(names(geno) %in% proband_parents$sanger_id)]
     }
     
