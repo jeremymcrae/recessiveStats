@@ -7,26 +7,28 @@ context("Recessive statistic checks")
 
 test_that("test_enrichment output is correct", {
     
-    freq = list(lof=0.001, functional=0.1)
+    freq = list(lof=0.001, functional=0.1, synonymous=0.3)
     
-    result = list(lof=0.001, functional=0.1,
+    result = list(lof=0.001, functional=0.1, synonymous=0.3,
         biallelic_lof_p=0.000999500666126,
         lof_func_p=0.001158649871933,
-        biallelic_func_p=0.989927345227986)
+        biallelic_func_p=0.989927345227986,
+        biallelic_silent_p=1.0)
     
-    expect_equal(test_enrichment(freq, 1, 4, 2, 1000), result)
+    expect_equal(test_enrichment(freq, 1, 4, 3, 2, 1000), result)
 })
 
 test_that("test_enrichment output is correct for NA input", {
     
-    freq = list(lof=NA, functional=NA)
+    freq = list(lof=NA, functional=NA, synonymous=NA)
     
-    result = list(lof=NA, functional=NA,
+    result = list(lof=NA, functional=NA, synonymous=NA,
         biallelic_lof_p=as.numeric(NA),
         lof_func_p=as.numeric(NA),
-        biallelic_func_p=as.numeric(NA))
+        biallelic_func_p=as.numeric(NA),
+        biallelic_silent_p=as.numeric(NA))
     
-    expect_identical(test_enrichment(freq, 1, 4, 2, 1000), result)
+    expect_identical(test_enrichment(freq, 1, 4, 3, 2, 1000), result)
 })
 
 context("Population combination generation checks")
@@ -118,7 +120,7 @@ test_that("sum_combo_tests is correct", {
 
 test_that("single enrichment tests are correct", {
     
-    freq = list("lof"=0.1, "functional"=0.2)
+    freq = list("lof"=0.1, "functional"=0.2, "synonymous"=0.3)
     cohort_n = 100
     count = 2
     
@@ -140,6 +142,10 @@ test_that("single enrichment tests are correct", {
     # check the functional enrichment calculation
     expect_equal(biallelic_func_enrichment(freq, count, cohort_n),
         0.91283668331261)
+        
+    # check the synonymous enrichment calculation
+    expect_equal(biallelic_silent_enrichment(freq, count, cohort_n),
+        0.99912668384)
     
     # check that NA counts return NA values
     expect_identical(biallelic_func_enrichment(freq, NA, cohort_n),
