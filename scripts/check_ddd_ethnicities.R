@@ -20,14 +20,26 @@ families = read.table(FAMILIES_PATH, sep="\t", header=TRUE, stringsAsFactors=FAL
 families = families[families$dad_id != 0, ]
 sanger_ids = read.table(SANGER_IDS_PATH, sep="\t", header=TRUE, stringsAsFactors=FALSE)
 families = merge(families, sanger_ids, by.x="individual_id", by.y="person_stable_id", all.x=TRUE)
-families = families[, c("individual_id", "sanger_id")]
+
 diagnosed = read.table(DIAGNOSED_PROBANDS_PATH, sep="\t", header=TRUE, stringsAsFactors=FALSE)
 families = families[!families$individual_id %in% diagnosed$person_id, ]
+
+# restrict ourselves to a single proband per family (I don't think it matters
+# which proband we select, since all of the children in a single family will be
+# classified into the same population)
+temp = families[, c("individual_id", "family_id")]
+individuals = temp[!duplicated(temp), ]
+sample_ids = individuals$individual_id[!duplicated(individuals$family_id)]
+families = families[families$individual_id %in% sample_ids, ]
 
 # load the PCA results for the DDD and thousand genomes
 kgenomes = read.table(KGENOMES_PCA_PATH, header=TRUE, sep="\t", stringsAsFactors=FALSE)
 ddd = read.table(DDD_PCA_PATH, header=TRUE, sep="\t", stringsAsFactors=FALSE)
-ddd = ddd[ddd$sample.id %in% families$sanger_id, ]
+ddd = merge(ddd, families, by.x="sample.id", by.y="sanger_id")
+
+# make sure we don't have duplicates due to samples being repeated from
+# different sanger IDs
+ddd = ddd[!duplicated(ddd$individual_id), ]
 
 # load the 1000 genomes sample information, so we can identify which sample
 # belongs to which population

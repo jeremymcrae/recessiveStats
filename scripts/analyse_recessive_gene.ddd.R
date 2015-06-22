@@ -13,7 +13,7 @@ library(getopt)
 spec = matrix(c('position', 'p', 2, "integer"), byrow=TRUE, ncol=4);
 opt = getopt(spec);
 
-COHORT_N = list("AFR"=109, "EAS"=15, "NFE"=2799, "SAS"=297)
+COHORT_N = list("AFR"=100, "EAS"=14, "NFE"=2688, "SAS"=270)
 LAST_BASE_RULE = TRUE
 RECESSIVE_DIR = "/nfs/users/nfs_j/jm33/apps/recessiveStats"
 if (!LAST_BASE_RULE) {
