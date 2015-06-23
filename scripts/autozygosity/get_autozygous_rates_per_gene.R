@@ -33,7 +33,7 @@ get_autozygous_regions <- function(path) {
     return(regions)
 }
 
-#' load a dataframe of family IDs andf individual IDs
+#' load a dataframe of family IDs and individual IDs
 get_families <- function(path) {
     families = read.table(path, sep="\t", header=TRUE, stringsAsFactors=FALSE)
     families = families[, c("family_id", "individual_id")]
@@ -69,7 +69,9 @@ get_autozygosity_per_gene <- function(path, regions, families, subset=NULL) {
         regions = regions[regions$sample_id %in% subset, ]
     }
     
-    rates = data.frame(hgnc=genes$gene, chrom=genes$chr, count=NA, rate=NA)
+    rates = data.frame(hgnc=genes$gene, chrom=genes$chr, count=NA, rate=NA,
+        setNames(replicate(length(unique(regions$sample_id)), FALSE, simplify=F), sort(unique(regions$sample_id))))
+    # sapply(sort(unique(regions$sample_id)), function(x) rates[[x]] = NA)
     for (pos in 1:nrow(genes)) {
         # get the coordinates for the gene
         chrom = genes$chr[pos]
@@ -85,6 +87,7 @@ get_autozygosity_per_gene <- function(path, regions, families, subset=NULL) {
         probands = get_independent_probands(families, probands)
         rates$count[pos] = length(probands)
         rates$rate[pos] = rates$count[pos]/probands_n
+        rates[pos, probands] = TRUE
     }
     
     # remove the chrX rates, since all of the male probands appear autozygous
@@ -117,10 +120,62 @@ plot_autozygosity <- function(all_probands, signif_path) {
     dev.off()
 }
 
+#' plot the size distribution of the autozygous regions, comparing sizes from
+#' consanguionous and nonconsanguinous probands
+plot_regions_by_size <- function(regions, consang_probands) {
+    regions_per_proband$size = regions_per_proband$end_pos - regions_per_proband$start_pos
+    regions_per_proband = regions_per_proband[regions_per_proband$chrom != "X", ]
+    
+    consang_regions = regions_per_proband[regions_per_proband$sample_id %in% consang_probands, ]
+    nonconsang_regions = regions_per_proband[!(regions_per_proband$sample_id %in% consang_probands), ]
+    
+    consang_size = density(log10(consang_regions$size))
+    nonconsang_size = density(log10(nonconsang_regions$size))
+    
+    x_min = min(consang_size$x, nonconsang_size$x)
+    x_max = max(consang_size$x, nonconsang_size$x)
+    y_max = max(consang_size$y, nonconsang_size$y)
+    
+    Cairo(file="autozygous_regions_size_distribution.pdf", type="pdf", height=15, width=15, units="cm")
+    plot(consang_size, xlim=c(x_min, x_max), ylim=c(0,y_max), las=1,
+        xlab="Size of autozygous region (log10-scaled)",
+        main="Size of autozygous regions for \nconsanguinous and unrelated probands")
+    lines(nonconsang_size, col="red")
+    legend("topleft", legend=c("consanguinous", "unrelated"), col=c("black", "red"), lwd=1, bty="n")
+    dev.off()
+}
+
+#' determine the fraction of probands with autozygosity who are consanguinous
+check_consanguinity_fraction <- function(all_autozygous, consang_probands) {
+    consang = all_autozygous[, c("hgnc", "chrom", "count", "rate", consang_probands)]
+    nonconsang = all_autozygous[, !(names(all_autozygous) %in% consang_probands)]
+    
+    counts = data.frame(hgnc=consang$hgnc, consanguinous=rowSums(consang[, 5:ncol(consang)]),
+        not_consanguinous=rowSums(nonconsang[, 5:ncol(nonconsang)]))
+    counts$consanguinous_fraction = counts$consanguinous / (counts$consanguinous + counts$not_consanguinous)
+    
+    Cairo(file="recessive.autozygosity_proportion_consanguinous.pdf", type="pdf", height=15, width=15, units="cm")
+    hist(counts$consanguinous_fraction, xlab="Proportion of autozygous probands who are consanguinous", main="Proportion of autozygous consanguinity", las=1)
+    dev.off()
+    
+    signif_genes = read.table(signif_path, sep="\t", header=TRUE, stringsAsFactors=FALSE)
+    signif_genes = merge(signif_genes, counts, by="hgnc")
+    signif_genes = signif_genes[order(signif_genes$p_combined), ]
+    write.table(signif_genes, file="recessive_genes.autozygosity_vs_consanguinity.txt", sep="\t", row.names=FALSE, quote=FALSE)
+}
+
 families = get_families(FAMILIES_PATH)
 regions_per_proband = get_autozygous_regions(AUTOZYGOSITY_DIR)
 all_autozygous = get_autozygosity_per_gene(AUTOZYGOSITY_DIR, regions_per_proband, families)
 
+# determine which probands are consanguinous (according to the King kinship statistic)
+consang_probands = get_consanguinous_probands(KINSHIP_PATH)
+consang_probands = consang_probands[consang_probands %in% regions_per_proband$sample_id]
+
+plot_regions_by_size(regions_per_proband, consang_probands)
+check_consanguinity_fraction(all_autozygous, consang_probands)
+
+all_autozygous = all_autozygous[, 1:4]
 write.table(all_autozygous, file="autozygosity.all_genes.all_probands.tsv", sep="\t", row.names=FALSE, quote=FALSE)
 
 plot_autozygosity(all_autozygous, SIGNIFICANT_PATH)
