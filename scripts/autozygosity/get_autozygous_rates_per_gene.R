@@ -122,7 +122,7 @@ plot_autozygosity <- function(all_probands, signif_path) {
 
 #' plot the size distribution of the autozygous regions, comparing sizes from
 #' consanguionous and nonconsanguinous probands
-plot_regions_by_size <- function(regions, consang_probands) {
+plot_regions_by_size <- function(regions_per_proband, consang_probands) {
     regions_per_proband$size = regions_per_proband$end_pos - regions_per_proband$start_pos
     regions_per_proband = regions_per_proband[regions_per_proband$chrom != "X", ]
     
