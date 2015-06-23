@@ -17,21 +17,21 @@ autozygosity = read.table(AUTOZYGOSITY_SYNONYMOUS_PATH, sep="\t", header=TRUE, s
 multiple_ethnicities_and_autozygosity = read.table(MULTIPLE_ETHNICITIES_AUTOZYGOSITY_SYNONYMOUS_PATH, sep="\t", header=TRUE, stringsAsFactors=FALSE)
 
 # make QQ plots of the results from testing the synonymous variants
-Cairo(file="initial_vs_updated_tests.qq_plot.pdf", type="pdf", height=15, width=15, units="cm")
-qq(initial$exac.biallelic_p, las=1, xlim=c(0, 5), ylim=c(0,5))
+Cairo(file="initial_vs_updated_tests.qq_plot.3.pdf", type="pdf", height=15, width=15, units="cm")
+qq(initial$exac.biallelic_silent_p, col="blue", las=1, xlim=c(0, 5), ylim=c(0,5))
 par(new=TRUE)
-qq(multiple_ethnicities$exac.biallelic_p,
+qq(multiple_ethnicities$exac.biallelic_silent_p,
     xlim=c(0, 5), ylim=c(0,5), col="red", axes=FALSE, xlab=NA, ylab=NA)
 par(new=TRUE)
-qq(autozygosity$exac.biallelic_p,
+qq(autozygosity$exac.biallelic_silent_p,
     xlim=c(0, 5), ylim=c(0,5), col="green", axes=FALSE, xlab=NA, ylab=NA)
 par(new=TRUE)
-qq(multiple_ethnicities_and_autozygosity$exac.biallelic_p,
+qq(multiple_ethnicities_and_autozygosity$exac.biallelic_silent_p,
     xlim=c(0, 5), ylim=c(0,5), col="gray", axes=FALSE, xlab=NA, ylab=NA)
 legend("topleft",
     legend=c("initial",
         "adjusted for multiple ethnicities",
         "adjusted for autozygosity rates",
         "adjusted for multiple ethnicities and autozygosity"),
-    col=c("black", "red", "green", "gray"), pch=19, bty="n", cex=0.8)
+    col=c("blue", "red", "green", "gray"), pch=19, bty="n", cex=0.8)
 dev.off()

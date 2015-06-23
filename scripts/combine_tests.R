@@ -7,7 +7,7 @@ PHENOTYPES_PATH = "/nfs/users/nfs_j/jm33/apps/hpo_similarity/results/recessive.h
 # GENOTYPES_PATH = "/nfs/users/nfs_j/jm33/apps/recessiveStats/results/recessive.allele_frequency_tests.txt"
 # PHENOTYPES_PATH = "/nfs/users/nfs_j/jm33/apps/hpo_similarity/results/recessive.hpo_similarity.txt"
 EXAC_VS_DDD_PATH = "/nfs/users/nfs_j/jm33/apps/recessiveStats/results/exac_vs_ddd.pdf"
-OUTPUT_PATH = "/nfs/users/nfs_j/jm33/apps/recessiveStats/results/recessive.combined_tests.ver2.txt"
+OUTPUT_PATH = "/nfs/users/nfs_j/jm33/apps/recessiveStats/results/recessive.combined_tests.ver3.txt"
 
 #' function to combine p values, using Fisher's method
 #'
@@ -22,22 +22,6 @@ fishersMethod <- function(x) {
     adjusted = pchisq(-2 * sum(log(x)), df=2 * length(x), lower.tail=FALSE)
     
     return(adjusted)
-}
-
-plot_ddd_vs_exac <- function(genotypic_p) {
-    # plot the DDD P values versus the ExAC P values, so we can demonstrate the
-    # two are very correlated
-    max_p = max(c(-log10(genotypic_p$ddd.biallelic_lof_p), -log10(genotypic_p$exac.biallelic_lof_p)))
-    Cairo(EXAC_VS_DDD_PATH, type="pdf", height=15, width=15, units="cm")
-    plot(-log10(genotypic_p$ddd.biallelic_lof_p), -log10(genotypic_p$exac.biallelic_lof_p), las=1,
-        xlab="-log10(P) for DDD LoF", ylab="-log10(P) for ExAC LoF",
-        xlim=c(0, max_p), ylim=c(0, max_p))
-        
-    plot(-log10(genotypic_p$ddd.lof_func_p), -log10(genotypic_p$exac.lof_func_p), las=1,
-        xlab="-log10(P) for DDD func", ylab="-log10(P) for ExAC func",
-        xlim=c(0, max_p), ylim=c(0, max_p))
-            
-    dev.off()
 }
 
 open_genotype_p_values <- function(path) {
@@ -65,7 +49,6 @@ open_phenotype_p_values <- function(path) {
 main <- function() {
     genotypic = open_genotype_p_values(GENOTYPES_PATH)
     phenotypic = open_phenotype_p_values(PHENOTYPES_PATH)
-    plot_ddd_vs_exac(genotypic)
     
     all = merge(genotypic, phenotypic, by="hgnc", all=TRUE)
     all$p_combined = apply(all, 1, function(x) fishersMethod(c(as.numeric(x[["p_genotype"]]), as.numeric(x[["p_phenotype"]]))))
