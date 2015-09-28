@@ -1,13 +1,8 @@
 language: r
 sudo: required
 warnings_are_errors: true
-r_binary_packages:
+r_packages:
+ - covr
  - testthat
-r_github_packages:
- - jimhester/covr
-notifications:
-  email:
-    on_success: never
-    on_failure: change
 after_success:
- - Rscript -e 'library(covr);coveralls()'
+ - Rscript -e 'covr::coveralls()'
