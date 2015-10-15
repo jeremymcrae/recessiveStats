@@ -5,17 +5,20 @@ library(argparse)
 
 DIAGNOSED_PATH = "/lustre/scratch113/projects/ddd/users/jm33/ddd_4k.diagnosed.2015-10-12.txt"
 BCF_PATH = "/lustre/scratch113/projects/ddd/users/jm33/ddd_4k.bcftools.bcf"
+SCRIPT_PATH = "scripts/autozygosity/proband_autozygosity.R"
+RSCRIPT_BINARY = "/software/R-3.2.2/bin/Rscript"
 
 get_options <- function() {
     parser = ArgumentParser()
     parser$add_argument("--bcf", default=BCF_PATH, help="Path to bcf to analyse.")
     parser$add_argument("--diagnosed", default=DIAGNOSED_PATH,
-        help="Include path to table listing probands with diagnoses, if you want
-            to exclude these probands.")
+        help="Include path to table listing probands with diagnoses, if you want to exclude these probands.")
+    parser$add_argument("--script", default=SCRIPT_PATH, help="Path to R script to run.")
+    parser$add_argument("--rbinary", default=RSCRIPT_BINARY, help="Path to Rscript binary.")
 
     args = parser$parse_args()
     
-    return args
+    return(args)
 }
 
 get_bjobs <- function() {
@@ -59,7 +62,7 @@ main <- function() {
     
     args = get_options()
     
-    if is.null(args$diagnosed) {
+    if (is.null(args$diagnosed)) {
         probands = get_proband_ids()
     } else {
         probands = get_undiagnosed_sanger_ids(args$diagnosed)
@@ -70,13 +73,14 @@ main <- function() {
         while (nrow(get_bjobs()) > 100) { Sys.sleep(30) }
         
         command = "bsub"
-        args = c("-o", "./get_autozygosity.bjob",
+        arguments = c("-o", "get_autozygosity.bjob",
             "bash", "-c",
-            "\"/software/R-3.2.2/bin/Rscript", "./scripts/autozygosity/proband_autozygosity.R",
+            "\"", args$rbinary, args$script,
             "--proband", proband,
+            "--bcf", args$bcf,
             "\"")
         
-        system2(command, args)
+        system2(command, arguments)
         Sys.sleep(0.25)
     }
 }

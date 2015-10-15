@@ -10,7 +10,7 @@ main <- function() {
 
     args = parser$parse_args()
 
-    proband_roh = check_sample_autozygosity_genome_wide(args$vcf, args$proband)
+    proband_roh = check_sample_autozygosity_genome_wide(args$bcf, args$proband)
     write.table(proband_roh,
         file=file.path("data-raw", "autozygosity", args$proband),
         sep="\t", row.names=FALSE, quote=FALSE)
