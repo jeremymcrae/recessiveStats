@@ -27,14 +27,23 @@ check_sample_autozygosity_genome_wide <- function(bcf_path, proband) {
     
     # analyse ROH and get results for the proband
     roh_output = system2(command, args, stdout=TRUE, stderr=FALSE)
-    roh = read.table(text=roh_output, sep="\t")
+    roh = try(read.table(text=roh_output, sep="\t"), silent=TRUE)
+    
+    # if the command doesn't return any output (such as for probands who only
+    # have CNV calls, which would not make it through to the merged VCF, which
+    # only contains biallelic SNVs/indels)
+    if (class(roh) == "try-error") {
+        roh = data.frame("sample_id"=character(0), "chrom"=character(0),
+            "start_pos"=numeric(0), "end_pos"=numeric(0))
+    }
+    
     names(roh) = c("sample_id", "chrom", "pos", "p_value", "state")
     
     # if there aren't any ROH regions predicted in the output, then return a
     # blank dataframe
     if (!any(roh$state == 1)) {
-        return(data.frame(sample_id=character(0), chrom=character(0),
-            start_pos=numeric(0),end_pos=numeric(0)))
+        return(data.frame("sample_id"=character(0), "chrom"=character(0),
+            "start_pos"=numeric(0), "end_pos"=numeric(0)))
     }
     
     # identify the start and end positions of ROH ranges
@@ -44,9 +53,9 @@ check_sample_autozygosity_genome_wide <- function(bcf_path, proband) {
     ends = c(row_positions[ends], row_positions[length(row_positions)])
     
     # define a table of ROH ranges
-    coords = data.frame(sample_id=roh$sample_id[starts],
-        chrom=roh$chrom[starts], start_pos=roh$pos[starts],
-        end_pos=roh$pos[ends])
+    coords = data.frame("sample_id"=roh$sample_id[starts],
+        "chrom"=roh$chrom[starts], "start_pos"=roh$pos[starts],
+        "end_pos"=roh$pos[ends])
     
     return(coords)
 }
