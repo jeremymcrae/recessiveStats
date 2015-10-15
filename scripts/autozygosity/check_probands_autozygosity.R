@@ -2,6 +2,8 @@
 
 library(recessiveStats)
 
+DIAGNOSED_PATH = "/lustre/scratch113/projects/ddd/users/jm33/ddd_4k.diagnosed.2015-10-12.txt"
+
 get_bjobs <- function() {
     args = c("-o", "\"JOBID", "USER", "STAT", "QUEUE", "JOB_NAME", "delimiter=';'\"")
     bjobs = system2("bjobs", args, stdout=TRUE)
@@ -22,7 +24,24 @@ get_running_jobs <- function() {
     return(bjobs = bjobs[bjobs$STAT == "RUN", ])
 }
 
-probands = get_undiagnosed_sanger_ids()
+get_proband_ids <- function() {
+    ddd = recessiveStats::get_ddd_cohort(parents=FALSE, unaffected=FALSE)
+    probands = ddd[ddd$dad_id != 0 & ddd$mum_id != 0, ]
+    
+    return(sort(unique(probands$individual_id)))
+}
+
+get_undiagnosed_sanger_ids <- function() {
+    probands = get_proband_ids()
+    
+    # remove the probands with diagnoses, or likely diagnostic variants.
+    diagnosed = read.table(DIAGNOSED_PATH, sep="\t", header=TRUE, stringsAsFactors=FALSE)
+    probands = probands[!probands %in% diagnosed$person_id]
+    
+    return(probands)
+}
+
+probands = get_proband_ids()
 for (proband in probands) {
     
     while (nrow(get_bjobs()) > 500) { Sys.sleep(30) }
