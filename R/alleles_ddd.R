@@ -13,7 +13,7 @@ get_ddd_cohort <- function(parents=TRUE, unaffected=TRUE) {
     ped = read.table(ped_path, sep="\t", header=TRUE, stringsAsFactors=FALSE)
     sanger_ids = read.table(sanger_id_path, sep="\t", header=TRUE, stringsAsFactors=FALSE)
     
-    if (parents) { ped = ped[ped$dad_id == 0, ] }
+    if (parents) { ped = ped[ped$dad_id == 0 & ped$mum_id == 0, ] }
     if (unaffected) { ped = ped[ped$affected == 1, ] }
     
     ped = merge(ped, sanger_ids, by.x="individual_id", by.y="person_stable_id", all.x=TRUE)
