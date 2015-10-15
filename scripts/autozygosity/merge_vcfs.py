@@ -75,8 +75,8 @@ info_fields = ["AC", "AFR_AF", "Allele", "Amino_acids", "AMR_AF", "AN",
     "SYMBOL", "SYMBOL_SOURCE", "TRF", "UK10K_cohort_AF", "UK10KFREQ", "VQSLOD"]
 info_fields = ["INFO/{}".format(x) for x in info_fields]
 EXCLUDE_FIELDS = ",".join(format_fields + info_fields)
-DIAGNOSED_PATH = "/lustre/scratch113/projects/ddd/users/jm33/ddd_likely_diagnosed.txt"
-FAMILIES_PATH = "/nfs/ddd0/Data/datafreeze/ddd_data_releases/2014-11-04/family_relationships.txt"
+DIAGNOSED_PATH = "/lustre/scratch113/projects/ddd/users/jm33/ddd_4k.diagnosed.2015-10-12.txt"
+FAMILIES_PATH = "/nfs/ddd0/Data/datafreeze/ddd_data_releases/2015-04-13/family_relationships.txt"
 
 def submit_bsub_job(command, job_id=None, dependent_id=None, memory=None, requeue_code=None, logfile=None, rerunnable=False):
     """ construct a bsub job submission command
@@ -204,22 +204,23 @@ def get_random_string():
     
     return hash_string
 
-def get_vcfs(diagnosed_path, families_path):
+def get_vcfs(families_path, diagnosed_path=None):
     """ get a list of the VCF paths for the unaffected DDD probands.
     """
     
     # identify the set of probands who have diagnoses
     diagnosed = set([])
-    with open(diagnosed_path) as handle:
-        for line in handle:
-            diagnosed.add(line.strip())
+    if diagnosed_path is not None:
+        with open(diagnosed_path) as handle:
+            for line in handle:
+                diagnosed.add(line.strip())
     
     vcfs = set([])
     with open(families_path) as handle:
         for line in handle:
             line = line.strip().split("\t")
             # remove parents, diagnosed probands, and the header
-            if line[2] == "0" or line[1] in diagnosed or line[2] == "dad_id":
+            if line[2] == "0" or line[3] == "0" or line[1] in diagnosed or line[2] == "dad_id":
                 continue
             
             vcfs.add(line[6])
@@ -244,7 +245,10 @@ def generate_mergeable_vcfs(vcfs, temp_dir):
         # identify the sample ID from the VCF (so that we can give the stripped
         # down VCF a sensible filename)
         command = [BCFTOOLS, "query", "--list-samples", vcf]
-        sample_id = subprocess.check_output(command).strip()
+        try:
+            sample_id = subprocess.check_output(command).strip()
+        except:
+            continue
         
         # get a path to put the VCF in
         stripped_vcf = os.path.join(temp_dir, "{}.vcf.gz".format(sample_id))
@@ -262,11 +266,11 @@ def generate_mergeable_vcfs(vcfs, temp_dir):
             "--output-file", stripped_vcf,
             ";", TABIX, "-p", "vcf", "-f", stripped_vcf]
         
-        # job_id = get_random_string()
-        # submit_bsub_job(command, job_id, memory=100)
-        # time.sleep(0.25)
+        job_id = get_random_string()
+        submit_bsub_job(command, job_id, memory=100)
+        time.sleep(0.25)
         stripped_vcfs.append(stripped_vcf)
-        # job_ids.append(job_id)
+        job_ids.append(job_id)
     
     return stripped_vcfs, job_ids
 
@@ -347,7 +351,8 @@ def merge_vcfs(vcfs, temp_dir):
     submit_bsub_job(command, memory=100)
 
 def main():
-    vcfs = get_vcfs(DIAGNOSED_PATH, FAMILIES_PATH)
+    # vcfs = get_vcfs(FAMILIES_PATH, DIAGNOSED_PATH)
+    vcfs = get_vcfs(FAMILIES_PATH)
     stripped, job_ids = generate_mergeable_vcfs(vcfs, TEMP_DIR)
     
     while has_current_jobs(job_ids):
