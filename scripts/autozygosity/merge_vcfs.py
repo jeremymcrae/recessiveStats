@@ -337,18 +337,23 @@ def merge_vcfs(vcfs, temp_dir):
         while has_current_jobs(job_ids):
             time.sleep(30)
     
-    shutil.copyfile(vcfs[0], os.path.join(os.path.dirname(temp_dir), "ddd_4k.bcftools.vcf.gz"))
-    subprocess.check_call([TABIX,
-        "-p", "vcf", "-f", os.path.join(os.path.dirname(temp_dir), "ddd_4k.bcftools.vcf.gz")])
-    
-    os.environ["BCFTOOLS_PLUGINS"] = "/nfs/users/nfs_j/jm33/apps/bcftools/plugins"
-    # finally, swap the missing genotypes to reference alleles, and convert to BCF
-    command = [BCFTOOLS, "+missing2ref", \
+    command = [BCFTOOLS, "view", \
         "--output-type", "b",
-        "--output", \
-            os.path.join(os.path.dirname(temp_dir), "ddd_4k.bcftools.missing_converted.bcf"), \
+        "--output-file", os.path.join(os.path.dirname(temp_dir), "ddd_4k.bcftools.bcf"), \
         vcfs[0]]
     submit_bsub_job(command, memory=100)
+    
+    # subprocess.check_call([TABIX,
+    #     "-p", "vcf", "-f", os.path.join(os.path.dirname(temp_dir), "ddd_4k.bcftools.vcf.gz")])
+    #
+    # os.environ["BCFTOOLS_PLUGINS"] = "/nfs/users/nfs_j/jm33/apps/bcftools/plugins"
+    # # finally, swap the missing genotypes to reference alleles, and convert to BCF
+    # command = [BCFTOOLS, "+missing2ref", \
+    #     "--output-type", "b",
+    #     "--output", \
+    #         os.path.join(os.path.dirname(temp_dir), "ddd_4k.bcftools.missing_converted.bcf"), \
+    #     vcfs[0]]
+    # submit_bsub_job(command, memory=100)
 
 def main():
     # vcfs = get_vcfs(FAMILIES_PATH, DIAGNOSED_PATH)
