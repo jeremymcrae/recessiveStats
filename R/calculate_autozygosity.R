@@ -34,7 +34,7 @@ check_sample_autozygosity_genome_wide <- function(bcf_path, proband) {
     # only contains biallelic SNVs/indels)
     if (class(roh) == "try-error") {
         roh = data.frame("sample_id"=character(0), "chrom"=character(0),
-            "start_pos"=numeric(0), "end_pos"=numeric(0))
+            "pos"=numeric(0), "p_value"=numeric(0), "state"=numeric(0))
     }
     
     names(roh) = c("sample_id", "chrom", "pos", "p_value", "state")
