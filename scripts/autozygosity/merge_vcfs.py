@@ -36,6 +36,7 @@ import shutil
 import itertools
 import random
 import time
+import argparse
 
 IS_PYTHON3 = sys.version_info[0] == 3
 
@@ -44,7 +45,6 @@ if not IS_PYTHON3:
 
 BCFTOOLS = "/software/hgi/pkglocal/bcftools-1.2/bin/bcftools"
 VCFANNOTATE = "/software/hgi/pkglocal/vcftools-0.1.11/bin/vcf-annotate"
-TABIX = "/software/hgi/pkglocal/tabix-git-1ae158a/bin/tabix"
 TEMP_DIR = "/lustre/scratch113/projects/ddd/users/jm33/bcfs"
 
 # define all the fields to strip from the VCFs (this prevents problems when
@@ -77,6 +77,25 @@ info_fields = ["INFO/{}".format(x) for x in info_fields]
 EXCLUDE_FIELDS = ",".join(format_fields + info_fields)
 DIAGNOSED_PATH = "/lustre/scratch113/projects/ddd/users/jm33/ddd_4k.diagnosed.2015-10-12.txt"
 FAMILIES_PATH = "/nfs/ddd0/Data/datafreeze/ddd_data_releases/2015-04-13/family_relationships.txt"
+
+
+def get_options():
+    """ parse the command line arguments
+    """
+    
+    parser = argparse.ArgumentParser(description="")
+    parser.add_argument("--vcf-annotate", default=VCFANNOTATE, help="path to vcf-annotate binary")
+    parser.add_argument("--bcftools", default=BCFTOOLS, help="path to bcftools binary")
+    parser.add_argument("--families", default=FAMILIES_PATH, \
+        help="Path to listing family relationships.")
+    parser.add_argument("--diagnosed", help="Path to listing diagnosed probands.")
+    parser.add_argument("--temp", default=TEMP_DIR, \
+        help="temporary folder to store intermediate merged VCFs")
+    parser.add_argument("--output", help="Path to write output bcf to.")
+    
+    args = parser.parse_args()
+    
+    return args
 
 def submit_bsub_job(command, job_id=None, dependent_id=None, memory=None, requeue_code=None, logfile=None, rerunnable=False):
     """ construct a bsub job submission command
@@ -227,7 +246,7 @@ def get_vcfs(families_path, diagnosed_path=None):
     
     return sorted(list(vcfs))
 
-def generate_mergeable_vcfs(vcfs, temp_dir):
+def generate_mergeable_vcfs(vcfs, temp_dir, vcfannotate, bcftools):
     """ converts sample VCFs to VCFs that can be merged with bcftools
     
     Args:
@@ -244,27 +263,27 @@ def generate_mergeable_vcfs(vcfs, temp_dir):
     for vcf in vcfs:
         # identify the sample ID from the VCF (so that we can give the stripped
         # down VCF a sensible filename)
-        command = [BCFTOOLS, "query", "--list-samples", vcf]
+        command = [bcftools, "query", "--list-samples", vcf]
         try:
             sample_id = subprocess.check_output(command).strip()
         except:
             continue
         
         # get a path to put the VCF in
-        stripped_vcf = os.path.join(temp_dir, "{}.vcf.gz".format(sample_id))
+        stripped_vcf = os.path.join(temp_dir, "{}.bcf".format(sample_id))
         
         # set up the vcftools and bcftools command that will strip out all
         # unecessary INFO and FORMAT fields, then remove all failing variant
-        # lines. Finally, tabix index the resulting VCF.
-        command = [VCFANNOTATE, \
+        # lines.
+        command = [vcfannotate, \
             "--remove", EXCLUDE_FIELDS, \
             vcf, "|", \
-            BCFTOOLS, "view", \
+            bcftools, "view", \
             "--apply-filters", "PASS", \
             "--max-alleles", "2", \
-            "--output-type"," z", \
-            "--output-file", stripped_vcf,
-            ";", TABIX, "-p", "vcf", "-f", stripped_vcf]
+            "--output-type", "b", \
+            "--output-file", stripped_vcf, \
+            ";", bcftools, "index", stripped_vcf]
         
         job_id = get_random_string()
         submit_bsub_job(command, job_id, memory=100)
@@ -274,7 +293,7 @@ def generate_mergeable_vcfs(vcfs, temp_dir):
     
     return stripped_vcfs, job_ids
 
-def merge_vcf_pairs(paths, temp_dir):
+def merge_vcf_pairs(paths, temp_dir, bcftools):
     """ merge pairs of VCFs using bcftools
     
     Args:
@@ -297,7 +316,7 @@ def merge_vcf_pairs(paths, temp_dir):
     
     for pair in pairs:
         path = tempfile.mkstemp(dir=temp_dir, prefix="tmp_merge.",
-            suffix=".vcf.gz")[1]
+            suffix=".bcf")[1]
         new_paths.append(path)
         
         job_id = get_random_string()
@@ -306,10 +325,10 @@ def merge_vcf_pairs(paths, temp_dir):
         # the pair, then we only copy the VCF to the temp file, before indexing
         if len(pair) == 1:
             shutil.copyfile(pair[0], path)
-            command = [BCFTOOLS, "index", "--tbi", path]
+            command = [bcftools, "index", path]
         else:
-            command = [BCFTOOLS, "merge", "--merge", "none", "--output-type", "z", "--output", \
-                path, pair[0],  pair[1], ";", BCFTOOLS, "index", "--tbi", path]
+            command = [bcftools, "merge", "--merge", "none", "--output-type", "b", "--output", \
+                path, pair[0],  pair[1], ";", bcftools, "index", path]
         
         submit_bsub_job(command, job_id, memory=100)
         time.sleep(0.5)
@@ -318,7 +337,7 @@ def merge_vcf_pairs(paths, temp_dir):
         
     return new_paths, job_ids
 
-def merge_vcfs(vcfs, temp_dir):
+def merge_vcfs(output_path, vcfs, temp_dir, bcftools):
     """ merge a large number of single-sample VCFs into a single multisample VCF
     
     Args:
@@ -337,39 +356,24 @@ def merge_vcfs(vcfs, temp_dir):
         while has_current_jobs(job_ids):
             time.sleep(30)
     
-    command = [BCFTOOLS, "view", \
-        "--output-type", "b",
-        "--output-file", os.path.join(os.path.dirname(temp_dir), "ddd_4k.bcftools.bcf"), \
-        vcfs[0]]
-    submit_bsub_job(command, memory=100)
-    
-    # subprocess.check_call([TABIX,
-    #     "-p", "vcf", "-f", os.path.join(os.path.dirname(temp_dir), "ddd_4k.bcftools.vcf.gz")])
-    #
-    # os.environ["BCFTOOLS_PLUGINS"] = "/nfs/users/nfs_j/jm33/apps/bcftools/plugins"
-    # # finally, swap the missing genotypes to reference alleles, and convert to BCF
-    # command = [BCFTOOLS, "+missing2ref", \
-    #     "--output-type", "b",
-    #     "--output", \
-    #         os.path.join(os.path.dirname(temp_dir), "ddd_4k.bcftools.missing_converted.bcf"), \
-    #     vcfs[0]]
-    # submit_bsub_job(command, memory=100)
+    shutil.copyfile(vcfs[0], output_path)
 
-def main():
-    # vcfs = get_vcfs(FAMILIES_PATH, DIAGNOSED_PATH)
-    vcfs = get_vcfs(FAMILIES_PATH)
-    stripped, job_ids = generate_mergeable_vcfs(vcfs, TEMP_DIR)
+def main(args):
+    
+    vcfs = get_vcfs(args.families, args.diagnosed)
+    stripped, job_ids = generate_mergeable_vcfs(vcfs, args.temp, args.vcf_annotate, args.bcftools)
     
     while has_current_jobs(job_ids):
         time.sleep(30)
     
-    merge_vcfs(stripped, TEMP_DIR)
+    merge_vcfs(args.output, stripped, args.temp, args.bcftools)
 
 if __name__ == "__main__":
     try:
-        main()
+        args = get_options()
+        main(args)
     finally:
         # make sure we clean up any temporary files
-        temp_vcfs = glob.glob(os.path.join(TEMP_DIR, "tmp_merge*"))
+        temp_vcfs = glob.glob(os.path.join(args.temp, "tmp_merge*"))
         for path in temp_vcfs:
             os.remove(path)
