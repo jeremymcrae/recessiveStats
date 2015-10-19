@@ -87,8 +87,9 @@ def get_options():
     parser.add_argument("--vcf-annotate", default=VCFANNOTATE, help="path to vcf-annotate binary")
     parser.add_argument("--bcftools", default=BCFTOOLS, help="path to bcftools binary")
     parser.add_argument("--families", default=FAMILIES_PATH, \
-        help="Path to listing family relationships.")
-    parser.add_argument("--diagnosed", help="Path to listing diagnosed probands.")
+        help="Path to listing family relationships, with VCF paths.")
+    parser.add_argument("--diagnosed", help="Path to listing diagnosed probands,"
+        "if you want to exclude the diagnosed probands.")
     parser.add_argument("--temp", default=TEMP_DIR, \
         help="temporary folder to store intermediate merged VCFs")
     parser.add_argument("--output", help="Path to write output bcf to.")
