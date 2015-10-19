@@ -83,7 +83,9 @@ def get_options():
     """ parse the command line arguments
     """
     
-    parser = argparse.ArgumentParser(description="")
+    parser = argparse.ArgumentParser(description="script to merge all single"
+        "sample VCFs for probands in a cohort into a BCF with all samples"
+        "contained therein.")
     parser.add_argument("--vcf-annotate", default=VCFANNOTATE, help="path to vcf-annotate binary")
     parser.add_argument("--bcftools", default=BCFTOOLS, help="path to bcftools binary")
     parser.add_argument("--families", default=FAMILIES_PATH, \
