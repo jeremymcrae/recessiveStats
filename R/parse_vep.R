@@ -51,7 +51,9 @@ parse_vep_output <- function(variant, hgnc) {
         symbol = prediction[15]
         cq = prediction[5]
         
-        if (symbol != hgnc) { next }
+        if (!is.null(hgnc)) {
+            if (symbol != hgnc) { next }
+        }
         
         cq = unlist(strsplit(cq, "&"))
         consequences[[allele]] = c(consequences[[allele]], cq)

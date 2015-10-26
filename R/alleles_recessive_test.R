@@ -9,6 +9,12 @@
 #' @param biallelic_func number of probands with inherited biallelic functional
 #'        variants in the gene.
 #' @param lof_func number of probands with inherited Lof/Func variants in the gene.
+#' @param start start position of region to be investigated (if checking for
+#'        gene region defined by chromosome coordinates rather than a HGNC-based
+#'        gene region).
+#' @param end end position of region to be investigated (if checking for
+#'        gene region defined by chromosome coordinates rather than a HGNC-based
+#'        gene region).
 #' @param probands vector of probands who have inherited recessive variants in
 #'     the gene, or NULL.
 #' @param cohort_n number of probands in population.
@@ -19,10 +25,11 @@
 #'
 #' @return a list of P values from tests using the DDD population, the ExAC
 #'     population, under LoF and functional tests.
-analyse_inherited_enrichment <- function(hgnc, chrom, biallelic_lof, biallelic_func, lof_func, probands=NULL, cohort_n=3072, check_last_base=FALSE, autozygous_rate=0) {
+analyse_inherited_enrichment <- function(hgnc, chrom, biallelic_lof, biallelic_func, lof_func, start=NULL, end=NULL, probands=NULL, cohort_n=3072, check_last_base=FALSE, autozygous_rate=0) {
     
     cat("extracting ddd frequencies\n")
-    ddd = try(get_ddd_variants_for_gene(hgnc, chrom, probands, check_last_base=check_last_base), silent=TRUE)
+    ddd = try(get_ddd_variants_for_gene(hgnc, chrom, probands, start=start,
+        end=end, check_last_base=check_last_base), silent=TRUE)
     if (class(ddd) != "try-error") {
         ddd = get_cumulative_frequencies(ddd)
         ddd = test_enrichment(ddd, biallelic_lof, biallelic_func, lof_func, sum(unlist(cohort_n)), autozygous_rate)
@@ -31,7 +38,7 @@ analyse_inherited_enrichment <- function(hgnc, chrom, biallelic_lof, biallelic_f
     }
     
     cat("extracting ExAC frequencies\n")
-    exac = get_exac_variants_for_gene(hgnc, chrom, check_last_base=check_last_base)
+    exac = get_exac_variants_for_gene(hgnc, chrom, start=start, end=end, check_last_base=check_last_base)
     exac = get_cumulative_frequencies(exac)
     
     if (!is.list(cohort_n)) {

@@ -4,12 +4,21 @@
 \alias{get_exac_variants_for_gene}
 \title{get and parse ExAC variants within a gene}
 \usage{
-get_exac_variants_for_gene(hgnc, chrom, check_last_base = FALSE)
+get_exac_variants_for_gene(hgnc, chrom, start = NULL, end = NULL,
+  check_last_base = FALSE)
 }
 \arguments{
 \item{hgnc}{HGNC symbol for the gene that we want data for eg "ARID1B"}
 
 \item{chrom}{chromosome string e.g. "6"}
+
+\item{start}{start position of region to be investigated (if checking for
+gene region defined by chromosome coordinates rather than a HGNC-based
+gene region).}
+
+\item{end}{end position of region to be investigated (if checking for
+gene region defined by chromosome coordinates rather than a HGNC-based
+gene region).}
 
 \item{check_last_base}{boolean for whether to check if last base non-lofs can
 be LoF.}

@@ -46,13 +46,6 @@ The probability of getting more than or equal to the number of the observed
 inherited events in each class was estimated using a binomial model where
 n=number of families with undiagnosed probands and k=baseline rate of variation.
 
-##### Suspected syndrome matches
-- Inspect ‘suspected syndrome’ field and prepare it for manually curation to
-  generate comma separated lists of correctly spelled clinical syndromes.
-- Manually curate dataset, any uncertainties are flagged clinical review.
-- Generate pairwise matrix of similarity based on exact matches between
-  clinical syndromes and frequency with which each syndrome is suspected.
-
 ##### Installation
 The package can be installed or updated using R 3.1.0 or greater with:
 ```R
@@ -76,7 +69,16 @@ biallelic_lof = 5
 biallelic_func = 10
 lof_func = 6
 probands = c("DDDP00000X", "DDDP00000Y", "DDDP00000Z")
-analyse_inherited_enrichment(hgnc, chrom, biallelic_lof, biallelic_func, lof_func, probands, cohort_n)
+analyse_inherited_enrichment(hgnc, chrom, biallelic_lof, biallelic_func, lof_func, probands=probands, cohort_n=cohort_n)
+```
+
+Rather than naming a gene, you can give a chromosome range (but define the gene
+symbol as NULL, otherwise all of the variants that don't match the gene symbol
+are removed):
+```R
+start=225083964
+end=225586996
+analyse_inherited_enrichment(hgnc=NULL, chrom, biallelic_lof, biallelic_func, lof_func, start=start, end=end, probands=probands, cohort_n=cohort_n)
 ```
 
 You can also take the autozygosity into account. Calculate the proportion of
@@ -84,16 +86,16 @@ probands who have an autozygous region overlapping the gene `bcftools roh` is
 recommended). Then you can include the rate as:
 ```R
 RATE=0.005
-analyse_inherited_enrichment(hgnc, chrom, biallelic_lof, biallelic_func, lof_func, probands, autozygous_rate=RATE)
+analyse_inherited_enrichment(hgnc, chrom, biallelic_lof, biallelic_func, lof_func, probands=probands, autozygous_rate=RATE)
 ```
 
-Also, if your probands are of multiple ethnicities, you can account for 
+Also, if your probands are of multiple ethnicities, you can account for
 differences in allele frequencies between ethnicities by specifying the number
 of probands that would be classified as belonging to each ExAC population. For
 example:
 ```R
 cohort_n = list("AFR"=100, "EAS"=50, "NFE"=800, "SAS"=50)
-analyse_inherited_enrichment(hgnc, chrom, biallelic_lof, biallelic_func, lof_func, probands, cohort_n)
+analyse_inherited_enrichment(hgnc, chrom, biallelic_lof, biallelic_func, lof_func, probands=probands, cohort_n=cohort_n)
 ```
 
 The populations available in ExAC are:

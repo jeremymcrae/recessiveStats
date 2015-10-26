@@ -331,22 +331,34 @@ convert_genotypes <- function(vars, vep, probands) {
 #'
 #' @param hgnc hgnc symbol as character string
 #' @param chrom chromosome as character string
+#' @param start start position of region to be investigated (if checking for
+#'        gene region defined by chromosome coordinates rather than a HGNC-based
+#'        gene region).
+#' @param end end position of region to be investigated (if checking for
+#'        gene region defined by chromosome coordinates rather than a HGNC-based
+#'        gene region).
 #' @param probands vector of IDs for probands for the gene, or NULL
 #' @param check_last_base boolean for whether to check if last base non-lofs can
 #'     be LoF.
 #' @export
 #'
 #' @return dataframe of variants
-get_ddd_variants_for_gene <- function(hgnc, chrom, probands=NULL, check_last_base=FALSE) {
+get_ddd_variants_for_gene <- function(hgnc, chrom, start=NULL, end=NULL,
+    probands=NULL, check_last_base=FALSE) {
     
     vcf_path = Sys.glob(file.path(DDD_VCFS_DIR, paste(chrom, "\\:1-*.vcf.gz", sep="")))
     
-    rows = get_gene_coordinates(hgnc, chrom)
+    if (!is.null(hgnc) & is.null(start) & is.null(end)) {
+        rows = get_gene_coordinates(hgnc, chrom)
+        start=rows$start
+        end=rows$stop
+    }
     
-    start=rows$start
-    end=rows$stop
-    
-    cat(paste("loading DDD vcfs for ", hgnc, "\n", sep = ""))
+    if (!is.null(hgnc)) {
+        cat(paste("loading DDD vcfs for ", hgnc, "\n", sep = ""))
+    } else {
+        cat(paste("loading DDD vcfs for ", chrom, ":", start, "-", end, "\n", sep = ""))
+    }
     # extract variants within the region from the VCF
     vars = seqminer::readVCFToListByRange(fileName=vcf_path,
         range=paste(chrom, ":", start, "-", end, sep=""),
@@ -363,7 +375,7 @@ get_ddd_variants_for_gene <- function(hgnc, chrom, probands=NULL, check_last_bas
         
     vars = standardise_multiple_alt_variants(vars, include_hgnc=TRUE)
     
-    if (check_last_base) {
+    if (check_last_base & !is.null(hgnc)) {
         ends = get_exon_ends(hgnc)
         exon_ends = ends$all_ends
         strand = ends$strand
@@ -372,7 +384,8 @@ get_ddd_variants_for_gene <- function(hgnc, chrom, probands=NULL, check_last_bas
     
     # remove alleles with none observed in the unaffected DDD parents, and
     # alleles not in the required gene
-    vars = vars[vars$AC > 0 & vars$HGNC == hgnc, ]
+    vars = vars[vars$AC > 0, ]
+    if (!is.null(hgnc)) { vars = vars[vars$HGNC == hgnc, ] }
     
     # remove the HGNC column, to match the output for the ExAC functions
     vars$HGNC = NULL

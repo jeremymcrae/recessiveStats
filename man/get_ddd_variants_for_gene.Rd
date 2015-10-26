@@ -4,13 +4,21 @@
 \alias{get_ddd_variants_for_gene}
 \title{loads the variants for a given gene from source VCFs}
 \usage{
-get_ddd_variants_for_gene(hgnc, chrom, probands = NULL,
-  check_last_base = FALSE)
+get_ddd_variants_for_gene(hgnc, chrom, start = NULL, end = NULL,
+  probands = NULL, check_last_base = FALSE)
 }
 \arguments{
 \item{hgnc}{hgnc symbol as character string}
 
 \item{chrom}{chromosome as character string}
+
+\item{start}{start position of region to be investigated (if checking for
+gene region defined by chromosome coordinates rather than a HGNC-based
+gene region).}
+
+\item{end}{end position of region to be investigated (if checking for
+gene region defined by chromosome coordinates rather than a HGNC-based
+gene region).}
 
 \item{probands}{vector of IDs for probands for the gene, or NULL}
 

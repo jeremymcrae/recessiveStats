@@ -4,16 +4,24 @@
 #'
 #' @param hgnc HGNC symbol for the gene that we want data for eg "ARID1B"
 #' @param chrom chromosome string e.g. "6"
+#' @param start start position of region to be investigated (if checking for
+#'        gene region defined by chromosome coordinates rather than a HGNC-based
+#'        gene region).
+#' @param end end position of region to be investigated (if checking for
+#'        gene region defined by chromosome coordinates rather than a HGNC-based
+#'        gene region).
 #' @param check_last_base boolean for whether to check if last base non-lofs can
 #'        be LoF.
 #' @export
 #'
 #' @return data frame of variants in gene
-get_exac_variants_for_gene <- function(hgnc, chrom, check_last_base=FALSE) {
+get_exac_variants_for_gene <- function(hgnc, chrom, start=NULL, end=NULL, check_last_base=FALSE) {
     
-    rows = get_gene_coordinates(hgnc, chrom)
-    start=rows$start
-    end=rows$stop
+    if (!is.null(hgnc) & is.null(start) & is.null(end)) {
+        rows = get_gene_coordinates(hgnc, chrom)
+        start=rows$start
+        end=rows$stop
+    }
     
     if (!file.exists(get("EXAC", envir=exacPathEnv))) {
         stop(paste("Cannot find the ExAC file. Check that the file exists at: ",
@@ -43,7 +51,7 @@ get_exac_variants_for_gene <- function(hgnc, chrom, check_last_base=FALSE) {
     vars$CQ = apply(vars, 1, parse_vep_output, hgnc=hgnc)
     vars$CSQ = NULL
     
-    if (check_last_base) {
+    if (check_last_base & !is.null(hgnc)) {
         ends = get_exon_ends(hgnc)
         exon_ends = ends$all_ends
         strand = ends$strand

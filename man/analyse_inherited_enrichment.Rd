@@ -5,8 +5,8 @@
 \title{test for enrichment of inherited variants in the DDD and ExAC datasets}
 \usage{
 analyse_inherited_enrichment(hgnc, chrom, biallelic_lof, biallelic_func,
-  lof_func, probands = NULL, cohort_n = 3072, check_last_base = FALSE,
-  autozygous_rate = 0)
+  lof_func, start = NULL, end = NULL, probands = NULL, cohort_n = 3072,
+  check_last_base = FALSE, autozygous_rate = 0)
 }
 \arguments{
 \item{hgnc}{HGNC symbol for a gene.}
@@ -20,6 +20,14 @@ in the gene.}
 variants in the gene.}
 
 \item{lof_func}{number of probands with inherited Lof/Func variants in the gene.}
+
+\item{start}{start position of region to be investigated (if checking for
+gene region defined by chromosome coordinates rather than a HGNC-based
+gene region).}
+
+\item{end}{end position of region to be investigated (if checking for
+gene region defined by chromosome coordinates rather than a HGNC-based
+gene region).}
 
 \item{probands}{vector of probands who have inherited recessive variants in
 the gene, or NULL.}
