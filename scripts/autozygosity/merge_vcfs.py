@@ -352,7 +352,7 @@ def merge_vcfs(output_path, vcfs, temp_dir, bcftools):
     # containing >1 sample per VCF. These can be merged again, and repeated,
     # until we end up with a single VCF, containing all the initial samples.
     while len(vcfs) > 1:
-        vcfs, job_ids = merge_vcf_pairs(vcfs, temp_dir)
+        vcfs, job_ids = merge_vcf_pairs(vcfs, temp_dir, bcftools)
         
         # add a delay, so that the jobs can be submitted to the cluster
         time.sleep(10)
