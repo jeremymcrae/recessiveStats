@@ -2,7 +2,7 @@
 library(Cairo)
 library(dplyr)
 
-AUTOZYGOSITY_DIR = "/nfs/users/nfs_j/jm33/apps/recessiveStats/data-raw/autozygosity"
+AUTOZYGOSITY_DIR = "/lustre/scratch113/projects/ddd/users/jm33/autozygosity"
 KINSHIP_PATH = "/nfs/ddd0/Data/datafreeze/ddd_data_releases/2014-11-04/kinship_and_pca_trios.txt"
 FAMILIES_PATH = "/nfs/ddd0/Data/datafreeze/ddd_data_releases/2014-11-04/family_relationships.txt"
 SIGNIFICANT_PATH = "/nfs/users/nfs_j/jm33/apps/recessiveStats/results/recessive.combined_tests.ver2.txt"

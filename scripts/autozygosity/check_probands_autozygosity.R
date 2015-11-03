@@ -4,7 +4,7 @@ library(recessiveStats)
 library(argparse)
 
 BCF_PATH = "/lustre/scratch113/projects/ddd/users/jm33/ddd_4k.bcftools.bcf"
-OUTPUT_DIR = "data-raw/autozygosity"
+OUTPUT_DIR = "/lustre/scratch113/projects/ddd/users/jm33/autozygosity"
 SCRIPT_PATH = "scripts/autozygosity/proband_autozygosity.R"
 RSCRIPT_BINARY = "/software/R-3.2.2/bin/Rscript"
 
