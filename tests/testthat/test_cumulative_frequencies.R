@@ -45,16 +45,18 @@ test_that("correct cumulative frequencies with higher MAF", {
 test_that("correct cumulative frequencies without rare functional variants", {
     vars = read.table(header = TRUE, text = "
         AC AN CQ
-        20 1000  missense_variant
+        20 800  missense_variant
         1 500  stop_gained
-        20 1000  stop_lost
+        20 800  stop_lost
         1 1000  synonymous_variant
         ")
+    
+    print(get_cumulative_frequencies(vars))
     
     # if we don't have any rare functional vars, the number is determined from
     # the lowest allele number (plus two).
     expect_equal(get_cumulative_frequencies(vars),
-        list(lof=0.002, functional=0.0019920318725))
+        list(lof=0.002, functional=0.00132978723404255))
 })
 
 test_that("correct cumulative frequencies when we lack a rare variants", {
