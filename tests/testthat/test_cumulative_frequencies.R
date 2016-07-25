@@ -51,8 +51,6 @@ test_that("correct cumulative frequencies without rare functional variants", {
         1 1000  synonymous_variant
         ")
     
-    print(get_cumulative_frequencies(vars))
-    
     # if we don't have any rare functional vars, the number is determined from
     # the lowest allele number (plus two).
     expect_equal(get_cumulative_frequencies(vars),

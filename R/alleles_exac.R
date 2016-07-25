@@ -10,12 +10,14 @@
 #' @param end end position of region to be investigated (if checking for
 #'        gene region defined by chromosome coordinates rather than a HGNC-based
 #'        gene region).
+#' @param fileName path to tabis-indexed ExAC VCF file.
 #' @param check_last_base boolean for whether to check if last base non-lofs can
 #'        be LoF.
 #' @export
 #'
 #' @return data frame of variants in gene
-get_exac_variants_for_gene <- function(hgnc, chrom, start=NULL, end=NULL, check_last_base=FALSE) {
+get_exac_variants_for_gene <- function(hgnc, chrom, start=NULL, end=NULL,
+        fileName=NULL, check_last_base=FALSE) {
     
     if (!is.null(hgnc) & is.null(start) & is.null(end)) {
         rows = get_gene_coordinates(hgnc, chrom)
@@ -23,9 +25,13 @@ get_exac_variants_for_gene <- function(hgnc, chrom, start=NULL, end=NULL, check_
         end=rows$stop
     }
     
-    if (!file.exists(get("EXAC", envir=exacPathEnv))) {
+    if (is.null(fileName)) {
+        fileName = get("EXAC", envir=exacPathEnv)
+     }
+    
+    if (!file.exists(fileName)) {
         stop(paste("Cannot find the ExAC file. Check that the file exists at: ",
-            get("EXAC", envir=exacPathEnv), ", or obtain the ExAC datasets, ",
+            fileName, ", or obtain the ExAC datasets, ",
             "then run set_exac_path(YOUR_PATH) before trying this function ",
             "again.", sep=""))
     }
@@ -36,7 +42,7 @@ get_exac_variants_for_gene <- function(hgnc, chrom, start=NULL, end=NULL, check_
         SAS="South Asian")
     
     # extract variants within the region from the VCF
-    vars = seqminer::readVCFToListByRange(fileName=get("EXAC", envir=exacPathEnv),
+    vars = seqminer::readVCFToListByRange(fileName,
         range=paste(chrom, ":", start, "-", end, sep=""),
         annoType="",
         vcfColumn=c("CHROM", "POS", "REF", "ALT"),
