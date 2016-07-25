@@ -67,7 +67,7 @@ get_cumulative_frequencies <- function(vars) {
     # biallelic individual had been included in the population.
     if (length(vars$AN[!is.na(vars$AN)]) != 0) {
         if (lof_freq == 0) { lof_freq = 1/(median(vars$AN, na.rm=TRUE) + 2) }
-        if (functional_freq == 0) { functional_freq = 1/(median(vars$AN, na.rm=TRUE) + 2) }
+        if (functional_freq == 0) { functional_freq = 1/(stats::median(vars$AN, na.rm=TRUE) + 2) }
     } else {
         if (lof_freq == 0) { lof_freq = NA }
         if (functional_freq == 0) { functional_freq = NA }

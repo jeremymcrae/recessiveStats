@@ -12,21 +12,52 @@
 #'
 #' @param bcf_path path to a BCF for the full genome across all probands
 #' @param proband ID for the proband to analyse
+#' @param chrom chromosome to analyse
+#' @param map genetic recombination map for the given chromosome
 #' @export
 #'
 #' @return dataframe of proband ID, chromosome, start and end coordinates.
-check_sample_autozygosity_genome_wide <- function(bcf_path, proband) {
+check_sample_autozygosity_genome_wide <- function(bcf_path, proband, chrom, map) {
+    
+    coords = NULL
+    for (chrom in as.character(seq(1, 22))) {
+        chrom_map = gsub('XXX', chrom, map)
+        
+        chrom_coords = check_autozygosity_in_chrom(bcf_path, proband, chrom, map)
+        
+        if (is.null(coords)) {
+            coords = chrom_coords
+        } else {
+            coords = rbind(coords, chrom_coords)
+        }
+    }
+    
+    return(coords)
+}
+
+#' identify chromosomal regions where a proband has runs-of-homozygosity
+#'
+#' @param bcf_path path to a BCF for the full genome across all probands
+#' @param proband ID for the proband to analyse
+#' @param chrom chromosome to analyse
+#' @param map genetic recombination map for the given chromosome
+#' @export
+#'
+#' @return dataframe of proband ID, chromosome, start and end coordinates.
+check_autozygosity_in_chrom <- function(bcf_path, proband, chrom, map) {
     command = BCFTOOLS
     args = c("roh",
         "--estimate-AF", "-",
         "--GTs-only", 30,
         "--skip-indels",
+        "--regions", chrom,
+        "--genetic-map", map,
         "--sample", proband,
         bcf_path)
     
     # analyse ROH and get results for the proband
     roh_output = system2(command, args, stdout=TRUE, stderr=FALSE)
-    roh = try(read.table(text=roh_output, sep="\t"), silent=TRUE)
+    roh = try(utils::read.table(text=roh_output, sep="\t"), silent=TRUE)
     
     # if the command doesn't return any output (such as for probands who only
     # have CNV calls, which would not make it through to the merged VCF, which

@@ -26,7 +26,7 @@ open_suspected_syndromes <- function(path) {
     missing = vector("list", length(missing_probands))
     missing = lapply(missing, function(x) NA)
     names(missing) = missing_probands
-    syndromes = modifyList(syndromes, missing)
+    syndromes = utils::modifyList(syndromes, missing)
     
     return(syndromes)
 }
@@ -94,11 +94,11 @@ calculate_gene_similarity <- function(probands, syndrome_rates) {
 #' @return proportion of sample pairs lacking a syndrome term match
 calculate_no_match <- function(syndromes) {
     
-    pb = txtProgressBar(min=0, max=length(syndromes), style=3)
+    pb = utils::txtProgressBar(min=0, max=length(syndromes), style=3)
     no_matches = 0
     total = 0
     for (x in 1:length(syndromes)) {
-        setTxtProgressBar(pb, x)
+        utils::setTxtProgressBar(pb, x)
         for (y in x:length(syndromes)) {
             if (x == y) { next }
             

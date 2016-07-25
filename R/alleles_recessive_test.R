@@ -72,7 +72,7 @@ enrichment_single_population <- function(freq, counts, cohort_n, autozygosity=0)
 #' @return P-value from testing for biallelic LoF variants.
 biallelic_lof_enrichment <- function(freq, count, cohort_n, autozygosity=0) {
     rate = (freq$lof ** 2) * (1 - autozygosity) + freq$lof * autozygosity
-    return(pbinom(count - 1, cohort_n, prob=rate, lower.tail=FALSE))
+    return(stats::pbinom(count - 1, cohort_n, prob=rate, lower.tail=FALSE))
 }
 
 #' test enrichment of inherited biallelic LoF and compound heterozygous LoF/Func
@@ -94,7 +94,7 @@ lof_func_enrichment <- function(freq, count, cohort_n, autozygosity=0) {
     rate = (freq$lof ** 2) * (1 - autozygosity) +
         (freq$lof) * autozygosity +
         (2 * freq$lof * (1 - freq$lof) * freq$functional)
-    return(pbinom(count - 1, cohort_n, prob=rate, lower.tail=FALSE))
+    return(stats::pbinom(count - 1, cohort_n, prob=rate, lower.tail=FALSE))
 }
 
 #' test enrichment of inherited biallelic functional variants
@@ -114,7 +114,7 @@ lof_func_enrichment <- function(freq, count, cohort_n, autozygosity=0) {
 #' @return P-value from testing for biallelic functional variants.
 biallelic_func_enrichment <- function(freq, count, cohort_n, autozygosity=0) {
     rate = (freq$functional ** 2) * (1 - autozygosity) + freq$functional * autozygosity
-    return(pbinom(count - 1, cohort_n, prob=rate, lower.tail=FALSE))
+    return(stats::pbinom(count - 1, cohort_n, prob=rate, lower.tail=FALSE))
 }
 
 #' test for enrichment of inherited variants in multiple populations

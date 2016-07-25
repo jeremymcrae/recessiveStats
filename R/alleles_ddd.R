@@ -10,8 +10,8 @@ get_ddd_cohort <- function(parents=TRUE, unaffected=TRUE) {
     ped_path = file.path(DATAFREEZE_DIR, "family_relationships.txt")
     sanger_id_path = file.path(DATAFREEZE_DIR, "person_sanger_decipher.txt")
     
-    ped = read.table(ped_path, sep="\t", header=TRUE, stringsAsFactors=FALSE)
-    sanger_ids = read.table(sanger_id_path, sep="\t", header=TRUE, stringsAsFactors=FALSE)
+    ped = utils::read.table(ped_path, sep="\t", header=TRUE, stringsAsFactors=FALSE)
+    sanger_ids = utils::read.table(sanger_id_path, sep="\t", header=TRUE, stringsAsFactors=FALSE)
     
     if (parents) { ped = ped[ped$dad_id == 0 & ped$mum_id == 0, ] }
     if (unaffected) { ped = ped[ped$affected == 1, ] }
@@ -88,7 +88,7 @@ get_lines_from_vep_vcf <- function(chrom, start, end) {
     con = file(vep_path, open="r")
     seek(con, file_start, origin="start")
     lines_n = (file_end - file_start) / line_length
-    vep = read.table(con, skip=1, sep="\t", nrows=lines_n, stringsAsFactors=FALSE)
+    vep = utils::read.table(con, skip=1, sep="\t", nrows=lines_n, stringsAsFactors=FALSE)
     names(vep) = c("chrom", "pos", "id", "ref", "alt", "qual", "filter", "info", "format")
     close(con)
     

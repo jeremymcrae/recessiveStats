@@ -8,6 +8,8 @@ Depends:
 License: file LICENSE
 LazyData: true
 Imports:
+    stats,
+    utils,
     seqminer,
     httr,
     rjson
