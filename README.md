@@ -65,11 +65,19 @@ cohort_n = 1000
 
 hgnc ="DNAH14"
 chrom = "1"
-biallelic_lof = 5
-biallelic_func = 10
-lof_func = 6
-probands = c("DDDP00000X", "DDDP00000Y", "DDDP00000Z")
-analyse_inherited_enrichment(hgnc, chrom, biallelic_lof, biallelic_func, lof_func, probands=probands, cohort_n=cohort_n)
+counts = list()
+counts$biallelic_lof = 5
+counts$biallelic_func = 10
+counts$lof_func = 6
+variants = get_exac_variants_for_gene(hgnc, chrom)
+
+# the variants object should be a list of tables, one for each of the ExAC
+# populations, e.g. 'AFR', 'EAS', 'NFE'. You'll need to pick the population that
+# matches your cohort. For this example we'll use the 'NFE'.
+analyse_inherited_enrichment(counts, variants[['NFE']], cohort_n)
+
+# alternatively, provide your path to the ExAC VCF e.g.
+variants = get_exac_variants_for_gene(hgnc, chrom, fileName='PATH_TO_VCF')
 ```
 
 Rather than naming a gene, you can give a chromosome range (but define the gene
@@ -78,7 +86,8 @@ are removed):
 ```R
 start=225083964
 end=225586996
-analyse_inherited_enrichment(hgnc=NULL, chrom, biallelic_lof, biallelic_func, lof_func, start=start, end=end, probands=probands, cohort_n=cohort_n)
+variants = get_exac_variants_for_gene(hgnc=NULL, chrom='1', start=start, end=end)
+analyse_inherited_enrichment(counts, variants[['NFE']], cohort_n)
 ```
 
 You can also take the autozygosity into account. Calculate the proportion of
@@ -86,7 +95,7 @@ probands who have an autozygous region overlapping the gene `bcftools roh` is
 recommended). Then you can include the rate as:
 ```R
 RATE=0.005
-analyse_inherited_enrichment(hgnc, chrom, biallelic_lof, biallelic_func, lof_func, probands=probands, autozygous_rate=RATE)
+analyse_inherited_enrichment(counts, variants[['NFE']], cohort_n, autozygous_rate=RATE)
 ```
 
 Also, if your probands are of multiple ethnicities, you can account for
@@ -95,7 +104,7 @@ of probands that would be classified as belonging to each ExAC population. For
 example:
 ```R
 cohort_n = list("AFR"=100, "EAS"=50, "NFE"=800, "SAS"=50)
-analyse_inherited_enrichment(hgnc, chrom, biallelic_lof, biallelic_func, lof_func, probands=probands, cohort_n=cohort_n)
+analyse_inherited_enrichment(counts, variants, cohort_n)
 ```
 
 The populations available in ExAC are:
