@@ -5,6 +5,75 @@ library(testthat)
 
 context("Recessive statistic checks")
 
+test_that("analyse_inherited_enrichment output is correct", {
+    
+    vars = read.table(header = TRUE, text = "
+        AC AN CQ
+        1 1000  missense_variant
+        1 1000  stop_gained
+        1 1000  stop_lost
+        1 1000  synonymous_variant
+        ")
+    
+    counts = list("biallelic_lof"=1, 'biallelic_func'=4, 'lof_func'=2)
+    cohort_n = 1000
+    
+    result = list(lof=0.001, functional=0.002,
+        biallelic_lof_p=0.000999500666126,
+        lof_func_p=2.064381e-08,
+        biallelic_func_p=1.056905e-11)
+    
+    expect_equal(analyse_inherited_enrichment(counts, vars, cohort_n), result)
+})
+
+test_that("analyse_inherited_enrichment output is correct for multi-population", {
+    vars1 = read.table(header = TRUE, text = "
+        AC AN CQ
+        1 1000  missense_variant
+        1 1000  stop_gained
+        ")
+    
+    vars2 = read.table(header = TRUE, text = "
+        AC AN CQ
+        1 1000  missense_variant
+        1 1000  stop_gained
+        ")
+    
+    vars = list("first"=vars1, "second"=vars2)
+    
+    counts = list("biallelic_lof"=1, 'biallelic_func'=4, 'lof_func'=2)
+    cohort_n = list("first"=500, "second"=500)
+    
+    result = list(lof=NA, functional=NA,
+        biallelic_lof_p=0.000999500666126,
+        lof_func_p=4.467516e-09,
+        biallelic_func_p=4.138414e-14)
+    
+    expect_equal(analyse_inherited_enrichment(counts, vars, cohort_n), result)
+})
+
+test_that("analyse_inherited_enrichment output raises an error if the cohort
+    populations aren't in the variant dataset", {
+    vars1 = read.table(header = TRUE, text = "
+        AC AN CQ
+        1 1000  missense_variant
+        1 1000  stop_gained
+        ")
+    
+    vars2 = read.table(header = TRUE, text = "
+        AC AN CQ
+        1 1000  missense_variant
+        1 1000  stop_gained
+        ")
+    
+    vars = list("first"=vars1, "second"=vars2)
+    
+    counts = list("biallelic_lof"=1, 'biallelic_func'=4, 'lof_func'=2)
+    cohort_n = list("first"=500, "third"=500)
+    
+    expect_error(analyse_inherited_enrichment(counts, vars, cohort_n))
+})
+
 test_that("enrichment_single_population output is correct", {
     
     freq = list(lof=0.001, functional=0.1)
@@ -50,6 +119,19 @@ test_that("enrichment_single_population output is correct when correcting for au
         biallelic_func_p=0.989927345227986)
     
     expect_equal(enrichment_single_population(freq, counts, 1000, autozygosity=0), result)
+})
+
+test_that("enrichment_single_population output is correct when missing count data", {
+    
+    freq = list(lof=0.001, functional=0.1)
+    counts = list("biallelic_lof"=1, 'lof_func'=2)
+    
+    result = list(lof=0.001, functional=0.1,
+        biallelic_lof_p=0.0009995006661,
+        lof_func_p=0.001158649872,
+        biallelic_func_p=numeric(0))
+    
+    expect_equal(enrichment_single_population(freq, counts, 1000), result)
 })
 
 context("Population combination generation checks")
@@ -118,6 +200,11 @@ test_that("get_count_combinations is correct for more cohorts", {
     expect_equal(combos, result)
 })
 
+test_that("get_count_combinations is correct for NA cohorts", {
+    #
+    expect_equal(get_count_combinations(populations, NA), NA)
+})
+
 context("Enrichment tests return the correct P-values")
 
 test_that("enrichment_multiple_populations is correct", {
@@ -160,6 +247,9 @@ test_that("sum_combo_tests is correct", {
     cohort_n = list("A"=20, "B"=180)
     expect_equal(sum_combo_tests(freqs, cohort_n, combos, biallelic_lof_enrichment),
         pbinom(6, sum(unlist(cohort_n)), freqs[[1]][["lof"]]**2, lower.tail=FALSE))
+    
+    # if the combos object is NA, then it returns NA
+    expect_equal(sum_combo_tests(freqs, cohort_n, NA, biallelic_lof_enrichment), NA)
 })
 
 test_that("single enrichment tests are correct", {
