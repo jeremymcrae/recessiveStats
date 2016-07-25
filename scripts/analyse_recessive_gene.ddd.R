@@ -43,19 +43,25 @@ autozygosity = autozygous_rates$rate[autozygous_rates$hgnc == gene]
 if (length(autozygosity) == 0) { autozygosity = 0 }
 
 chrom = row$chrom
-biallelic_lof = row$lof_sum
-lof_func = row$lof_func
-biallelic_func = 0
+counts = list()
 
-result = try(analyse_inherited_enrichment(gene, chrom, biallelic_lof, biallelic_func, lof_func,
-    probands=proband_ids, cohort_n=COHORT_N, check_last_base=LAST_BASE_RULE,
-    autozygous_rate=autozygosity))
+counts$biallelic_lof = row$lof_sum
+counts$lof_func = row$lof_func
+# counts$biallelic_func = NA
 
-if (class(result) == "try-error") { }
+# get the DDD and ExAC variants within the gene
+ddd = try(get_ddd_variants_for_gene(gene, chrom, probands=proband_ids, check_last_base=LAST_BASE_RULE), silent=TRUE)
+exac = try(get_exac_variants_for_gene(gene, chrom, check_last_base=LAST_BASE_RULE), silent=TRUE)
+
+ddd_p_values = analyse_inherited_enrichment(counts, ddd, COHORT_N, autozygosity=autozygosity)
+exac_p_values = analyse_inherited_enrichment(counts, exac, COHORT_N, autozygosity=autozygosity)
+
+names(ddd_p_values) = paste("ddd.", names(ddd_p_values), sep="")
+names(exac_p_values) = paste("exac.", names(exac_p_values), sep="")
 
 # join the result for the gene to the larger set of gene results
-gene_data = data.frame(hgnc=gene, chrom=chrom, func_count=lof_func,
-    lof_count=biallelic_lof)
-result = cbind(gene_data, data.frame(result))
+gene_data = data.frame(hgnc=gene, chrom=chrom, func_count=counts$lof_func,
+    lof_count=counts$biallelic_lof)
+result = cbind(gene_data, data.frame(ddd_p_values), data.frame(exac_p_values))
 
 write.table(result, file=OUTPUT_PATH, sep="\t", row.names=FALSE, quote=FALSE)
