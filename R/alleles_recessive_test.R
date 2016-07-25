@@ -3,9 +3,9 @@
 #' test for enrichment of inherited variants
 #'
 #' @param counts list of counts of biallelically inherited genotypes in a gene for:
-#'             biallelic_lof: inherited Lof/LoF variants.
-#'             lof_func: ninherited Lof/Func variants.
-#'             biallelic_func: inherited func/func variants.
+#'            1) biallelic_lof - inherited Lof/LoF variants,
+#'            2) lof_func - ninherited Lof/Func variants,
+#'            3) biallelic_func  inherited func/func variants.
 #' @param variants dataframe of variants in gene
 #' @param cohort_n number of probands in population.
 #' @param autozygosity rate of autozygosity within the gene in the probands.
@@ -31,9 +31,9 @@ analyse_inherited_enrichment <- function(counts, variants, cohort_n=3072, autozy
 #' @param freq list of cumulative frequencies of variation in a population for
 #'        rare LoF variants, and rare functional variants.
 #' @param counts list of counts of biallelically inherited genotypes in a gene for:
-#'             biallelic_lof: inherited Lof/LoF variants.
-#'             lof_func: ninherited Lof/Func variants.
-#'             biallelic_func: inherited func/func variants.
+#'            1) biallelic_lof - inherited Lof/LoF variants,
+#'            2) lof_func - ninherited Lof/Func variants,
+#'            3) biallelic_func  inherited func/func variants.
 #' @param cohort_n number of probands in population.
 #' @param autozygosity rate of autozygosity in the cohort being investigated.
 #' @export
@@ -121,9 +121,9 @@ biallelic_func_enrichment <- function(freq, count, cohort_n, autozygosity=0) {
 #'
 #' @param freqs list of frequency estimates for each ExAC population.
 #' @param counts list of counts of biallelically inherited genotypes in a gene for:
-#'             biallelic_lof: inherited Lof/LoF variants.
-#'             lof_func: ninherited Lof/Func variants.
-#'             biallelic_func: inherited func/func variants.
+#'            1) biallelic_lof - inherited Lof/LoF variants,
+#'            2) lof_func - ninherited Lof/Func variants,
+#'            3) biallelic_func  inherited func/func variants.
 #' @param cohort_n list of number of probands in each population.
 #' @param autozygosity rate of autozygosity in the cohort being investigated.
 #' @export
