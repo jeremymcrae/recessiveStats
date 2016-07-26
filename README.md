@@ -63,15 +63,27 @@ devtools::install_github("jeremymcrae/recessiveStats")
 library(recessiveStats)
 cohort_n = 1000
 
-hgnc ="DNAH14"
+hgnc = "DNAH14"
 chrom = "1"
 counts = list()
 counts$biallelic_lof = 5
 counts$biallelic_func = 10
 counts$lof_func = 6
+
+# define the variants in the control population, including allele counts
+variants = read.table(header = TRUE, text = "
+    chrom  pos   AC  AN    CQ
+    1      1000  1   1000  missense_variant
+    1      1000  5   1000  stop_gained
+    1      1000  8   1000  stop_lost
+    1      1000  20  1000  synonymous_variant")
+
+analyse_inherited_enrichment(counts, variants, cohort_n)
+
+# For ease of use, you can also load variant counts from ExAC with:
 variants = get_exac_variants_for_gene(hgnc, chrom)
 
-# the variants object should be a list of tables, one for each of the ExAC
+# The ExAC variants object should be a list of tables, one for each of the ExAC
 # populations, e.g. 'AFR', 'EAS', 'NFE'. You'll need to pick the population that
 # matches your cohort. For this example we'll use the 'NFE'.
 analyse_inherited_enrichment(counts, variants[['NFE']], cohort_n)
