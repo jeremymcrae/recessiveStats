@@ -107,7 +107,7 @@ probands who have an autozygous region overlapping the gene `bcftools roh` is
 recommended). Then you can include the rate as:
 ```R
 RATE=0.005
-analyse_inherited_enrichment(counts, variants[['NFE']], cohort_n, autozygous_rate=RATE)
+analyse_inherited_enrichment(counts, variants[['NFE']], cohort_n, autozygosity=RATE)
 ```
 
 Also, if your probands are of multiple ethnicities, you can account for
