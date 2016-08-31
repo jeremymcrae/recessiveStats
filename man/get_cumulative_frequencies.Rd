@@ -4,13 +4,18 @@
 \alias{get_cumulative_frequencies}
 \title{obtain cumulative allele frequency of rare lof and functional variants}
 \usage{
-get_cumulative_frequencies(vars)
+get_cumulative_frequencies(vars, threshold = 0.01)
 }
 \arguments{
 \item{vars}{dataframe of variants (one row per allele), which includes the
 number of times that allele was observed within the population, as
 well as the total number of alleles in the population. Alternatively,
 this can be a list of dataframe, each for a different population}
+
+\item{threshold}{minor allele frequency (MAF) threshold, we exclude variants
+with MAF values above or equal to this threshold. This needs to be
+matched to the thresh9old used during identification of the
+biallelically inherited genotypes.}
 }
 \value{
 a list of loss of function cumulative frequency, and functional
@@ -38,5 +43,8 @@ vars2 = read.table(header = TRUE, text = "
      1   1000  synonymous_variant")
 var_list = list("first"=vars, "second"=vars2)
 get_cumulative_frequencies(var_list)
+
+threshold = 0.005
+get_cumulative_frequencies(var_list, threshold)
 }
 
