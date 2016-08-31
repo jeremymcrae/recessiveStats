@@ -6,6 +6,10 @@
 #'        well as the total number of alleles in the population. Alternatively,
 #'        this can be a list of dataframe, each for a different population
 #         (e.g. list("EAS"=df(...), "SAS"=df(...))).
+#' @param threshold minor allele frequency (MAF) threshold, we exclude variants
+#'        with MAF values above or equal to this threshold. This needs to be
+#'        matched to the thresh9old used during identification of the
+#'        biallelically inherited genotypes.
 #' @export
 #'
 #' @return a list of loss of function cumulative frequency, and functional
