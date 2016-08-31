@@ -30,7 +30,10 @@
 #'      1   1000  synonymous_variant")
 #' var_list = list("first"=vars, "second"=vars2)
 #' get_cumulative_frequencies(var_list)
-get_cumulative_frequencies <- function(vars) {
+#'
+#' threshold = 0.005
+#' get_cumulative_frequencies(var_list, threshold)
+get_cumulative_frequencies <- function(vars, threshold=0.01) {
     
     # define the VEP consequence types for loss of function and missense variants
     lof_cq = c("stop_gained", "splice_acceptor_variant", "splice_donor_variant",
@@ -50,7 +53,7 @@ get_cumulative_frequencies <- function(vars) {
     
     # select the rare variants (possibly this should be done on a site basis,
     # rather than per allele?)
-    vars = vars[vars$frequency < 0.01, ]
+    vars = vars[vars$frequency < threshold, ]
     
     # find the loss of function variants
     lof_vars = vars[vars$CQ %in% lof_cq, ]
