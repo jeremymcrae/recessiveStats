@@ -7,8 +7,8 @@
 #' @return list of probands, where each proband has a vector of suspected
 #'     syndromes.
 open_suspected_syndromes <- function(path) {
-    probands = read.table(PHENOTYPES_PATH, sep="\t", header=TRUE, stringsAsFactors=TRUE)
-    syndromes = read.table(path, sep="\t", header=TRUE, stringsAsFactors=FALSE, quote="")
+    probands = utils::read.table(PHENOTYPES_PATH, sep="\t", header=TRUE, stringsAsFactors=TRUE)
+    syndromes = utils::read.table(path, sep="\t", header=TRUE, stringsAsFactors=FALSE, quote="")
     
     syndromes$syndrome = strsplit(syndromes$syndrome, ";")
     
