@@ -100,6 +100,9 @@ start=225083964
 end=225586996
 variants = get_exac_variants_for_gene(hgnc=NULL, chrom='1', start=start, end=end)
 analyse_inherited_enrichment(counts, variants[['NFE']], cohort_n)
+
+# define your own MAF threshold for variant inclusion
+analyse_inherited_enrichment(counts, variants[['NFE']], threshold=0.005, cohort_n)
 ```
 
 You can also take the autozygosity into account. Calculate the proportion of
