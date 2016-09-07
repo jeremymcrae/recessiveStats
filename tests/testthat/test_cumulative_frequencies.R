@@ -89,3 +89,20 @@ test_that("correct cumulative frequencies when we test a list of dataframes", {
         list("first"=list(lof=0.001, functional=0.001),
             "second"=list(lof=0.001, functional=0.001)))
 })
+
+test_that("correct cumulative frequencies when we change the frequency threshold", {
+    vars = read.table(header = TRUE, text = "
+        AC AN CQ
+        1 1000  missense_variant
+        1 1000  stop_gained
+        8 1000  stop_gained
+        1 1000  synonymous_variant
+        ")
+    
+    expect_equal(get_cumulative_frequencies(vars, threshold=0.005),
+        list(lof=0.001, functional=0.001))
+    
+    # expect higher frequencies when we use a higher threshold
+    expect_equal(get_cumulative_frequencies(vars, threshold=0.01),
+        list(lof=0.009, functional=0.001))
+})

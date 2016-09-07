@@ -5,7 +5,7 @@
 \title{test for enrichment of inherited variants}
 \usage{
 analyse_inherited_enrichment(counts, variants, cohort_n = 3072,
-  autozygosity = 0)
+  autozygosity = 0, threshold = 0.01)
 }
 \arguments{
 \item{counts}{list of counts of biallelically inherited genotypes in a gene for:
@@ -18,6 +18,9 @@ analyse_inherited_enrichment(counts, variants, cohort_n = 3072,
 \item{cohort_n}{number of probands in population.}
 
 \item{autozygosity}{rate of autozygosity within the gene in the probands.}
+
+\item{threshold}{threshold for minor allele frequency, above which we exclude
+variants.}
 }
 \value{
 a list of P values from LoF and functional tests.

@@ -52,6 +52,36 @@ test_that("analyse_inherited_enrichment output is correct for multi-population",
     expect_equal(analyse_inherited_enrichment(counts, vars, cohort_n), result)
 })
 
+test_that("analyse_inherited_enrichment output can use different frequency threshold", {
+    vars = read.table(header = TRUE, text = "
+        AC AN CQ
+        1 1000  missense_variant
+        1 1000  stop_gained
+        8 1000  stop_gained
+        1 1000  synonymous_variant
+        ")
+    
+    counts = list("biallelic_lof"=1, 'biallelic_func'=4, 'lof_func'=2)
+    cohort_n = list("first"=500, "second"=500)
+    
+    result = list(lof=0.009, functional=0.001,
+        biallelic_lof_p=0.07780933397,
+        lof_func_p=0.0001490382885,
+        biallelic_func_p=4.138413726e-14)
+    
+    expect_equal(analyse_inherited_enrichment(counts, vars, cohort_n,
+        threshold=0.01), result)
+    
+    # now check when we change the frequency threshold
+    result = list(lof=0.001, functional=0.001,
+        biallelic_lof_p=0.0009995006661,
+        lof_func_p=4.467516392e-09,
+        biallelic_func_p=4.138413726e-14)
+        
+    expect_equal(analyse_inherited_enrichment(counts, vars, cohort_n,
+        threshold=0.005), result)
+})
+
 test_that("analyse_inherited_enrichment output raises an error if the cohort
     populations aren't in the variant dataset", {
     vars1 = read.table(header = TRUE, text = "

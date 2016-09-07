@@ -9,12 +9,14 @@
 #' @param variants dataframe of variants in gene
 #' @param cohort_n number of probands in population.
 #' @param autozygosity rate of autozygosity within the gene in the probands.
+#' @param threshold threshold for minor allele frequency, above which we exclude
+#'        variants.
 #' @export
 #'
 #' @return a list of P values from LoF and functional tests.
-analyse_inherited_enrichment <- function(counts, variants, cohort_n=3072, autozygosity=0) {
+analyse_inherited_enrichment <- function(counts, variants, cohort_n=3072, autozygosity=0, threshold=0.01) {
     
-    freqs = get_cumulative_frequencies(variants)
+    freqs = get_cumulative_frequencies(variants, threshold)
     
     if (!is.list(cohort_n) || !any(names(freqs) %in% names(cohort_n))) {
         p_values = enrichment_single_population(freqs, counts, sum(unlist(cohort_n)), autozygosity)
