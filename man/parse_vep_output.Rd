@@ -4,13 +4,16 @@
 \alias{parse_vep_output}
 \title{parses VEP output}
 \usage{
-parse_vep_output(variant, hgnc)
+parse_vep_output(variant, hgnc, remove_benign = TRUE)
 }
 \arguments{
 \item{variant}{single row dataframe containing allele column and VEP prediction
 column.}
 
 \item{hgnc}{HGNC symbol for the gene that we are currently investigating.}
+
+\item{remove_benign}{boolean for whether to exclude missense_variants with
+polyphen tolerated predictions.}
 }
 \value{
 vep consequence string for the most severe consequence for the gene

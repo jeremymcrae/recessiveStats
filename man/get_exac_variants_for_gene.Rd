@@ -5,7 +5,7 @@
 \title{get and parse ExAC variants within a gene}
 \usage{
 get_exac_variants_for_gene(hgnc, chrom, start = NULL, end = NULL,
-  fileName = NULL, check_last_base = FALSE)
+  fileName = NULL, check_last_base = FALSE, remove_benign = FALSE)
 }
 \arguments{
 \item{hgnc}{HGNC symbol for the gene that we want data for eg "ARID1B"}
@@ -24,6 +24,9 @@ gene region).}
 
 \item{check_last_base}{boolean for whether to check if last base non-lofs can
 be LoF.}
+
+\item{remove_benign}{boolean for whether to exclude missense_variants with
+polyphen tolerated predictions.}
 }
 \value{
 data frame of variants in gene

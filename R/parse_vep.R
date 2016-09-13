@@ -22,13 +22,15 @@ severity = data.frame(consequence=consequences, rank=seq(1:length(consequences))
 #' @param variant single row dataframe containing allele column and VEP prediction
 #'     column.
 #' @param hgnc HGNC symbol for the gene that we are currently investigating.
+#' @param remove_benign boolean for whether to exclude missense_variants with
+#'        polyphen tolerated predictions.
 #' @export
 #'
 #' @return vep consequence string for the most severe consequence for the gene
 #'     of interest. If none of the predicted consequences lie within the gene of
 #'    interest, return "NA". If the variant has multiple alleles, return a
 #'    comma-separated list of VEP consequences for the alleles.
-parse_vep_output <- function(variant, hgnc) {
+parse_vep_output <- function(variant, hgnc, remove_benign=TRUE) {
     
     # Sometimes the VEP prediction is a comma-separated list of VEP predictions.
     # This can occur for two reasons, when we have predictions for the different
@@ -50,6 +52,7 @@ parse_vep_output <- function(variant, hgnc) {
         allele = prediction[1]
         symbol = prediction[15]
         cq = prediction[5]
+        polyphen = prediction[25]
         
         if (!is.null(hgnc)) {
             if (symbol != hgnc) { next }
@@ -74,6 +77,12 @@ parse_vep_output <- function(variant, hgnc) {
     
     # get the most severe consequence for each allele
     cq = paste(sapply(consequences, get_most_severe_consequence), collapse=",")
+    
+    # if the variant is a benign missense_variant, then swap to a nonfunctional
+    # consequence
+    if (remove_benign & cq == 'missense_variant' & grepl('tolerated', polyphen)) {
+        cq = 'synonymous_variant'
+    }
     
     return(cq)
 }

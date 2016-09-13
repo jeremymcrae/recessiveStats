@@ -13,11 +13,13 @@
 #' @param fileName path to tabis-indexed ExAC VCF file.
 #' @param check_last_base boolean for whether to check if last base non-lofs can
 #'        be LoF.
+#' @param remove_benign boolean for whether to exclude missense_variants with
+#'        polyphen tolerated predictions.
 #' @export
 #'
 #' @return data frame of variants in gene
 get_exac_variants_for_gene <- function(hgnc, chrom, start=NULL, end=NULL,
-        fileName=NULL, check_last_base=FALSE) {
+        fileName=NULL, check_last_base=FALSE, remove_benign=FALSE) {
     
     if (!is.null(hgnc) & is.null(start) & is.null(end)) {
         rows = get_gene_coordinates(hgnc, chrom)
@@ -54,7 +56,7 @@ get_exac_variants_for_gene <- function(hgnc, chrom, start=NULL, end=NULL,
     # from the VEP data field.
     vars$sampleId = NULL
     vars = data.frame(vars, stringsAsFactors=FALSE)
-    vars$CQ = apply(vars, 1, parse_vep_output, hgnc=hgnc)
+    vars$CQ = apply(vars, 1, parse_vep_output, hgnc=hgnc, remove_benign=remove_benign)
     vars$CSQ = NULL
     
     if (check_last_base & !is.null(hgnc)) {
