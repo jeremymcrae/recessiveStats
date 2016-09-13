@@ -1,11 +1,10 @@
-
-
 #' test for enrichment of inherited variants
 #'
 #' @param counts list of counts of biallelically inherited genotypes in a gene for:
 #'            1) biallelic_lof - inherited Lof/LoF variants,
 #'            2) lof_func - ninherited Lof/Func variants,
 #'            3) biallelic_func  inherited func/func variants.
+#'            4) all  all inherited LoF/LoF, LoF/func or func/func variants.
 #' @param variants dataframe of variants in gene
 #' @param cohort_n number of probands in population.
 #' @param autozygosity rate of autozygosity within the gene in the probands.
@@ -53,7 +52,7 @@ enrichment_single_population <- function(freq, counts, cohort_n, autozygosity=0)
     freq$biallelic_lof_p = biallelic_lof_enrichment(freq, counts$biallelic_lof, cohort_n, autozygosity)
     freq$lof_func_p = lof_func_enrichment(freq, counts$biallelic_lof + counts$lof_func, cohort_n, autozygosity)
     freq$biallelic_func_p = biallelic_func_enrichment(freq, counts$biallelic_func, cohort_n, autozygosity)
-    
+    freq$all_p = all_enrichment(freq, counts$biallelic_lof + counts$lof_func + counts$biallelic_func, cohort_n, autozygosity)
     return(freq)
 }
 
@@ -96,6 +95,28 @@ lof_func_enrichment <- function(freq, count, cohort_n, autozygosity=0) {
     rate = (freq$lof ** 2) * (1 - autozygosity) +
         (freq$lof) * autozygosity +
         (2 * freq$lof * (1 - freq$lof) * freq$functional)
+    return(stats::pbinom(count - 1, cohort_n, prob=rate, lower.tail=FALSE))
+}
+#' test enrichment of inherited biallelic LoF, compound heterozygous LoF/Func or biallelic Func
+#'
+#' @param freq list of cumulative frequencies of variation in a population for
+#'        rare LoF variants, and rare functional variants.
+#' @param count number of probands with inherited variants in the gene.
+#' @param cohort_n number of probands in population.
+#' @param autozygosity rate of autozygosity in the cohort being investigated.
+#' @export
+#'
+#' @examples
+#' freq = list(lof=0.001, functional=0.1)
+#' count = 3
+#' lof_func_enrichment(freq, count, 1000)
+#'
+#' @return P-value from testing for biallelic LoF, Lof/Func and biallelic Func variants.
+all_enrichment <- function(freq, count, cohort_n, autozygosity=0) {
+    rate = (freq$lof ** 2) * (1 - autozygosity) +
+        (freq$lof) * autozygosity +
+        (2 * freq$lof * (1 - freq$lof) * freq$functional) +
+          (freq$functional ** 2) * (1-autozygosity) + (freq$functional) * autozygosity
     return(stats::pbinom(count - 1, cohort_n, prob=rate, lower.tail=FALSE))
 }
 
@@ -147,14 +168,16 @@ enrichment_multiple_populations <- function(freqs, counts, cohort_n, autozygosit
     biallelic_lof_combos = get_count_combinations(populations, counts$biallelic_lof)
     biallelic_func_combos = get_count_combinations(populations, counts$biallelic_func)
     lof_func_combos = get_count_combinations(populations, counts$biallelic_lof + counts$lof_func)
+    all_combos = get_count_combinations(populations,counts$biallelic_lof + counts$lof_func + counts$biallelic_func)
     
-    p_values = list(lof=NA, functional=NA)
+      p_values = list(lof=NA, functional=NA)
     p_values$biallelic_lof_p = sum_combo_tests(freqs, cohort_n,
         biallelic_lof_combos, biallelic_lof_enrichment, autozygosity)
     p_values$lof_func_p = sum_combo_tests(freqs, cohort_n,
         lof_func_combos, lof_func_enrichment, autozygosity)
     p_values$biallelic_func_p = sum_combo_tests(freqs, cohort_n,
         biallelic_func_combos, biallelic_func_enrichment, autozygosity)
+    p_values$all_p = sum_combo_tests(freqs,cohort_n,all_combos,all_enrichment,autozygosity)
     
     return(p_values)
 }

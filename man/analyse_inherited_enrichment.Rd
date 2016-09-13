@@ -11,7 +11,8 @@ analyse_inherited_enrichment(counts, variants, cohort_n = 3072,
 \item{counts}{list of counts of biallelically inherited genotypes in a gene for:
 1) biallelic_lof - inherited Lof/LoF variants,
 2) lof_func - ninherited Lof/Func variants,
-3) biallelic_func  inherited func/func variants.}
+3) biallelic_func  inherited func/func variants.
+4) all  all inherited LoF/LoF, LoF/func or func/func variants.}
 
 \item{variants}{dataframe of variants in gene}
 
