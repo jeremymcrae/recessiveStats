@@ -21,7 +21,8 @@ test_that("analyse_inherited_enrichment output is correct", {
     result = list(lof=0.001, functional=0.002,
         biallelic_lof_p=0.000999500666126,
         lof_func_p=2.064381e-08,
-        biallelic_func_p=1.056905e-11)
+        biallelic_func_p=1.056905e-11,
+        all_p=9.191389e-19)
     
     expect_equal(analyse_inherited_enrichment(counts, vars, cohort_n), result)
 })
@@ -47,7 +48,8 @@ test_that("analyse_inherited_enrichment output is correct for multi-population",
     result = list(lof=NA, functional=NA,
         biallelic_lof_p=0.000999500666126,
         lof_func_p=4.467516e-09,
-        biallelic_func_p=4.138414e-14)
+        biallelic_func_p=4.138414e-14,
+        all_p=3.16097e-21)
     
     expect_equal(analyse_inherited_enrichment(counts, vars, cohort_n), result)
 })
@@ -67,7 +69,8 @@ test_that("analyse_inherited_enrichment output can use different frequency thres
     result = list(lof=0.009, functional=0.001,
         biallelic_lof_p=0.07780933397,
         lof_func_p=0.0001490382885,
-        biallelic_func_p=4.138413726e-14)
+        biallelic_func_p=4.138413726e-14,
+        all_p=1.761373e-11)
     
     expect_equal(analyse_inherited_enrichment(counts, vars, cohort_n,
         threshold=0.01), result)
@@ -76,7 +79,8 @@ test_that("analyse_inherited_enrichment output can use different frequency thres
     result = list(lof=0.001, functional=0.001,
         biallelic_lof_p=0.0009995006661,
         lof_func_p=4.467516392e-09,
-        biallelic_func_p=4.138413726e-14)
+        biallelic_func_p=4.138413726e-14,
+        all_p=3.16097e-21)
         
     expect_equal(analyse_inherited_enrichment(counts, vars, cohort_n,
         threshold=0.005), result)
@@ -112,7 +116,8 @@ test_that("enrichment_single_population output is correct", {
     result = list(lof=0.001, functional=0.1,
         biallelic_lof_p=0.000999500666126,
         lof_func_p=0.001158649871933,
-        biallelic_func_p=0.989927345227986)
+        biallelic_func_p=0.989927345227986,
+        all_p=0.883268773181358)
     
     expect_equal(enrichment_single_population(freq, counts, 1000), result)
 })
@@ -125,7 +130,8 @@ test_that("enrichment_single_population output is correct for NA input", {
     result = list(lof=NA, functional=NA,
         biallelic_lof_p=as.numeric(NA),
         lof_func_p=as.numeric(NA),
-        biallelic_func_p=as.numeric(NA))
+        biallelic_func_p=as.numeric(NA),
+        all_p=as.numeric(NA))
     
     expect_identical(enrichment_single_population(freq, counts, 1000), result)
 })
@@ -138,7 +144,8 @@ test_that("enrichment_single_population output is correct when correcting for au
     result = list(lof=0.001, functional=0.1,
         biallelic_lof_p=0.0019970053242,
         lof_func_p=0.0011751598957,
-        biallelic_func_p=0.99057656658)
+        biallelic_func_p=0.99057656658,
+        all_p=0.888449945683488)
     
     expect_equal(enrichment_single_population(freq, counts, 1000, autozygosity=0.001), result)
     
@@ -146,7 +153,8 @@ test_that("enrichment_single_population output is correct when correcting for au
     result = list(lof=0.001, functional=0.1,
         biallelic_lof_p=0.000999500666126,
         lof_func_p=0.001158649871933,
-        biallelic_func_p=0.989927345227986)
+        biallelic_func_p=0.989927345227986,
+        all_p=0.883268773181358)
     
     expect_equal(enrichment_single_population(freq, counts, 1000, autozygosity=0), result)
 })
@@ -159,7 +167,8 @@ test_that("enrichment_single_population output is correct when missing count dat
     result = list(lof=0.001, functional=0.1,
         biallelic_lof_p=0.0009995006661,
         lof_func_p=0.001158649872,
-        biallelic_func_p=numeric(0))
+        biallelic_func_p=numeric(0),
+        all_p=numeric(0))
     
     expect_equal(enrichment_single_population(freq, counts, 1000), result)
 })
@@ -250,7 +259,8 @@ test_that("enrichment_multiple_populations is correct", {
     # this test operates on multiple populations, so we can't get a single value
     # for the frequencies.
     result = list(lof=NA, functional=NA, biallelic_lof_p=1.721856125e-06,
-        lof_func_p=1.4797290028e-05, biallelic_func_p=0.019410324318)
+        lof_func_p=1.4797290028e-05, biallelic_func_p=0.019410324318,
+        all_p=7.68708279005614e-06)
     
     expect_equal(enrichment_multiple_populations(freqs,
         counts, cohort_n, autozygous_rate), result)
