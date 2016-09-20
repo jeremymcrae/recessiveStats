@@ -53,6 +53,7 @@ enrichment_single_population <- function(freq, counts, cohort_n, autozygosity=0)
     freq$lof_func_p = lof_func_enrichment(freq, counts$biallelic_lof + counts$lof_func, cohort_n, autozygosity)
     freq$biallelic_func_p = biallelic_func_enrichment(freq, counts$biallelic_func, cohort_n, autozygosity)
     freq$all_p = all_enrichment(freq, counts$biallelic_lof + counts$lof_func + counts$biallelic_func, cohort_n, autozygosity)
+    freq$biallelic_syn_p = biallelic_syn_enrichment(freq, counts$biallelic_syn, cohort_n, autozygosity)
     return(freq)
 }
 
@@ -140,6 +141,26 @@ biallelic_func_enrichment <- function(freq, count, cohort_n, autozygosity=0) {
     return(stats::pbinom(count - 1, cohort_n, prob=rate, lower.tail=FALSE))
 }
 
+#' test enrichment of inherited biallelic synonymous variants
+#'
+#' @param freq list of cumulative frequencies of variation in a population for
+#'        rare LoF variants, and rare functional variants.
+#' @param count number of probands with inherited variants in the gene.
+#' @param cohort_n number of probands in population.
+#' @param autozygosity rate of autozygosity in the cohort being investigated.
+#' @export
+#'
+#' @examples
+#' freq = list(lof=0.001, functional=0.1, synonymous=0.3)
+#' count = 3
+#' biallelic_syn_enrichment(freq, count, 1000)
+#'
+#' @return P-value from testing for biallelic synonymous variants.
+biallelic_syn_enrichment <- function(freq, count, cohort_n, autozygosity=0) {
+    rate = (freq$synonymous ** 2) * (1 - autozygosity) + freq$synonymous * autozygosity
+    return(stats::pbinom(count - 1, cohort_n, prob=rate, lower.tail=FALSE))
+}
+
 #' test for enrichment of inherited variants in multiple populations
 #'
 #' @param freqs list of frequency estimates for each ExAC population.
@@ -147,14 +168,15 @@ biallelic_func_enrichment <- function(freq, count, cohort_n, autozygosity=0) {
 #'            1) biallelic_lof - inherited Lof/LoF variants,
 #'            2) lof_func - ninherited Lof/Func variants,
 #'            3) biallelic_func  inherited func/func variants.
+#'            3) biallelic_syn  inherited synonymous/synonymous variants.
 #' @param cohort_n list of number of probands in each population.
 #' @param autozygosity rate of autozygosity in the cohort being investigated.
 #' @export
 #'
 #' @examples
-#' freqs = list("AFR"=list("lof"=0.01, "functional"=0.1),
-#'     "EAS"=list("lof"=0.02, "functional"=0.1))
-#' counts = list("biallelic_lof"=4, 'biallelic_func'=6, 'lof_func'=3)
+#' freqs = list("AFR"=list("lof"=0.01, "functional"=0.1,"synonymous"=0.3),
+#'     "EAS"=list("lof"=0.02, "functional"=0.1,"synonymous"=0.3))
+#' counts = list("biallelic_lof"=4, 'biallelic_func'=6, 'lof_func'=3,"biallelic_syn"=5)
 #' cohort_n = list("AFR"=50, "EAS"=150)
 #' autozygous_rate = 0.005
 #' enrichment_multiple_populations(freqs, counts, cohort_n, autozygous_rate)
@@ -167,6 +189,7 @@ enrichment_multiple_populations <- function(freqs, counts, cohort_n, autozygosit
     populations = names(cohort_n)
     biallelic_lof_combos = get_count_combinations(populations, counts$biallelic_lof)
     biallelic_func_combos = get_count_combinations(populations, counts$biallelic_func)
+    biallelic_syn_combos = get_count_combinations(populations, counts$biallelic_syn)
     lof_func_combos = get_count_combinations(populations, counts$biallelic_lof + counts$lof_func)
     all_combos = get_count_combinations(populations,counts$biallelic_lof + counts$lof_func + counts$biallelic_func)
     
@@ -177,6 +200,8 @@ enrichment_multiple_populations <- function(freqs, counts, cohort_n, autozygosit
         lof_func_combos, lof_func_enrichment, autozygosity)
     p_values$biallelic_func_p = sum_combo_tests(freqs, cohort_n,
         biallelic_func_combos, biallelic_func_enrichment, autozygosity)
+    p_values$biallelic_syn_p = sum_combo_tests(freqs, cohort_n,
+      biallelic_syn_combos, biallelic_syn_enrichment, autozygosity)
     p_values$all_p = sum_combo_tests(freqs,cohort_n,all_combos,all_enrichment,autozygosity)
     
     return(p_values)

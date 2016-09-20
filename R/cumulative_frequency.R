@@ -10,12 +10,11 @@
 #'        with MAF values above or equal to this threshold. This needs to be
 #'        matched to the thresh9old used during identification of the
 #'        biallelically inherited genotypes.
-#' @param synonymous Boolean indicated whether you want to pretent synonymous
-#'        variants are functional. Note, the frequency will come as "functional".
 #' @export
 #'
-#' @return a list of loss of function cumulative frequency, and functional
-#'         cumulative frequency. Alternatively, if the function was prvoided
+#' @return a list of loss of function cumulative frequency, functional
+#'         cumulative frequency and synonymous cumulative frequency.
+#'         Alternatively, if the function was prvoided
 #'         with a list of dataframe, return a list of frequency lists, named as
 #'         per the input list.
 #'
@@ -39,7 +38,7 @@
 #'
 #' threshold = 0.005
 #' get_cumulative_frequencies(var_list, threshold)
-get_cumulative_frequencies <- function(vars, threshold=0.01,synonymous=FALSE) {
+get_cumulative_frequencies <- function(vars, threshold=0.01) {
    
     # define the VEP consequence types for loss of function and missense variants
     lof_cq = c("stop_gained", "splice_acceptor_variant", "splice_donor_variant",
@@ -48,10 +47,8 @@ get_cumulative_frequencies <- function(vars, threshold=0.01,synonymous=FALSE) {
     functional_cq = c("stop_lost", "initiator_codon_variant",
         "transcript_amplification", "inframe_insertion", "inframe_deletion",
            "missense_variant", "coding_sequence_variant")
-    
-    if(synonymous){
-      functional_cq = c("synonymous_variant")
-    }
+
+    silent_cq = c("synonymous_variant")
     
     # if we have provided a list of dataframes, then run this function on each
     # of them in turn, and return a list of frequency lists.
@@ -68,9 +65,11 @@ get_cumulative_frequencies <- function(vars, threshold=0.01,synonymous=FALSE) {
     # find the loss of function variants
     lof_vars = vars[vars$CQ %in% lof_cq, ]
     functional_vars = vars[vars$CQ %in% functional_cq, ]
-    
+    silent_vars = vars[vars$CQ %in% silent_cq, ]    
+
     lof_freq = sum(lof_vars$frequency, na.rm=TRUE)
     functional_freq = sum(functional_vars$frequency, na.rm=TRUE)
+    silent_freq = sum(silent_vars$frequency, na.rm=TRUE)
     
     # What do we do if the frequency is zero? We won't be able to get meaningful
     # estimates of the enrichment of inherited variants. Estimate the frequency
@@ -81,12 +80,14 @@ get_cumulative_frequencies <- function(vars, threshold=0.01,synonymous=FALSE) {
     if (length(vars$AN[!is.na(vars$AN)]) != 0) {
         if (lof_freq == 0) { lof_freq = 1/(stats::median(vars$AN, na.rm=TRUE) + 2) }
         if (functional_freq == 0) { functional_freq = 1/(stats::median(vars$AN, na.rm=TRUE) + 2) }
+        if (silent_freq == 0) { silent_freq = 1/(stats::median(vars$AN, na.rm=TRUE) + 2) }
     } else {
         if (lof_freq == 0) { lof_freq = NA }
         if (functional_freq == 0) { functional_freq = NA }
+        if (silent_freq == 0) { silent_freq = NA }
     }
     
-    frequencies = list(lof=lof_freq, functional=functional_freq)
+    frequencies = list(lof=lof_freq, functional=functional_freq,synonymous=silent_freq)
     
     return(frequencies)
 }

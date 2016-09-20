@@ -12,7 +12,8 @@ enrichment_multiple_populations(freqs, counts, cohort_n, autozygosity = 0)
 \item{counts}{list of counts of biallelically inherited genotypes in a gene for:
 1) biallelic_lof - inherited Lof/LoF variants,
 2) lof_func - ninherited Lof/Func variants,
-3) biallelic_func  inherited func/func variants.}
+3) biallelic_func  inherited func/func variants.
+3) biallelic_syn  inherited synonymous/synonymous variants.}
 
 \item{cohort_n}{list of number of probands in each population.}
 
@@ -26,9 +27,9 @@ a list of P values from tests across the populations, under LoF and
 test for enrichment of inherited variants in multiple populations
 }
 \examples{
-freqs = list("AFR"=list("lof"=0.01, "functional"=0.1),
-    "EAS"=list("lof"=0.02, "functional"=0.1))
-counts = list("biallelic_lof"=4, 'biallelic_func'=6, 'lof_func'=3)
+freqs = list("AFR"=list("lof"=0.01, "functional"=0.1,"synonymous"=0.3),
+    "EAS"=list("lof"=0.02, "functional"=0.1,"synonymous"=0.3))
+counts = list("biallelic_lof"=4, 'biallelic_func'=6, 'lof_func'=3,"biallelic_syn"=5)
 cohort_n = list("AFR"=50, "EAS"=150)
 autozygous_rate = 0.005
 enrichment_multiple_populations(freqs, counts, cohort_n, autozygous_rate)
