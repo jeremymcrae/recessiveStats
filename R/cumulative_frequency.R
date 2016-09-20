@@ -10,6 +10,8 @@
 #'        with MAF values above or equal to this threshold. This needs to be
 #'        matched to the thresh9old used during identification of the
 #'        biallelically inherited genotypes.
+#' @param synonymous Boolean indicated whether you want to pretent synonymous
+#'        variants are functional. Note, the frequency will come as "functional".
 #' @export
 #'
 #' @return a list of loss of function cumulative frequency, and functional
@@ -37,8 +39,8 @@
 #'
 #' threshold = 0.005
 #' get_cumulative_frequencies(var_list, threshold)
-get_cumulative_frequencies <- function(vars, threshold=0.01) {
-    
+get_cumulative_frequencies <- function(vars, threshold=0.01,synonymous=FALSE) {
+   
     # define the VEP consequence types for loss of function and missense variants
     lof_cq = c("stop_gained", "splice_acceptor_variant", "splice_donor_variant",
         "frameshift_variant", "transcript_ablation")
@@ -46,6 +48,10 @@ get_cumulative_frequencies <- function(vars, threshold=0.01) {
     functional_cq = c("stop_lost", "initiator_codon_variant",
         "transcript_amplification", "inframe_insertion", "inframe_deletion",
            "missense_variant", "coding_sequence_variant")
+    
+    if(synonymous){
+      functional_cq = c("synonymous_variant")
+    }
     
     # if we have provided a list of dataframes, then run this function on each
     # of them in turn, and return a list of frequency lists.
