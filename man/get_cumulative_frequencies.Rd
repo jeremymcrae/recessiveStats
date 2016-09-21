@@ -18,8 +18,9 @@ matched to the thresh9old used during identification of the
 biallelically inherited genotypes.}
 }
 \value{
-a list of loss of function cumulative frequency, and functional
-        cumulative frequency. Alternatively, if the function was prvoided
+a list of loss of function cumulative frequency, functional
+        cumulative frequency and synonymous cumulative frequency.
+        Alternatively, if the function was prvoided
         with a list of dataframe, return a list of frequency lists, named as
         per the input list.
 }
