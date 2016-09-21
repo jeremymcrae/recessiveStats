@@ -52,8 +52,8 @@ enrichment_single_population <- function(freq, counts, cohort_n, autozygosity=0)
     freq$biallelic_lof_p = biallelic_lof_enrichment(freq, counts$biallelic_lof, cohort_n, autozygosity)
     freq$lof_func_p = lof_func_enrichment(freq, counts$biallelic_lof + counts$lof_func, cohort_n, autozygosity)
     freq$biallelic_func_p = biallelic_func_enrichment(freq, counts$biallelic_func, cohort_n, autozygosity)
-    freq$all_p = all_enrichment(freq, counts$biallelic_lof + counts$lof_func + counts$biallelic_func, cohort_n, autozygosity)
     freq$biallelic_syn_p = biallelic_syn_enrichment(freq, counts$biallelic_syn, cohort_n, autozygosity)
+    freq$all_p = all_enrichment(freq, counts$biallelic_lof + counts$lof_func + counts$biallelic_func, cohort_n, autozygosity)
     return(freq)
 }
 
@@ -193,7 +193,7 @@ enrichment_multiple_populations <- function(freqs, counts, cohort_n, autozygosit
     lof_func_combos = get_count_combinations(populations, counts$biallelic_lof + counts$lof_func)
     all_combos = get_count_combinations(populations,counts$biallelic_lof + counts$lof_func + counts$biallelic_func)
     
-      p_values = list(lof=NA, functional=NA)
+    p_values = list(lof=NA, functional=NA, synonymous=NA)
     p_values$biallelic_lof_p = sum_combo_tests(freqs, cohort_n,
         biallelic_lof_combos, biallelic_lof_enrichment, autozygosity)
     p_values$lof_func_p = sum_combo_tests(freqs, cohort_n,
