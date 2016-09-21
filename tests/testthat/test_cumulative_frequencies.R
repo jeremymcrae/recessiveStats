@@ -12,8 +12,8 @@ test_that("get_cumulative_frequencies output is correct for simplest table", {
         1 1000  stop_gained
         ")
     
-    expect_identical(get_cumulative_frequencies(vars),
-        list(lof=0.001, functional=0.001))
+    expect_equal(get_cumulative_frequencies(vars),
+        list(lof=0.001, functional=0.001, synonymous=0.000998004))
 })
 
 test_that("correct cumulative frequencies with larger table", {
@@ -26,7 +26,7 @@ test_that("correct cumulative frequencies with larger table", {
         ")
     
     expect_equal(get_cumulative_frequencies(vars),
-        list(lof=0.001, functional=0.002))
+        list(lof=0.001, functional=0.002, synonymous=0.001))
 })
 
 test_that("correct cumulative frequencies with higher MAF", {
@@ -39,7 +39,7 @@ test_that("correct cumulative frequencies with higher MAF", {
         ")
     
     expect_equal(get_cumulative_frequencies(vars),
-        list(lof=0.001, functional=0.001))
+        list(lof=0.001, functional=0.001, synonymous=0.001))
 })
 
 test_that("correct cumulative frequencies without rare functional variants", {
@@ -54,7 +54,7 @@ test_that("correct cumulative frequencies without rare functional variants", {
     # if we don't have any rare functional vars, the number is determined from
     # the lowest allele number (plus two).
     expect_equal(get_cumulative_frequencies(vars),
-        list(lof=0.002, functional=0.00132978723404255))
+        list(lof=0.002, functional=0.00132978723404255, synonymous=0.001))
 })
 
 test_that("correct cumulative frequencies when we lack a rare variants", {
@@ -68,7 +68,7 @@ test_that("correct cumulative frequencies when we lack a rare variants", {
     
     # if we don't have any rare variants, then we get NA values
     expect_equal(get_cumulative_frequencies(vars),
-        list(lof=NA, functional=NA))
+        list(lof=NA, functional=NA, synonymous=NA))
 })
 
 test_that("correct cumulative frequencies when we test a list of dataframes", {
@@ -85,9 +85,9 @@ test_that("correct cumulative frequencies when we test a list of dataframes", {
         ")
     vars = list("first"=vars1, "second"=vars2)
     
-    expect_identical(get_cumulative_frequencies(vars),
-        list("first"=list(lof=0.001, functional=0.001),
-            "second"=list(lof=0.001, functional=0.001)))
+    expect_equal(get_cumulative_frequencies(vars),
+        list("first"=list(lof=0.001, functional=0.001, synonymous=0.000998004),
+            "second"=list(lof=0.001, functional=0.001, synonymous=0.000998004)))
 })
 
 test_that("correct cumulative frequencies when we change the frequency threshold", {
@@ -100,9 +100,9 @@ test_that("correct cumulative frequencies when we change the frequency threshold
         ")
     
     expect_equal(get_cumulative_frequencies(vars, threshold=0.005),
-        list(lof=0.001, functional=0.001))
+        list(lof=0.001, functional=0.001, synonymous=0.001))
     
     # expect higher frequencies when we use a higher threshold
     expect_equal(get_cumulative_frequencies(vars, threshold=0.01),
-        list(lof=0.009, functional=0.001))
+        list(lof=0.009, functional=0.001, synonymous=0.001))
 })
