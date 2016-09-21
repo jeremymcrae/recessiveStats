@@ -15,13 +15,14 @@ test_that("analyse_inherited_enrichment output is correct", {
         1 1000  synonymous_variant
         ")
     
-    counts = list("biallelic_lof"=1, 'biallelic_func'=4, 'lof_func'=2)
+    counts = list("biallelic_lof"=1, 'biallelic_func'=4, 'lof_func'=2, "biallelic_syn"=1)
     cohort_n = 1000
     
-    result = list(lof=0.001, functional=0.002,
+    result = list(lof=0.001, functional=0.002, synonymous=0.001,
         biallelic_lof_p=0.000999500666126,
         lof_func_p=2.064381e-08,
         biallelic_func_p=1.056905e-11,
+        biallelic_syn_p=0.00099950067,
         all_p=9.191389e-19)
     
     expect_equal(analyse_inherited_enrichment(counts, vars, cohort_n), result)
@@ -42,13 +43,15 @@ test_that("analyse_inherited_enrichment output is correct for multi-population",
     
     vars = list("first"=vars1, "second"=vars2)
     
-    counts = list("biallelic_lof"=1, 'biallelic_func'=4, 'lof_func'=2)
+    counts = list("biallelic_lof"=1, 'biallelic_func'=4, 'lof_func'=2,
+        'biallelic_syn'=1)
     cohort_n = list("first"=500, "second"=500)
     
-    result = list(lof=NA, functional=NA,
+    result = list(lof=NA, functional=NA, synonymous=NA,
         biallelic_lof_p=0.000999500666126,
         lof_func_p=4.467516e-09,
         biallelic_func_p=4.138414e-14,
+        biallelic_syn_p=0.000995516608,
         all_p=3.16097e-21)
     
     expect_equal(analyse_inherited_enrichment(counts, vars, cohort_n), result)
@@ -63,23 +66,25 @@ test_that("analyse_inherited_enrichment output can use different frequency thres
         1 1000  synonymous_variant
         ")
     
-    counts = list("biallelic_lof"=1, 'biallelic_func'=4, 'lof_func'=2)
+    counts = list("biallelic_lof"=1, 'biallelic_func'=4, 'lof_func'=2, 'biallelic_syn'=1)
     cohort_n = list("first"=500, "second"=500)
     
-    result = list(lof=0.009, functional=0.001,
+    result = list(lof=0.009, functional=0.001, synonymous=0.001,
         biallelic_lof_p=0.07780933397,
         lof_func_p=0.0001490382885,
         biallelic_func_p=4.138413726e-14,
+        biallelic_syn_p=0.000999500666,
         all_p=1.761373e-11)
     
     expect_equal(analyse_inherited_enrichment(counts, vars, cohort_n,
         threshold=0.01), result)
     
     # now check when we change the frequency threshold
-    result = list(lof=0.001, functional=0.001,
+    result = list(lof=0.001, functional=0.001, synonymous=0.001,
         biallelic_lof_p=0.0009995006661,
         lof_func_p=4.467516392e-09,
         biallelic_func_p=4.138413726e-14,
+        biallelic_syn_p=0.000999500666,
         all_p=3.16097e-21)
         
     expect_equal(analyse_inherited_enrichment(counts, vars, cohort_n,
@@ -102,7 +107,7 @@ test_that("analyse_inherited_enrichment output raises an error if the cohort
     
     vars = list("first"=vars1, "second"=vars2)
     
-    counts = list("biallelic_lof"=1, 'biallelic_func'=4, 'lof_func'=2)
+    counts = list("biallelic_lof"=1, 'biallelic_func'=4, 'lof_func'=2, 'biallelic_syn'=1)
     cohort_n = list("first"=500, "third"=500)
     
     expect_error(analyse_inherited_enrichment(counts, vars, cohort_n))
@@ -110,13 +115,14 @@ test_that("analyse_inherited_enrichment output raises an error if the cohort
 
 test_that("enrichment_single_population output is correct", {
     
-    freq = list(lof=0.001, functional=0.1)
-    counts = list("biallelic_lof"=1, 'biallelic_func'=4, 'lof_func'=2)
+    freq = list(lof=0.001, functional=0.1, synonymous=0.1)
+    counts = list("biallelic_lof"=1, 'biallelic_func'=4, 'lof_func'=2, 'biallelic_syn'=1)
     
-    result = list(lof=0.001, functional=0.1,
+    result = list(lof=0.001, functional=0.1, synonymous=0.1,
         biallelic_lof_p=0.000999500666126,
         lof_func_p=0.001158649871933,
         biallelic_func_p=0.989927345227986,
+        biallelic_syn_p=0.999956829,
         all_p=0.883268773181358)
     
     expect_equal(enrichment_single_population(freq, counts, 1000), result)
@@ -124,13 +130,14 @@ test_that("enrichment_single_population output is correct", {
 
 test_that("enrichment_single_population output is correct for NA input", {
     
-    freq = list(lof=NA, functional=NA)
-    counts = list("biallelic_lof"=1, 'biallelic_func'=4, 'lof_func'=2)
+    freq = list(lof=NA, functional=NA, synonymous=NA)
+    counts = list("biallelic_lof"=1, 'biallelic_func'=4, 'lof_func'=2, 'biallelic_syn'=1)
     
-    result = list(lof=NA, functional=NA,
+    result = list(lof=NA, functional=NA, synonymous=NA,
         biallelic_lof_p=as.numeric(NA),
         lof_func_p=as.numeric(NA),
         biallelic_func_p=as.numeric(NA),
+        biallelic_syn_p=as.numeric(NA),
         all_p=as.numeric(NA))
     
     expect_identical(enrichment_single_population(freq, counts, 1000), result)
@@ -138,22 +145,24 @@ test_that("enrichment_single_population output is correct for NA input", {
 
 test_that("enrichment_single_population output is correct when correcting for autozygosity", {
     
-    freq = list(lof=0.001, functional=0.1)
-    counts = list("biallelic_lof"=1, 'biallelic_func'=4, 'lof_func'=2)
+    freq = list(lof=0.001, functional=0.1, synonymous=0.1)
+    counts = list("biallelic_lof"=1, 'biallelic_func'=4, 'lof_func'=2, 'biallelic_syn'=1)
     
-    result = list(lof=0.001, functional=0.1,
+    result = list(lof=0.001, functional=0.1, synonymous=0.1,
         biallelic_lof_p=0.0019970053242,
         lof_func_p=0.0011751598957,
         biallelic_func_p=0.99057656658,
+        biallelic_syn_p=0.99996058,
         all_p=0.888449945683488)
     
     expect_equal(enrichment_single_population(freq, counts, 1000, autozygosity=0.001), result)
     
     # also try the test when we explicitly state the autozygous rate is zero
-    result = list(lof=0.001, functional=0.1,
+    result = list(lof=0.001, functional=0.1, synonymous=0.1,
         biallelic_lof_p=0.000999500666126,
         lof_func_p=0.001158649871933,
         biallelic_func_p=0.989927345227986,
+        biallelic_syn_p=0.999956829,
         all_p=0.883268773181358)
     
     expect_equal(enrichment_single_population(freq, counts, 1000, autozygosity=0), result)
@@ -161,13 +170,14 @@ test_that("enrichment_single_population output is correct when correcting for au
 
 test_that("enrichment_single_population output is correct when missing count data", {
     
-    freq = list(lof=0.001, functional=0.1)
+    freq = list(lof=0.001, functional=0.1, synonymous=0.1)
     counts = list("biallelic_lof"=1, 'lof_func'=2)
     
-    result = list(lof=0.001, functional=0.1,
+    result = list(lof=0.001, functional=0.1, synonymous=0.1,
         biallelic_lof_p=0.0009995006661,
         lof_func_p=0.001158649872,
         biallelic_func_p=numeric(0),
+        biallelic_syn_p=numeric(0),
         all_p=numeric(0))
     
     expect_equal(enrichment_single_population(freq, counts, 1000), result)
@@ -248,19 +258,19 @@ context("Enrichment tests return the correct P-values")
 
 test_that("enrichment_multiple_populations is correct", {
     
-    freqs = list("AFR"=list("lof"=0.01, "functional"=0.1),
-        "EAS"=list("lof"=0.02, "functional"=0.1))
+    freqs = list("AFR"=list("lof"=0.01, "functional"=0.1, 'synonymous'=0.1),
+        "EAS"=list("lof"=0.02, "functional"=0.1, 'synonymous'=0.1))
     cohort_n = list("AFR"=50, "EAS"=150)
     autozygous_rate = 0.005
-    counts = list("biallelic_lof"=4, 'biallelic_func'=6, 'lof_func'=3)
+    counts = list("biallelic_lof"=4, 'biallelic_func'=6, 'lof_func'=3, 'biallelic_syn'=1)
     
     # define the values that would be obtained for all the individual tests.
     # We get NA values for the cumulative loF and functional frequencies, since
     # this test operates on multiple populations, so we can't get a single value
     # for the frequencies.
-    result = list(lof=NA, functional=NA, biallelic_lof_p=1.721856125e-06,
+    result = list(lof=NA, functional=NA, synonymous=NA, biallelic_lof_p=1.721856125e-06,
         lof_func_p=1.4797290028e-05, biallelic_func_p=0.019410324318,
-        all_p=7.68708279005614e-06)
+        biallelic_syn_p=0.877665591, all_p=7.68708279005614e-06)
     
     expect_equal(enrichment_multiple_populations(freqs,
         counts, cohort_n, autozygous_rate), result)
@@ -268,8 +278,8 @@ test_that("enrichment_multiple_populations is correct", {
 
 test_that("sum_combo_tests is correct", {
     
-    freqs = list("A"=list("lof"=0.1, "functional"=0.1),
-        "B"=list("lof"=0.1, "functional"=0.1))
+    freqs = list("A"=list("lof"=0.1, "functional"=0.1, 'synonymous'=0.3),
+        "B"=list("lof"=0.1, "functional"=0.1, 'synonymous'=0.3))
     cohort_n = list("A"=100, "B"=100)
     combos = get_count_combinations(names(cohort_n), count=1)
     
@@ -294,7 +304,7 @@ test_that("sum_combo_tests is correct", {
 
 test_that("single enrichment tests are correct", {
     
-    freq = list("lof"=0.1, "functional"=0.2)
+    freq = list("lof"=0.1, "functional"=0.2, 'synonymous'=0.3)
     cohort_n = 100
     count = 2
     
