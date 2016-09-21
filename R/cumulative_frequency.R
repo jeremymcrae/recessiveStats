@@ -12,8 +12,9 @@
 #'        biallelically inherited genotypes.
 #' @export
 #'
-#' @return a list of loss of function cumulative frequency, and functional
-#'         cumulative frequency. Alternatively, if the function was prvoided
+#' @return a list of loss of function cumulative frequency, functional
+#'         cumulative frequency and synonymous cumulative frequency.
+#'         Alternatively, if the function was prvoided
 #'         with a list of dataframe, return a list of frequency lists, named as
 #'         per the input list.
 #'
