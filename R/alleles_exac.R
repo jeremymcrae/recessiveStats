@@ -52,6 +52,19 @@ get_exac_variants_for_gene <- function(hgnc, chrom, start=NULL, end=NULL,
             paste("AN_", names(populations), sep=""), "CSQ"),
         vcfIndv=c())
     
+    # if the gene doesn't contain any variants in ExAC, then return a list of
+    # empty dataframes
+    if (length(vars$CHROM) == 0) {
+        empty = data.frame('CHROM'=character(0), 'POS'=character(0),
+            'REF'=character(0), 'ALT'=character(0), 'AC'=character(0),
+            'AN'=character(0), 'CSQ'=character(0))
+        
+        vars = list()
+        for (x in names(populations)) { vars[[x]] = empty }
+        
+        return(vars)
+    }
+    
     # convert the vars list to a data frame, then extract the necessary info
     # from the VEP data field.
     vars$sampleId = NULL
