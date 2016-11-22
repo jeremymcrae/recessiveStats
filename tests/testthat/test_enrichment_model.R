@@ -8,11 +8,11 @@ context("Recessive statistic checks")
 test_that("analyse_inherited_enrichment output is correct", {
     
     vars = read.table(header = TRUE, text = "
-        AC AN CQ
-        1 1000  missense_variant
-        1 1000  stop_gained
-        1 1000  stop_lost
-        1 1000  synonymous_variant
+        CHROM  POS  REF  ALT  AC AN CQ
+        1      1    A    G    1 1000  missense_variant
+        1      2    G    C    1 1000  stop_gained
+        1      3    T    A    1 1000  stop_lost
+        1      4    G    T    1 1000  synonymous_variant
         ")
     
     counts = list("biallelic_lof"=1, 'biallelic_func'=4, 'lof_func'=2, "biallelic_syn"=1)
@@ -30,15 +30,15 @@ test_that("analyse_inherited_enrichment output is correct", {
 
 test_that("analyse_inherited_enrichment output is correct for multi-population", {
     vars1 = read.table(header = TRUE, text = "
-        AC AN CQ
-        1 1000  missense_variant
-        1 1000  stop_gained
+        CHROM  POS  REF  ALT  AC AN CQ
+        1      1    A    G    1 1000  missense_variant
+        1      2    G    C    1 1000  stop_gained
         ")
     
     vars2 = read.table(header = TRUE, text = "
-        AC AN CQ
-        1 1000  missense_variant
-        1 1000  stop_gained
+        CHROM  POS  REF  ALT  AC AN CQ
+        1      1    A    G    1 1000  missense_variant
+        1      2    G    C    1 1000  stop_gained
         ")
     
     vars = list("first"=vars1, "second"=vars2)
@@ -59,11 +59,11 @@ test_that("analyse_inherited_enrichment output is correct for multi-population",
 
 test_that("analyse_inherited_enrichment output can use different frequency threshold", {
     vars = read.table(header = TRUE, text = "
-        AC AN CQ
-        1 1000  missense_variant
-        1 1000  stop_gained
-        8 1000  stop_gained
-        1 1000  synonymous_variant
+        CHROM  POS  REF  ALT  AC AN CQ
+        1      1    A    G    1 1000  missense_variant
+        1      2    G    C    1 1000  stop_gained
+        1      3    T    A    8 1000  stop_gained
+        1      4    G    T    1 1000  synonymous_variant
         ")
     
     counts = list("biallelic_lof"=1, 'biallelic_func'=4, 'lof_func'=2, 'biallelic_syn'=1)
@@ -94,15 +94,15 @@ test_that("analyse_inherited_enrichment output can use different frequency thres
 test_that("analyse_inherited_enrichment output raises an error if the cohort
     populations aren't in the variant dataset", {
     vars1 = read.table(header = TRUE, text = "
-        AC AN CQ
-        1 1000  missense_variant
-        1 1000  stop_gained
+        CHROM  POS  REF  ALT  AC AN CQ
+        1      1    A    G    1 1000  missense_variant
+        1      2    G    C    1 1000  stop_gained
         ")
     
     vars2 = read.table(header = TRUE, text = "
-        AC AN CQ
-        1 1000  missense_variant
-        1 1000  stop_gained
+        CHROM  POS  REF  ALT  AC AN CQ
+        1      1    A    G    1 1000  missense_variant
+        1      2    G    C    1 1000  stop_gained
         ")
     
     vars = list("first"=vars1, "second"=vars2)
