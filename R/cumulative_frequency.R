@@ -67,9 +67,9 @@ get_cumulative_frequencies <- function(vars, threshold=0.01) {
     functional_vars = vars[vars$CQ %in% functional_cq, ]
     silent_vars = vars[vars$CQ %in% silent_cq, ]
     
-    lof_freq = sum(lof_vars$frequency, na.rm=TRUE)
-    functional_freq = sum(functional_vars$frequency, na.rm=TRUE)
-    silent_freq = sum(silent_vars$frequency, na.rm=TRUE)
+    lof_freq = cumulative_frequency(lof_vars$frequency)
+    functional_freq = cumulative_frequency(functional_vars$frequency)
+    silent_freq = cumulative_frequency(silent_vars$frequency)
     
     # What do we do if the frequency is zero? We won't be able to get meaningful
     # estimates of the enrichment of inherited variants. Estimate the frequency
@@ -91,4 +91,36 @@ get_cumulative_frequencies <- function(vars, threshold=0.01) {
         synonymous=silent_freq)
     
     return(frequencies)
+}
+
+#' calculate cumulative allele frequency from a vector of allele frequencies
+#'
+#' Rather than simply summing the individual allele frequencies to get a
+#' cumulative frequency, we need to take the chance of having two variants on
+#' one chromosome into account. The chance of observing two variants on the same
+#' chromosome is their frequencies multiplied together (e.g. p1 * p2), so the
+#' probability of seeing them on independent chromosomes is p1 * (1 - p2).
+#' This can be extended beyond two variants, to simply account for the
+#' probability of the preceeding variants.
+#'
+#' @param probs vector of frequencies
+#'
+#' @return summed cumulative frequency.
+#' @export
+#'
+#' @examples
+#'
+#' freqs = runif(100, min=1e-7, max=0.01)
+#' cumulative_frequency(freqs)
+cumulative_frequency <- function(probs) {
+    
+    if (length(probs) > 0) {
+        probs = probs[!is.na(probs)]
+    }
+    
+    total = 0
+    for (p in probs) {
+        total = total + p * (1 - total)
+    }
+    return(total)
 }

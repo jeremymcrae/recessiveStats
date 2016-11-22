@@ -18,9 +18,9 @@ test_that("analyse_inherited_enrichment output is correct", {
     counts = list("biallelic_lof"=1, 'biallelic_func'=4, 'lof_func'=2, "biallelic_syn"=1)
     cohort_n = 1000
     
-    result = list(lof=0.001, functional=0.002, synonymous=0.001,
+    result = list(lof=0.001, functional=0.001999, synonymous=0.001,
         biallelic_lof_p=0.000999500666126,
-        lof_func_p=2.064381e-08,
+        lof_func_p=2.061908282e-08,
         biallelic_func_p=1.056905e-11,
         biallelic_syn_p=0.00099950067,
         all_p=9.191389e-19)
@@ -69,9 +69,9 @@ test_that("analyse_inherited_enrichment output can use different frequency thres
     counts = list("biallelic_lof"=1, 'biallelic_func'=4, 'lof_func'=2, 'biallelic_syn'=1)
     cohort_n = list("first"=500, "second"=500)
     
-    result = list(lof=0.009, functional=0.001, synonymous=0.001,
-        biallelic_lof_p=0.07780933397,
-        lof_func_p=0.0001490382885,
+    result = list(lof=0.008992, functional=0.001, synonymous=0.001,
+        biallelic_lof_p=0.07767657724,
+        lof_func_p=0.0001483348721,
         biallelic_func_p=4.138413726e-14,
         biallelic_syn_p=0.000999500666,
         all_p=1.761373e-11)

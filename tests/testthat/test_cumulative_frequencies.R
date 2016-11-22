@@ -26,7 +26,7 @@ test_that("correct cumulative frequencies with larger table", {
         ")
     
     expect_equal(get_cumulative_frequencies(vars),
-        list(lof=0.001, functional=0.002, synonymous=0.001))
+        list(lof=0.001, functional=0.001999, synonymous=0.001))
 })
 
 test_that("correct cumulative frequencies with higher MAF", {
@@ -104,5 +104,27 @@ test_that("correct cumulative frequencies when we change the frequency threshold
     
     # expect higher frequencies when we use a higher threshold
     expect_equal(get_cumulative_frequencies(vars, threshold=0.01),
-        list(lof=0.009, functional=0.001, synonymous=0.001))
+        list(lof=0.008992, functional=0.001, synonymous=0.001))
+})
+
+test_that("correct cumulative frequency caclulation", {
+    
+    freqs = rep(0.005, 500)
+    expect_equal(cumulative_frequency(freqs), 0.9184281386)
+    
+    # corect expectation for empty vector
+    freqs = c()
+    expect_equal(cumulative_frequency(freqs), 0)
+    
+    # correct expectation for zero value
+    freqs = 0
+    expect_equal(cumulative_frequency(freqs), 0)
+    
+    # correct expectation for vector with NA
+    freqs = c(NA, 0.01)
+    expect_equal(cumulative_frequency(freqs), 0.01)
+    
+    # correct expectation for vector with NA only
+    freqs = c(NA)
+    expect_equal(cumulative_frequency(freqs), 0)
 })
